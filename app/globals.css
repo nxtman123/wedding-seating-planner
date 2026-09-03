@@ -450,8 +450,9 @@ button.small {
    a short label, so the row needs no separate badge beside the names. */
 .level-select {
   flex: none;
-  /* Fits the longest option, "+++ should sit with", without clipping. */
-  width: 152px;
+  /* Sized for the phrase alone, which is all the row shows. The open list is
+     wider — the browser sizes the popup to its own contents. */
+  width: 128px;
   padding: 3px 2px 3px 7px;
   font-size: 0.8rem;
   font-weight: 600;

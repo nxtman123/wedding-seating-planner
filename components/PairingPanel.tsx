@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import {
   PAIRING_LEVELS,
   levelBadge,
@@ -100,6 +101,19 @@ export default function PairingPanel({
   const sorted = sortedPairings(doc);
   const focused = sorted.filter(inFocus);
   const pairings = [...focused, ...sorted.filter((p) => !inFocus(p))];
+
+  /**
+   * Which row's level dropdown is about to open, if any.
+   *
+   * A native select paints its collapsed state from the selected option's own
+   * text, so the strength signs cannot just live in the options — they would
+   * show on the row too, where the phrase alone reads better. Instead the labels
+   * gain their signs on the way into the open list and lose them again on the
+   * way out: React flushes this discrete event before the browser runs the
+   * default action, so the popup is built from the labels with signs.
+   */
+  const [opening, setOpening] = useState<string | null>(null);
+
 
   return (
     <section className="panel">
@@ -225,13 +239,19 @@ export default function PairingPanel({
                 value={p.level}
                 aria-label={`${guestName(doc, p.a)} and ${guestName(doc, p.b)}`}
                 title={levelLabel(p.level)}
-                onChange={(e) =>
-                  onSetLevel(p.id, Number(e.target.value) as PairingLevel)
-                }
+                onMouseDown={() => setOpening(p.id)}
+                onKeyDown={() => setOpening(p.id)}
+                onBlur={() => setOpening(null)}
+                onChange={(e) => {
+                  setOpening(null);
+                  onSetLevel(p.id, Number(e.target.value) as PairingLevel);
+                }}
               >
                 {PAIRING_LEVELS.map((l) => (
                   <option key={l} value={l}>
-                    {levelBadge(l)} {levelPhrase(l)}
+                    {opening === p.id
+                      ? `${levelBadge(l)} ${levelPhrase(l)}`
+                      : levelPhrase(l)}
                   </option>
                 ))}
               </select>
