@@ -1,5 +1,5 @@
 import { uid } from './defaults';
-import type { Guest, Pairing, PairingLevel, SeatingDoc } from './types';
+import type { Group, Guest, Pairing, PairingLevel, SeatingDoc } from './types';
 
 /* -------------------------------------------------------------------------- */
 /*  Guests                                                                     */
@@ -9,7 +9,8 @@ import type { Guest, Pairing, PairingLevel, SeatingDoc } from './types';
 export function addGuest(doc: SeatingDoc, name: string): SeatingDoc {
   const trimmed = name.trim();
   if (!trimmed) return doc;
-  return { ...doc, guests: [...doc.guests, { id: uid(), name: trimmed }] };
+  const guest: Guest = { id: uid(), name: trimmed, groupId: null };
+  return normalize({ ...doc, guests: [...doc.guests, guest] });
 }
 
 /**
@@ -25,10 +26,10 @@ export function addGuestsFromText(doc: SeatingDoc, text: string): SeatingDoc {
     const key = name.toLowerCase();
     if (existing.has(key)) continue;
     existing.add(key);
-    added.push({ id: uid(), name });
+    added.push({ id: uid(), name, groupId: null });
   }
   if (added.length === 0) return doc;
-  return { ...doc, guests: [...doc.guests, ...added] };
+  return normalize({ ...doc, guests: [...doc.guests, ...added] });
 }
 
 export function renameGuest(
@@ -86,6 +87,127 @@ export function moveGuests(
 /** Look up a display name, falling back for ids that no longer exist. */
 export function guestName(doc: SeatingDoc, id: string): string {
   return doc.guests.find((g) => g.id === id)?.name || 'Unknown guest';
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Groups                                                                     */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Put `guests` back into the order the list draws: loose guests first, then each
+ * group's members in `groups` order, everyone keeping their relative position.
+ * A guest pointing at a group that no longer exists counts as loose.
+ *
+ * Every operation that changes membership or group order ends here, which is
+ * what lets a position in the list be a plain index into `guests`.
+ */
+export function normalize(doc: SeatingDoc): SeatingDoc {
+  const known = new Set(doc.groups.map((g) => g.id));
+  const of = (groupId: string | null) =>
+    doc.guests.filter((g) =>
+      groupId === null
+        ? g.groupId === null || !known.has(g.groupId)
+        : g.groupId === groupId,
+    );
+  const guests = [...of(null), ...doc.groups.flatMap((g) => of(g.id))];
+  return { ...doc, guests };
+}
+
+/** The guests under a group, or the loose ones when given null. */
+export function groupMembers(doc: SeatingDoc, groupId: string | null): Guest[] {
+  const known = new Set(doc.groups.map((g) => g.id));
+  return doc.guests.filter((g) =>
+    groupId === null
+      ? g.groupId === null || !known.has(g.groupId)
+      : g.groupId === groupId,
+  );
+}
+
+/** Append a group. A blank name is ignored. */
+export function addGroup(doc: SeatingDoc, name: string): SeatingDoc {
+  const trimmed = name.trim();
+  if (!trimmed) return doc;
+  const group: Group = { id: uid(), name: trimmed };
+  return { ...doc, groups: [...doc.groups, group] };
+}
+
+export function renameGroup(
+  doc: SeatingDoc,
+  id: string,
+  name: string,
+): SeatingDoc {
+  return {
+    ...doc,
+    groups: doc.groups.map((g) => (g.id === id ? { ...g, name } : g)),
+  };
+}
+
+/** Remove a group. Its members are turned loose rather than deleted. */
+export function removeGroup(doc: SeatingDoc, id: string): SeatingDoc {
+  return normalize({
+    ...doc,
+    groups: doc.groups.filter((g) => g.id !== id),
+    guests: doc.guests.map((g) =>
+      g.groupId === id ? { ...g, groupId: null } : g,
+    ),
+  });
+}
+
+/** Move a group so it sits before position `index` among the groups. */
+export function moveGroup(
+  doc: SeatingDoc,
+  id: string,
+  index: number,
+): SeatingDoc {
+  const from = doc.groups.findIndex((g) => g.id === id);
+  if (from < 0) return doc;
+  const target = Math.max(0, Math.min(doc.groups.length, index));
+  if (target === from || target === from + 1) return doc;
+  const groups = [...doc.groups];
+  const [moved] = groups.splice(from, 1);
+  groups.splice(target > from ? target - 1 : target, 0, moved);
+  return normalize({ ...doc, groups });
+}
+
+/**
+ * Put guests under a group — or turn them loose with null — leaving them at the
+ * end of wherever they land. Used by the group heading's "Add to group".
+ */
+export function assignToGroup(
+  doc: SeatingDoc,
+  ids: string[],
+  groupId: string | null,
+): SeatingDoc {
+  const moving = new Set(ids);
+  if (moving.size === 0) return doc;
+  return normalize({
+    ...doc,
+    guests: doc.guests.map((g) =>
+      moving.has(g.id) ? { ...g, groupId } : g,
+    ),
+  });
+}
+
+/**
+ * Drop guests into a group at a given position in the list. `index` counts
+ * against `guests` as it stands, the same as `moveGuests`, and must fall inside
+ * the target group's run — which is what the drop points the list offers give.
+ */
+export function moveGuestsInto(
+  doc: SeatingDoc,
+  ids: string[],
+  groupId: string | null,
+  index: number,
+): SeatingDoc {
+  const moving = new Set(ids);
+  if (moving.size === 0) return doc;
+  const regrouped = {
+    ...doc,
+    guests: doc.guests.map((g) =>
+      moving.has(g.id) ? { ...g, groupId } : g,
+    ),
+  };
+  return normalize(moveGuests(regrouped, ids, index));
 }
 
 /* -------------------------------------------------------------------------- */

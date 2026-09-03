@@ -369,6 +369,95 @@ textarea {
   line-height: 1;
 }
 
+/* ---------------- groups ---------------- */
+
+.sections {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Flush and flat — no border or panel of its own. The space above and below is
+   what sets a group apart from the loose guests and from the next group. */
+.group-section {
+  position: relative;
+  padding: 16px 0 2px;
+}
+.group-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 5px 7px;
+}
+/* Reads as a caption until you go to change it. */
+.group-name {
+  flex: 1;
+  min-width: 0;
+  padding: 3px 6px;
+  border-color: transparent;
+  background: none;
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+.group-name:hover,
+.group-name:focus {
+  border-color: var(--border);
+  background: var(--surface);
+}
+.group-add {
+  flex: none;
+  padding: 3px 9px;
+  font-size: 0.75rem;
+  border-radius: 6px;
+  color: var(--accent);
+  border-color: #f0dbe2;
+  background: #fdf3f6;
+}
+.group-add:hover:not(:disabled) {
+  background: #f7e2e9;
+  border-color: #e6c7d2;
+}
+/* Quiet until reached for, so a subtle heading stays subtle. */
+.group-head .icon-button {
+  width: 22px;
+  height: 22px;
+  font-size: 0.8rem;
+  border-color: transparent;
+  background: none;
+  color: #d5ccc3;
+}
+.group-head .icon-button:hover:not(:disabled) {
+  background: #fbecec;
+  color: var(--danger);
+}
+.group-empty {
+  padding: 4px 8px 6px;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-style: italic;
+}
+
+/* Where a dragged group would land, drawn in its own padding. */
+.group-drop-before::before,
+.group-drop-after::after {
+  content: '';
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--accent);
+  pointer-events: none;
+}
+.group-drop-before::before {
+  top: 7px;
+}
+.group-drop-after::after {
+  bottom: -6px;
+}
+
 /* ---------------- pairings ---------------- */
 .add-pairing {
   display: flex;

@@ -14,6 +14,7 @@ export const DEFAULT_SEATS_PER_TABLE = 8;
 export function defaultDoc(): SeatingDoc {
   return {
     guests: [],
+    groups: [],
     pairings: [],
     seatsPerTable: DEFAULT_SEATS_PER_TABLE,
     extraTables: 0,

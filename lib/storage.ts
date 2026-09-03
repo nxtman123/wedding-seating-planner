@@ -4,7 +4,8 @@ import {
   isPairingLevel,
   uid,
 } from './defaults';
-import type { Pairing, SeatingDoc } from './types';
+import { normalize } from './guests';
+import type { Group, Guest, Pairing, SeatingDoc } from './types';
 
 const KEY = 'wedding-seating/v1';
 
@@ -29,7 +30,24 @@ export function isDoc(value: unknown): value is SeatingDoc {
   for (const g of guests) {
     if (!isRecord(g)) return false;
     if (typeof g.id !== 'string' || typeof g.name !== 'string') return false;
+    // Absent in documents saved before groups existed; sanitize fills it in.
+    if (
+      g.groupId !== undefined &&
+      g.groupId !== null &&
+      typeof g.groupId !== 'string'
+    ) {
+      return false;
+    }
     ids.add(g.id);
+  }
+
+  const groups = (value as { groups?: unknown }).groups;
+  if (groups !== undefined) {
+    if (!Array.isArray(groups)) return false;
+    for (const g of groups) {
+      if (!isRecord(g)) return false;
+      if (typeof g.id !== 'string' || typeof g.name !== 'string') return false;
+    }
   }
 
   if (!Array.isArray(pairings)) return false;
@@ -71,8 +89,17 @@ function sanitize(doc: SeatingDoc): SeatingDoc {
   for (const [id, table] of Object.entries(doc.pins)) {
     if (ids.has(id) && table >= 0) pins[id] = table;
   }
-  return {
-    guests: doc.guests,
+  // Documents predating groups have neither field; a groupId with no group left
+  // to point at is turned loose rather than stranding the guest.
+  const groups: Group[] = doc.groups ?? [];
+  const known = new Set(groups.map((g) => g.id));
+  const guests: Guest[] = doc.guests.map((g) => ({
+    ...g,
+    groupId: g.groupId && known.has(g.groupId) ? g.groupId : null,
+  }));
+  return normalize({
+    guests,
+    groups,
     pairings: doc.pairings.filter(
       (p) => p.a !== p.b && ids.has(p.a) && ids.has(p.b),
     ),
@@ -83,7 +110,7 @@ function sanitize(doc: SeatingDoc): SeatingDoc {
     extraTables: Math.max(0, Math.min(50, Math.round(doc.extraTables) || 0)),
     pins,
     tables: doc.tables.map((t) => t.filter((id) => ids.has(id))),
-  };
+  });
 }
 
 /* -------------------------------------------------------------------------- */
@@ -134,11 +161,21 @@ export function exportDoc(doc: SeatingDoc): void {
  * already in memory.
  */
 function reIdDoc(doc: SeatingDoc): SeatingDoc {
+  const groupRemap = new Map<string, string>();
+  const groups = doc.groups.map((g) => {
+    const id = uid();
+    groupRemap.set(g.id, id);
+    return { ...g, id };
+  });
   const remap = new Map<string, string>();
   const guests = doc.guests.map((g) => {
     const id = uid();
     remap.set(g.id, id);
-    return { ...g, id };
+    return {
+      ...g,
+      id,
+      groupId: g.groupId ? (groupRemap.get(g.groupId) ?? null) : null,
+    };
   });
   const pairings: Pairing[] = doc.pairings.map((p) => ({
     ...p,
@@ -154,6 +191,7 @@ function reIdDoc(doc: SeatingDoc): SeatingDoc {
   return {
     ...doc,
     guests,
+    groups,
     pairings,
     pins,
     tables: doc.tables.map((t) =>

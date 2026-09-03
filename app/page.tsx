@@ -3,19 +3,24 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { defaultDoc } from '@/lib/defaults';
 import {
+  addGroup,
   addGuest,
   addGuestsFromText,
   applyGroupLevel,
+  assignToGroup,
   clearAllPins,
   clearPin,
   commonLevel,
   fillGroupLevel,
   guestName,
   linkedGuests,
-  moveGuests,
-  removeGuests,
+  moveGroup,
+  moveGuestsInto,
   pairingCounts,
+  removeGroup,
+  removeGuests,
   removePairing,
+  renameGroup,
   renameGuest,
   setExtraTables,
   setPairingLevel,
@@ -135,6 +140,25 @@ export default function Page() {
     setDraft((d) => ({ ...d, guests: [] }));
   };
 
+  /**
+   * Removing a group frees its members rather than deleting them, so this only
+   * confirms when the group actually holds anyone.
+   */
+  const dropGroup = (groupId: string) => {
+    const group = doc.groups.find((g) => g.id === groupId);
+    if (!group) return;
+    const held = doc.guests.filter((g) => g.groupId === groupId).length;
+    if (
+      held > 0 &&
+      !window.confirm(
+        `Remove the group "${group.name}"? Its ${held} guest${held === 1 ? '' : 's'} stay on the list, just ungrouped.`,
+      )
+    ) {
+      return;
+    }
+    setDoc((d) => removeGroup(d, groupId));
+  };
+
   /* ----- pinning ----- */
 
   /**
@@ -215,7 +239,18 @@ export default function Page() {
             onDeletePicked={deletePicked}
             selected={draft.guests}
             onTogglePair={toggleGuestSelection}
-            onReorder={(ids, index) => setDoc((d) => moveGuests(d, ids, index))}
+            onAddGroup={(n) => setDoc((d) => addGroup(d, n))}
+            onRenameGroup={(id, n) => setDoc((d) => renameGroup(d, id, n))}
+            onRemoveGroup={dropGroup}
+            onReorder={(ids, groupId, index) =>
+              setDoc((d) => moveGuestsInto(d, ids, groupId, index))
+            }
+            onReorderGroup={(id, index) =>
+              setDoc((d) => moveGroup(d, id, index))
+            }
+            onAddPickedToGroup={(groupId) =>
+              setDoc((d) => assignToGroup(d, draft.guests, groupId))
+            }
           />
           <PairingPanel
             doc={doc}
