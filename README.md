@@ -27,11 +27,16 @@ Pick **two** guests for a single pairing. Pick **three or more** and you get a c
 every pair within the group is set to the same level, so five friends who should all sit
 together is one selection and one click rather than ten separate pairings.
 
-Applying to a group is the last word on how its members relate — any pairing they already
-had between each other is overwritten, never duplicated, and rows about to be rewritten
-are highlighted so you can see what is changing. Pairings that reach *outside* the group
-are left alone. Picking guests who already agree on a level, in any order, loads that
-level into the form rather than the last one you used.
+There are two ways to apply a level to a group. **Apply to all N pairs** is the last word
+on how its members relate: every pair is set to the level, overwriting whatever they had
+between them. **Apply to N missing** only fills in the pairs that have no pairing yet and
+leaves the existing ones exactly as they are — useful for widening a group without
+flattening the levels you already tuned inside it. The second button appears only when the
+two would differ; rows about to be rewritten are highlighted either way.
+
+Neither touches pairings that reach *outside* the group, and neither ever duplicates a
+pair. Picking guests who already agree on a level, in any order, loads that level into the
+form rather than the last one you used.
 
 | Level | Meaning |
 | --- | --- |

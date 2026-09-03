@@ -202,6 +202,43 @@ export function applyGroupLevel(
 }
 
 /**
+ * The pairs within a group that have no pairing yet, as `[a, b]` tuples. Backs
+ * both the count of what filling the gaps would create and the filling itself.
+ */
+export function missingPairs(
+  doc: SeatingDoc,
+  ids: string[],
+): [string, string][] {
+  const members = [...new Set(ids)];
+  const gaps: [string, string][] = [];
+  for (let i = 0; i < members.length; i++) {
+    for (let j = i + 1; j < members.length; j++) {
+      if (!findPairing(doc, members[i], members[j])) {
+        gaps.push([members[i], members[j]]);
+      }
+    }
+  }
+  return gaps;
+}
+
+/**
+ * Give the group's unpaired pairs a level, leaving every pairing the members
+ * already have between them exactly as it was. The complement of
+ * `applyGroupLevel`, which overwrites those instead.
+ */
+export function fillGroupLevel(
+  doc: SeatingDoc,
+  ids: string[],
+  level: PairingLevel,
+): SeatingDoc {
+  let next = doc;
+  for (const [a, b] of missingPairs(doc, ids)) {
+    next = addPairing(next, a, b, level);
+  }
+  return next;
+}
+
+/**
  * The level every pair in a group already shares, or null when the group is
  * smaller than two, has a pair with no pairing, or mixes levels. Lets the form
  * show what a group agrees on instead of whatever level was last used.

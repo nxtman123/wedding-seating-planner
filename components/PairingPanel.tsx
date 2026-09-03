@@ -10,6 +10,7 @@ import {
 import {
   findPairing,
   guestName,
+  missingPairs,
   pairCount,
   sortedPairings,
 } from '@/lib/guests';
@@ -32,8 +33,10 @@ export interface PairingPanelProps {
   onToggleGuest: (id: string) => void;
   onLevelChange: (level: PairingLevel) => void;
   onClear: () => void;
-  /** Apply the level to every pair in the group. */
+  /** Apply the level to every pair in the group, overwriting what exists. */
   onApply: () => void;
+  /** Apply the level only to pairs in the group that have no pairing yet. */
+  onApplyMissing: () => void;
   onSetLevel: (id: string, level: PairingLevel) => void;
   onRemove: (id: string) => void;
 }
@@ -57,12 +60,19 @@ export default function PairingPanel({
   onLevelChange,
   onClear,
   onApply,
+  onApplyMissing,
   onSetLevel,
   onRemove,
 }: PairingPanelProps) {
   const { guests: picked, level } = draft;
   const chosen = new Set(picked);
   const pairs = pairCount(picked.length);
+  const missing = missingPairs(doc, picked).length;
+  /**
+   * Only worth offering when it would do something different from Apply to all
+   * — with nothing yet paired the two are the same button.
+   */
+  const showMissing = missing > 0 && missing < pairs;
 
   /** Only meaningful for a group of two — the one pairing this would rewrite. */
   const existing =
@@ -127,20 +137,21 @@ export default function PairingPanel({
               ))}
           </select>
 
+          <select
+            value={level}
+            aria-label="Priority level"
+            onChange={(e) =>
+              onLevelChange(Number(e.target.value) as PairingLevel)
+            }
+          >
+            {PAIRING_LEVELS.map((l) => (
+              <option key={l} value={l}>
+                {levelBadge(l)} · {levelLabel(l)}
+              </option>
+            ))}
+          </select>
+
           <div className="apply-row">
-            <select
-              value={level}
-              aria-label="Priority level"
-              onChange={(e) =>
-                onLevelChange(Number(e.target.value) as PairingLevel)
-              }
-            >
-              {PAIRING_LEVELS.map((l) => (
-                <option key={l} value={l}>
-                  {levelBadge(l)} · {levelLabel(l)}
-                </option>
-              ))}
-            </select>
             <button
               type="button"
               className="primary"
@@ -149,6 +160,11 @@ export default function PairingPanel({
             >
               {applyLabel}
             </button>
+            {showMissing && (
+              <button type="button" onClick={onApplyMissing}>
+                Apply to {missing} missing
+              </button>
+            )}
             {picked.length > 0 && (
               <button type="button" onClick={onClear}>
                 Clear
@@ -158,8 +174,11 @@ export default function PairingPanel({
 
           {picked.length > 2 && (
             <p className="hint">
-              Every pair in this group gets {levelBadge(level)} — any pairing
-              they already have between them is overwritten.
+              {missing === pairs
+                ? `All ${pairs} pairs get ${levelBadge(level)}.`
+                : missing === 0
+                  ? `Overwrites all ${pairs} existing pairings with ${levelBadge(level)}.`
+                  : `${pairs - missing} of these pairs already exist — apply to all overwrites them, apply to missing leaves them as they are.`}
             </p>
           )}
         </div>

@@ -9,6 +9,7 @@ import {
   clearAllPins,
   clearPin,
   commonLevel,
+  fillGroupLevel,
   removeGuest,
   pairingCounts,
   removePairing,
@@ -102,6 +103,12 @@ export default function Page() {
    */
   const applyToGroup = () => {
     setDoc((d) => applyGroupLevel(d, draft.guests, draft.level));
+    setDraft((d) => ({ ...d, guests: [] }));
+  };
+
+  /** Fill in only the pairs the group is missing, leaving the rest as they are. */
+  const applyToMissing = () => {
+    setDoc((d) => fillGroupLevel(d, draft.guests, draft.level));
     setDraft((d) => ({ ...d, guests: [] }));
   };
 
@@ -199,6 +206,7 @@ export default function Page() {
             onLevelChange={setDraftLevel}
             onClear={clearSelection}
             onApply={applyToGroup}
+            onApplyMissing={applyToMissing}
             onSetLevel={(id, level) =>
               setDoc((d) => setPairingLevel(d, id, level))
             }

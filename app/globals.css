@@ -327,14 +327,11 @@ textarea {
   flex-direction: column;
   gap: 8px;
 }
+/* Up to three buttons, so they wrap rather than squeezing their labels. */
 .apply-row {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
-}
-/* The level box gives up width first; the buttons keep their labels intact. */
-.apply-row select {
-  flex: 1;
-  min-width: 0;
 }
 .apply-row button {
   flex: none;
