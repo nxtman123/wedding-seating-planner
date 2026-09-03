@@ -1,0 +1,443 @@
+:root {
+  --bg: #f6f2ee;
+  --surface: #ffffff;
+  --surface-2: #faf7f4;
+  --border: #e4ddd5;
+  --text: #2c2622;
+  --muted: #8a7f76;
+  --accent: #b06a7e;
+  --accent-ink: #ffffff;
+  --danger: #b34a4a;
+  --ok: #4a8a5e;
+  --radius: 12px;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 4px 16px rgba(0, 0, 0, 0.05);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    Helvetica, Arial, sans-serif;
+  line-height: 1.4;
+}
+
+.app {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 24px 20px 64px;
+}
+
+/* ---------------- header / toolbar ---------------- */
+.app-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+.app-header h1 {
+  margin: 0;
+  font-size: 1.6rem;
+  letter-spacing: -0.01em;
+}
+.subtitle {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+.toolbar {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.loading {
+  color: var(--muted);
+}
+
+/* ---------------- controls ---------------- */
+button {
+  font: inherit;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.12s ease, border-color 0.12s ease;
+}
+button:hover:not(:disabled) {
+  background: var(--surface-2);
+  border-color: #d8cfc5;
+}
+button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+button.danger {
+  color: var(--danger);
+  border-color: #e7c9c9;
+}
+button.danger:hover:not(:disabled) {
+  background: #fbecec;
+}
+button.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+button.primary:hover:not(:disabled) {
+  background: #9d5c6f;
+  border-color: #9d5c6f;
+}
+
+/* A button that reads as a link — used for the "Paste a list" disclosure. */
+.link-button {
+  align-self: flex-start;
+  padding: 2px 0;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font-size: 0.9rem;
+  text-decoration: underline;
+}
+.link-button:hover:not(:disabled) {
+  background: none;
+  color: #9d5c6f;
+}
+
+/* Square affordance for pin / remove, sized to sit inline with a text row. */
+.icon-button {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  line-height: 1;
+  border-radius: 6px;
+  color: var(--muted);
+}
+.icon-button.pin-on {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: #fdf3f6;
+}
+
+input,
+select,
+textarea {
+  font: inherit;
+  padding: 7px 9px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  min-width: 0;
+}
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+textarea {
+  width: 100%;
+  resize: vertical;
+}
+
+/* ---------------- panels ---------------- */
+
+/* Guests are narrow, pairings need room for two names, tables are widest. */
+.panels {
+  display: grid;
+  grid-template-columns: 1fr 1.25fr 1.4fr;
+  gap: 16px;
+  align-items: start;
+}
+@media (max-width: 1100px) {
+  .panels {
+    grid-template-columns: 1fr;
+  }
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 16px;
+}
+.panel-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+.panel-header h2 {
+  margin: 0;
+  font-size: 1.05rem;
+  letter-spacing: 0.01em;
+}
+.count {
+  font-size: 0.85rem;
+  color: var(--muted);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 1px 9px;
+}
+.empty {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+.hint {
+  margin: -4px 0 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* ---------------- guests ---------------- */
+.add-row {
+  display: flex;
+  gap: 8px;
+}
+.add-row input {
+  flex: 1;
+}
+.bulk {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.guest-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.name-input {
+  flex: 1;
+}
+.table-badge {
+  flex: none;
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent);
+  background: #fdf3f6;
+  border: 1px solid #f0dbe2;
+  border-radius: 6px;
+  padding: 2px 7px;
+}
+
+/* ---------------- pairings ---------------- */
+.add-pairing {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.add-pairing select:nth-child(3),
+.add-pairing button {
+  grid-column: 1 / -1;
+}
+
+.pairing-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 8px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.pairing-names {
+  flex: 1;
+  font-size: 0.92rem;
+  min-width: 0;
+}
+.joiner {
+  color: var(--muted);
+}
+/* The row's level dropdown doubles as its chip: it carries the level color and
+   a short label, so the row needs no separate badge beside the names. */
+.level-select {
+  flex: none;
+  width: 108px;
+  padding: 3px 2px 3px 7px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-color: transparent;
+}
+
+.level-chip {
+  flex: none;
+  font-size: 0.78rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  border-radius: 6px;
+  padding: 2px 7px;
+  border: 1px solid transparent;
+}
+.level-pos-1 {
+  background: #2f6b4a;
+  color: #fff;
+}
+.level-pos-2 {
+  background: #d9ecdf;
+  color: #2f6b4a;
+  border-color: #bcdcc7;
+}
+.level-pos-3 {
+  background: #eef5f0;
+  color: #5b8a6e;
+  border-color: #dbe8e0;
+}
+.level-neg-3 {
+  background: #f7efee;
+  color: #a5766f;
+  border-color: #ecdedc;
+}
+.level-neg-2 {
+  background: #f6dedc;
+  color: #a3453d;
+  border-color: #eec6c2;
+}
+.level-neg-1 {
+  background: #a3453d;
+  color: #fff;
+}
+
+.dot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+.dot-ok {
+  background: var(--ok);
+}
+.dot-bad {
+  background: var(--danger);
+}
+.dot-unknown {
+  background: #d6cdc4;
+}
+
+/* ---------------- tables ---------------- */
+.room-controls {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.room-controls label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.room-controls input {
+  width: 88px;
+}
+
+.generate-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.score {
+  margin: 0;
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+}
+.score-ok {
+  color: var(--ok);
+}
+.score-bad {
+  color: var(--danger);
+}
+
+.tables {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 10px;
+}
+.table-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+.table-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+.table-head h3 {
+  margin: 0;
+  font-size: 0.95rem;
+}
+.seat-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.seat-list li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+}
+.seat-list .icon-button {
+  width: 22px;
+  height: 22px;
+  font-size: 0.75rem;
+}
+
+.table-warning {
+  list-style: none;
+  margin: 2px 0 0;
+  padding: 6px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: #fbecec;
+  border: 1px solid #eec6c2;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  color: #8f3f38;
+}
+.table-warning li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}

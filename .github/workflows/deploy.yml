@@ -1,0 +1,42 @@
+name: Deploy to kurtisjantzen.ca
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-kurtisjantzen-ca-seating
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run build
+        env:
+          NEXT_PUBLIC_BASE_PATH: /wedding-seating
+
+      # Note: the target site uses the legacy Jekyll pipeline, which ignores
+      # underscore-prefixed dirs such as Next's _next/. The .nojekyll at the ROOT
+      # of nxtman123/kurtisjantzen.ca is what disables that; public/.nojekyll here
+      # ships one inside out/ as well.
+      - uses: peaceiris/actions-gh-pages@v4
+        with:
+          personal_token: ${{ secrets.SITE_DEPLOY_TOKEN }}
+          external_repository: nxtman123/kurtisjantzen.ca
+          publish_branch: production
+          publish_dir: ./out
+          destination_dir: wedding-seating
+          # Without this the action would wipe the rest of the personal site.
+          keep_files: true
+          commit_message: "Deploy wedding-seating @ ${{ github.sha }}"
