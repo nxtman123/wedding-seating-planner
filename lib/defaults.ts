@@ -41,11 +41,17 @@ export function isPairingLevel(value: unknown): value is PairingLevel {
 }
 
 /**
- * Score contributed when a pair shares a table. Magnitudes are spread far apart
- * so the solver never trades a level-1 pairing for any number of weaker ones:
- * one level-1 outweighs eight level-2s, one level-2 outweighs five level-3s.
+ * Score contributed when a pair shares a table.
+ *
+ * The ratio between levels is 20, which is the largest table this app allows
+ * (see `setSeatsPerTable`). That is the number that matters, because a group
+ * applied to N guests creates N-choose-2 pairings and each guest at a full table
+ * of S seats holds S-1 of them: with a ratio of 20, one pairing still outweighs
+ * a whole table's worth of the level below it even at the maximum table size.
+ * At the usual six seats it is not close, which is the point — a level-3 clique
+ * should never crowd out a level-2 pairing on sheer volume.
  */
-const LEVEL_WEIGHTS: Record<1 | 2 | 3, number> = { 1: 1000, 2: 120, 3: 20 };
+const LEVEL_WEIGHTS: Record<1 | 2 | 3, number> = { 1: 2000, 2: 100, 3: 5 };
 
 /** Signed score for seating this pair together. Negative levels return < 0. */
 export function levelWeight(level: PairingLevel): number {

@@ -48,9 +48,12 @@ form rather than the last one you used.
 | `−1` | Must not share a table |
 
 The levels are weights, not rules — the solver maximizes the total, so it will always
-produce a seating even when the pairings contradict each other. The weights are spread
-far enough apart that it never trades a `+1` away for any number of weaker wins: one
-`+1` outweighs eight `+2`s, and one `+2` outweighs five `+3`s.
+produce a seating even when the pairings contradict each other. Each level is worth 20×
+the one below it, which matters more than it looks: a group applied to N guests creates
+N-choose-2 pairings, and every guest at a table of S seats holds S-1 of them, so a large
+low-level group could otherwise outvote a high-level pairing on sheer volume. At 20× no
+level can be outvoted by a whole table's worth of the level beneath it, even at the
+largest table size the app allows. At the usual six seats it is not close.
 
 **Tables** (right panel) — set the seats per table and press **Generate seating**. The
 number of tables is derived from the guest count; the *Spare tables* box adds slack on
