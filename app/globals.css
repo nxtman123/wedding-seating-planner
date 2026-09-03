@@ -734,22 +734,27 @@ textarea {
   flex-wrap: wrap;
 }
 
-/* Shown while the solver holds the thread. Its space is reserved either way, so
-   the button keeps its size. */
+/* While the solver holds the thread the label gives way to a spinner in the
+   middle of the button. The label is only hidden, never removed, so the button
+   stays exactly the size it was — and when idle there is no spinner in the
+   markup at all, so nothing is padding the label across. */
+.generate-row .primary {
+  position: relative;
+}
+.generating .label {
+  visibility: hidden;
+}
 .spinner {
-  display: inline-block;
-  width: 11px;
-  height: 11px;
-  margin-right: 7px;
-  vertical-align: -1px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 14px;
+  height: 14px;
+  margin: -8px 0 0 -8px;
   border: 2px solid rgba(255, 255, 255, 0.4);
   border-top-color: var(--accent-ink);
   border-radius: 50%;
   animation: spin 0.6s linear infinite;
-}
-.spinner.is-idle {
-  visibility: hidden;
-  animation: none;
 }
 @keyframes spin {
   to {

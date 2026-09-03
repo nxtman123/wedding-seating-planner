@@ -119,14 +119,15 @@ export default function TablePanel({
       <div className="generate-row">
         <button
           type="button"
-          className="primary"
+          className={solving ? 'primary generating' : 'primary'}
           onClick={onGenerate}
           disabled={solving || doc.guests.length === 0}
         >
-          {/* Always in the layout, so starting a solve does not resize the
-              button under the cursor. */}
-          <span className={solving ? 'spinner' : 'spinner is-idle'} />
-          Generate seating
+          {/* The label stays in the box while it spins, hidden rather than
+              removed, so the button holds its size and the spinner has
+              something to be centred in. */}
+          <span className="label">Generate seating</span>
+          {solving && <span className="spinner" />}
         </button>
         {pinCount > 0 && (
           <button type="button" onClick={onClearPins}>
