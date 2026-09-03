@@ -265,11 +265,51 @@ textarea {
 }
 
 .guest-row {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 6px;
   padding: 3px 5px;
   border-radius: 9px;
+}
+
+/* Where a dragged row would land. Drawn absolutely, in the gap between rows, so
+   showing it moves nothing — the list stays exactly where it was. */
+.guest-row.drop-before::before,
+.guest-row.drop-after::after {
+  content: '';
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--accent);
+  pointer-events: none;
+}
+.guest-row.drop-before::before {
+  top: -4px;
+}
+.guest-row.drop-after::after {
+  bottom: -4px;
+}
+.guest-row.row-dragging {
+  opacity: 0.4;
+}
+
+.drag-handle {
+  flex: none;
+  width: 14px;
+  text-align: center;
+  line-height: 1;
+  color: #cfc5bb;
+  cursor: grab;
+  user-select: none;
+}
+.guest-row:hover .drag-handle {
+  color: var(--muted);
+}
+.drag-handle:active {
+  cursor: grabbing;
 }
 /* Also marks the pairing row the form is about to edit, so picking two guests
    who are already paired points at the row it will change. */

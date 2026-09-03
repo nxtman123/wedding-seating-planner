@@ -13,7 +13,8 @@ You can also **Export** / **Import** it as JSON.
 ## How it works
 
 **Guests** (left panel) — add them one at a time, or paste a whole list, one name per
-line. Pasting again only adds names that aren't already there. The badge on a row counts
+line. Drag a row by its grip to reorder the list — a line shows where it will land, and
+nothing shifts until you drop. The badge on a row counts
 the pairings that guest is caught up in, so it's easy to spot who you've already placed
 and who is still floating; hover it for the split between together and apart.
 
