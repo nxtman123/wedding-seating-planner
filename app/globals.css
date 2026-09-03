@@ -617,25 +617,30 @@ textarea {
   background: #2f6b4a;
   color: #fff;
 }
+/* A notch down from the old wash, onto what used to be this level's own border
+   colour, with the ink darkened to match so it still clears 4.5:1. */
 .level-pos-2 {
-  background: #d9ecdf;
-  color: #2f6b4a;
-  border-color: #bcdcc7;
+  background: #bcdcc7;
+  color: #275a3d;
+  border-color: #a6cfb4;
 }
+/* The weakest level, so the faintest wash — the border is what keeps it a chip
+   at all. Its ink darkens as the ground lightens: it was the least readable of
+   the six at 3.6:1, which is backwards for the one there is most of. */
 .level-pos-3 {
-  background: #eef5f0;
-  color: #5b8a6e;
+  background: #f2f8f4;
+  color: #487257;
   border-color: #dbe8e0;
 }
 .level-neg-3 {
-  background: #f7efee;
-  color: #a5766f;
+  background: #f9f3f2;
+  color: #8f6058;
   border-color: #ecdedc;
 }
 .level-neg-2 {
-  background: #f6dedc;
-  color: #a3453d;
-  border-color: #eec6c2;
+  background: #eec6c2;
+  color: #8f3f38;
+  border-color: #e3aca6;
 }
 .level-neg-1 {
   background: #a3453d;
