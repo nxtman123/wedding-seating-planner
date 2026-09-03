@@ -206,16 +206,15 @@ export default function Page() {
     });
 
   /**
-   * Where a letter key means the letter rather than a shortcut: anything you
-   * type into, and a select, where it jumps to the option starting with it.
-   * Notably not a checkbox — clicking one leaves it focused, and that is exactly
-   * when clearing the pick is wanted.
+   * Where a letter key means the letter rather than a shortcut: somewhere you
+   * type prose. Not a checkbox, and not a select — both keep focus after you
+   * use them, which is exactly when clearing the pick is wanted.
    */
   const takesTyping = (el: HTMLElement | null): boolean => {
     if (!el) return false;
     if (el.isContentEditable) return true;
     const tag = el.tagName;
-    if (tag === 'TEXTAREA' || tag === 'SELECT') return true;
+    if (tag === 'TEXTAREA') return true;
     if (tag !== 'INPUT') return false;
     return [
       'text',
@@ -242,6 +241,9 @@ export default function Page() {
       if (e.key !== 'c' && e.key !== 'C') return;
       if (e.metaKey || e.ctrlKey || e.altKey) return;
       if (takesTyping(e.target as HTMLElement | null)) return;
+      // A select would otherwise jump to the option starting with the letter —
+      // in the guest dropdown that silently adds whoever comes first under C.
+      e.preventDefault();
       setDraft((d) => (d.guests.length ? { ...d, guests: [] } : d));
     };
     window.addEventListener('keydown', onKey);
