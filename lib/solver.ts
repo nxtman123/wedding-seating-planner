@@ -245,6 +245,92 @@ function seedAssignment(
 /*  Local search                                                               */
 /* -------------------------------------------------------------------------- */
 
+const START_TEMP = 400;
+const END_TEMP = 0.5;
+
+/**
+ * Guests roped together by pairings the annealing cannot undo.
+ *
+ * A move that costs `w` is accepted with probability exp(-w / temp), and the
+ * schedule never gets hotter than START_TEMP. For the top two levels that
+ * probability is around 2e-9 and 0.37 at the very hottest, falling to nothing
+ * within a few thousand steps — so in practice those pairs never come apart,
+ * and the guests they bind can only travel as a body. Without a move that takes
+ * the whole body at once, wherever the seeding drops such a group is where it
+ * stays: swapping two couples between tables would have to pass through a state
+ * with both couples split, which costs more than the annealing will ever pay.
+ *
+ * Groups too large for any table are dropped — they could never be placed whole.
+ */
+function boundClusters(
+  doc: SeatingDoc,
+  movable: string[],
+  largestTable: number,
+): string[][] {
+  const inPlay = new Set(movable);
+  const parent = new Map<string, string>();
+  for (const id of movable) parent.set(id, id);
+  const find = (id: string): string => {
+    let root = id;
+    while (parent.get(root) !== root) root = parent.get(root)!;
+    while (parent.get(id) !== root) {
+      const next = parent.get(id)!;
+      parent.set(id, root);
+      id = next;
+    }
+    return root;
+  };
+  for (const p of doc.pairings) {
+    if (p.level < 0 || levelWeight(p.level) < START_TEMP) continue;
+    if (!inPlay.has(p.a) || !inPlay.has(p.b)) continue;
+    const ra = find(p.a);
+    const rb = find(p.b);
+    if (ra !== rb) parent.set(rb, ra);
+  }
+  const groups = new Map<string, string[]>();
+  for (const id of movable) {
+    const root = find(id);
+    const bucket = groups.get(root);
+    if (bucket) bucket.push(id);
+    else groups.set(root, [id]);
+  }
+  return [...groups.values()].filter(
+    (g) => g.length > 1 && g.length <= largestTable,
+  );
+}
+
+/**
+ * Change in score from a whole set of guests changing table at once. Slower per
+ * call than the single-guest deltas, so it backs only the cluster moves; pairs
+ * with both ends moving are counted once, from whichever end comes first.
+ */
+function deltaForMoves(
+  affinities: Affinities,
+  seat: Map<string, number>,
+  moves: Map<string, number>,
+): number {
+  let delta = 0;
+  for (const [guest, to] of moves) {
+    const from = seat.get(guest)!;
+    for (const link of affinities.get(guest) ?? []) {
+      const otherFrom = seat.get(link.other);
+      if (otherFrom === undefined) continue;
+      const otherTo = moves.get(link.other);
+      if (otherTo === undefined) {
+        if (otherFrom === from) delta -= link.weight;
+        if (otherFrom === to) delta += link.weight;
+        continue;
+      }
+      // Both ends are moving, so this pair comes up twice. Take it from the
+      // lower id only — cheaper than remembering which pairs have been seen.
+      if (guest > link.other) continue;
+      if (otherFrom === from) delta -= link.weight;
+      if (otherTo === to) delta += link.weight;
+    }
+  }
+  return delta;
+}
+
 /** Change in score from moving `guest` out of `from` and into `to`. */
 function moveDelta(
   affinities: Affinities,
@@ -298,6 +384,7 @@ function improve(
   seating: string[][],
   affinities: Affinities,
   movable: string[],
+  clusters: string[][],
   sizes: number[],
   rng: () => number,
   iterations: number,
@@ -320,8 +407,66 @@ function improve(
     list.splice(list.indexOf(guest), 1);
   };
 
-  const startTemp = 400;
-  const endTemp = 0.5;
+  /** Clusters worth trying: everyone in them seated, and sitting together. */
+  const bodies = clusters
+    .filter((c) => c.every((id) => seat.has(id)))
+    .map((c) => ({ members: c, at: seat.get(c[0])! }))
+    .filter(({ members, at }) => members.every((id) => seat.get(id) === at));
+
+  const applyMoves = (moves: Map<string, number>) => {
+    for (const [guest] of moves) remove(seat.get(guest)!, guest);
+    for (const [guest, to] of moves) {
+      seating[to].push(guest);
+      seat.set(guest, to);
+    }
+  };
+
+  /** Take a whole cluster to another table, if it has the room. */
+  const clusterMove = (temp: number): void => {
+    const body = bodies[(rng() * bodies.length) | 0];
+    const to = (rng() * seating.length) | 0;
+    if (to === seat.get(body.members[0])) return;
+    if (seating[to].length + body.members.length > sizes[to]) return;
+    const moves = new Map(body.members.map((id) => [id, to] as const));
+    const delta = deltaForMoves(affinities, seat, moves);
+    if (delta >= 0 || rng() < Math.exp(delta / temp)) {
+      applyMoves(moves);
+      score += delta;
+      body.at = to;
+    }
+  };
+
+  /**
+   * Exchange two clusters between their tables. This is the move that a run of
+   * single swaps cannot reach: each half of it splits a cluster, and the
+   * annealing will not pay that even at its hottest.
+   */
+  const clusterSwap = (temp: number): void => {
+    const a = bodies[(rng() * bodies.length) | 0];
+    const b = bodies[(rng() * bodies.length) | 0];
+    const ta = seat.get(a.members[0])!;
+    const tb = seat.get(b.members[0])!;
+    if (a === b || ta === tb) return;
+    if (seating[ta].length - a.members.length + b.members.length > sizes[ta]) {
+      return;
+    }
+    if (seating[tb].length - b.members.length + a.members.length > sizes[tb]) {
+      return;
+    }
+    const moves = new Map<string, number>();
+    for (const id of a.members) moves.set(id, tb);
+    for (const id of b.members) moves.set(id, ta);
+    const delta = deltaForMoves(affinities, seat, moves);
+    if (delta >= 0 || rng() < Math.exp(delta / temp)) {
+      applyMoves(moves);
+      score += delta;
+      a.at = tb;
+      b.at = ta;
+    }
+  };
+
+  const startTemp = START_TEMP;
+  const endTemp = END_TEMP;
   // Reserve the tail of the budget so the polish pass always gets to run.
   const annealDeadline = deadline - (deadline - Date.now()) * 0.3;
 
@@ -330,6 +475,14 @@ function improve(
 
     const temp =
       startTemp * Math.pow(endTemp / startTemp, step / iterations);
+    // A quarter of the budget goes to moving whole clusters, which is the only
+    // way a bound group ever leaves the table the seeding gave it.
+    if (bodies.length > 1 && rng() < 0.25) {
+      if (rng() < 0.5) clusterMove(temp);
+      else clusterSwap(temp);
+      continue;
+    }
+
     const guest = inPlay[(rng() * inPlay.length) | 0];
     const from = seat.get(guest)!;
 
@@ -447,6 +600,7 @@ export function solveSeating(
 
   const honored = resolvePins(doc, sizes);
   const movable = doc.guests.map((g) => g.id).filter((id) => !honored.has(id));
+  const clusters = boundClusters(doc, movable, Math.max(...sizes));
 
   let best: string[][] | null = null;
   let bestScore = -Infinity;
@@ -459,6 +613,7 @@ export function solveSeating(
       seating,
       affinities,
       movable,
+      clusters,
       sizes,
       rng,
       iterations,
