@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   PAIRING_LEVELS,
   levelBadge,
@@ -131,6 +131,25 @@ export default function PairingPanel({
    * default action, so the popup is built from the labels with signs.
    */
   const [opening, setOpening] = useState<string | null>(null);
+
+  /*
+   * Blur alone is not enough to put the labels back. If the list re-sorts while
+   * a dropdown is armed — clearing the pick does exactly that — the element goes
+   * out from under the focus without React seeing a blur, and the row is left
+   * showing signs it should not. So the next thing the user does anywhere puts
+   * them back; a dropdown being opened again re-arms after this has run, since
+   * this listens on the way down and React's own handler on the way up.
+   */
+  useEffect(() => {
+    if (opening === null) return;
+    const clear = () => setOpening(null);
+    window.addEventListener('pointerdown', clear, true);
+    window.addEventListener('keydown', clear, true);
+    return () => {
+      window.removeEventListener('pointerdown', clear, true);
+      window.removeEventListener('keydown', clear, true);
+    };
+  }, [opening]);
 
 
   return (
