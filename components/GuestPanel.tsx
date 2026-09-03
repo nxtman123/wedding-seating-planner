@@ -15,7 +15,7 @@ export interface GuestPanelProps {
   selected: string[];
   onAdd: (name: string) => void;
   onAddMany: (text: string) => void;
-  /** Add an empty group at the top of the list. */
+  /** Add a group at the top of the list, taking any ticked guests into it. */
   onAddGroup: () => void;
   onRename: (id: string, name: string) => void;
   onRenameGroup: (id: string, name: string) => void;
@@ -355,7 +355,9 @@ export default function GuestPanel({
 
       <div className="guest-actions">
         <button type="button" onClick={onAddGroup}>
-          Add a group
+          {selected.length > 0
+            ? `New group of ${selected.length}`
+            : 'Add a group'}
         </button>
         {selected.length > 0 && (
           <button type="button" className="danger" onClick={onDeletePicked}>
