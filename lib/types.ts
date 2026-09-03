@@ -6,7 +6,7 @@
  * seat at one is equivalent, so a table is really just a set of guests — there
  * is no "next to" finer than "same table".
  */
-export type PairingLevel = -3 | -2 | -1 | 1 | 2 | 3;
+export type PairingLevel = -4 | -3 | -2 | -1 | 1 | 2 | 3 | 4;
 
 /** A named section of the guest list — a family, a table's worth of friends. */
 export interface Group {
@@ -61,6 +61,11 @@ export type Pins = Record<string, number>;
  * the guest count rather than stored (see `tableCount()` in `lib/solver.ts`).
  */
 export interface SeatingDoc {
+  /**
+   * Schema version, so a document written before a change can be brought
+   * forward. Absent means version 1, from before the fourth level existed.
+   */
+  version: number;
   guests: Guest[];
   groups: Group[];
   order: string[];

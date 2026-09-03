@@ -603,8 +603,8 @@ textarea {
    a lone "+" is a third the width of "+++". */
 .level-chip {
   flex: none;
-  /* The width of "+++", so a stack of chips aligns whatever their strength. */
-  min-width: 42px;
+  /* The width of "++++", so a stack of chips aligns whatever their strength. */
+  min-width: 50px;
   text-align: center;
   font-size: 0.78rem;
   font-weight: 600;
@@ -624,18 +624,28 @@ textarea {
   color: #275a3d;
   border-color: #a6cfb4;
 }
-/* The weakest level, so the faintest wash — the border is what keeps it a chip
-   at all. Its ink darkens as the ground lightens: it was the least readable of
-   the six at 3.6:1, which is backwards for the one there is most of. */
+/* Between "should" and "could", set midway between them in lightness. */
 .level-pos-3 {
+  background: #d8ecdf;
+  color: #356647;
+  border-color: #c3ddcd;
+}
+/* The weakest level, so the faintest wash — the border is what keeps it a chip
+   at all, and the ink darkens to make up for the ground. */
+.level-pos-4 {
   background: #f2f8f4;
   color: #487257;
   border-color: #dbe8e0;
 }
-.level-neg-3 {
+.level-neg-4 {
   background: #f9f3f2;
   color: #8f6058;
   border-color: #ecdedc;
+}
+.level-neg-3 {
+  background: #f4dcda;
+  color: #8c4a42;
+  border-color: #e8cac7;
 }
 .level-neg-2 {
   background: #eec6c2;

@@ -79,14 +79,16 @@ a pair. The level box stays where you put it as you tick and untick — it is th
 are about to apply, not a readout of what the pick already has, so a run of groups can all
 be set at one level without resetting it each time.
 
-| Strength | Setting a group | A single pairing reads |
-| --- | --- | --- |
-| `+++` | Must sit together | A **must sit with** B |
-| `++` | Should sit together | A **should sit with** B |
-| `+` | Could sit together | A **could sit with** B |
-| `−` | Could avoid each other | A **could avoid** B |
-| `−−` | Should avoid each other | A **should avoid** B |
-| `−−−` | Must avoid each other | A **must avoid** B |
+| Strength | Weight | Setting a group | A single pairing reads |
+| --- | --- | --- | --- |
+| `++++` | 8000 | Must sit together | A **must sit with** B |
+| `+++` | 400 | Should sit together | A **should sit with** B |
+| `++` | 20 | Would like to sit together | A **would like to sit with** B |
+| `+` | 1 | Could sit together | A **could sit with** B |
+| `−` | −1 | Could avoid each other | A **could avoid** B |
+| `−−` | −20 | Would rather avoid each other | A **would rather avoid** B |
+| `−−−` | −400 | Should avoid each other | A **should avoid** B |
+| `−−−−` | −8000 | Must avoid each other | A **must avoid** B |
 
 The same must / should / could ladder either way — the form speaks about the group you
 have picked, the row about the one pair it names.
@@ -95,8 +97,8 @@ In the pairing list the level sits between the two names, so each row reads as a
 and doubles as the control that changes it.
 
 The levels are weights, not rules — the solver maximizes the total, so it will always
-produce a seating even when the pairings contradict each other. Each level is worth 20×
-the one below it, which matters more than it looks: a group applied to N guests creates
+produce a seating even when the pairings contradict each other. Each level is worth 20× the one below
+it — 1, 20, 400, 8000 — which matters more than it looks: a group applied to N guests creates
 N-choose-2 pairings, and every guest at a table of S seats holds S-1 of them, so a large
 low-level group could otherwise outvote a high-level pairing on sheer volume. At 20× no
 level can be outvoted by a whole table's worth of the level beneath it, even at the

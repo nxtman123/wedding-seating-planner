@@ -1,4 +1,5 @@
 import {
+  DOC_VERSION,
   DEFAULT_SEATS_PER_TABLE,
   MAX_SEATS_PER_TABLE,
   defaultDoc,
@@ -11,6 +12,7 @@ import type {
   Group,
   Guest,
   Pairing,
+  PairingLevel,
   SeatingDoc,
   TableSpec,
 } from './types';
@@ -52,6 +54,9 @@ export function isDoc(value: unknown): value is SeatingDoc {
     }
     ids.add(g.id);
   }
+
+  const version = (value as { version?: unknown }).version;
+  if (version !== undefined && typeof version !== 'number') return false;
 
   const listOrder = (value as { order?: unknown }).order;
   if (listOrder !== undefined) {
@@ -156,6 +161,27 @@ function roomOf(
  * Drop anything pointing at a guest that no longer exists, and clamp the room
  * settings. Cheap insurance for documents edited by hand.
  */
+/**
+ * Bring a document forward to the current schema.
+ *
+ * Version 2 added a fourth rung to each ladder, "would like to sit together",
+ * between "should" and "could". The old weakest level was called "could", so it
+ * keeps that meaning and moves to the new weakest rung rather than being
+ * silently promoted into the new one.
+ */
+function migrate(doc: SeatingDoc): SeatingDoc {
+  if ((doc.version ?? 1) >= 2) return doc;
+  return {
+    ...doc,
+    version: 2,
+    pairings: doc.pairings.map((p) =>
+      Math.abs(p.level) === 3
+        ? { ...p, level: (p.level > 0 ? 4 : -4) as PairingLevel }
+        : p,
+    ),
+  };
+}
+
 function sanitize(doc: SeatingDoc): SeatingDoc {
   const ids = new Set(doc.guests.map((g) => g.id));
   const pins: Record<string, number> = {};
@@ -173,6 +199,7 @@ function sanitize(doc: SeatingDoc): SeatingDoc {
     groupId: g.groupId && known.has(g.groupId) ? g.groupId : null,
   }));
   return normalize({
+    version: DOC_VERSION,
     guests,
     groups,
     order,
@@ -198,7 +225,7 @@ export function loadDoc(): SeatingDoc {
     const raw = window.localStorage.getItem(KEY);
     if (!raw) return defaultDoc();
     const parsed: unknown = JSON.parse(raw);
-    return isDoc(parsed) ? sanitize(parsed) : defaultDoc();
+    return isDoc(parsed) ? sanitize(migrate(parsed)) : defaultDoc();
   } catch {
     return defaultDoc();
   }
@@ -285,5 +312,5 @@ export function parseDocFile(text: string): SeatingDoc {
   if (!isDoc(parsed)) {
     throw new Error('File does not contain a guest list and pairings.');
   }
-  return reIdDoc(sanitize(parsed));
+  return reIdDoc(sanitize(migrate(parsed)));
 }
