@@ -28,6 +28,7 @@ import {
   setPairingLevel,
   setPin,
   setTableName,
+  strengthenGroupLevel,
   setTableSpec,
 } from '@/lib/guests';
 import {
@@ -151,6 +152,10 @@ export default function Page() {
   /** Fill in only the pairs the group is missing, leaving the rest as they are. */
   const applyToMissing = () =>
     setDoc((d) => fillGroupLevel(d, draft.guests, draft.level));
+
+  /** Raise only the pairs weaker than the level shown, leaving stronger ones. */
+  const applyToWeaker = () =>
+    setDoc((d) => strengthenGroupLevel(d, draft.guests, draft.level));
 
   /**
    * Delete whoever is ticked. Guests can only be removed this way now, so the
@@ -347,6 +352,7 @@ export default function Page() {
             onLevelChange={setDraftLevel}
             onApply={applyToGroup}
             onApplyMissing={applyToMissing}
+            onApplyStrengthen={applyToWeaker}
             onSetLevel={(id, level) =>
               setDoc((d) => setPairingLevel(d, id, level))
             }

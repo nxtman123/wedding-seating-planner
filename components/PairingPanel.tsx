@@ -14,6 +14,7 @@ import {
   missingPairs,
   pairCount,
   sortedPairings,
+  weakerPairs,
 } from '@/lib/guests';
 import type {
   Pairing,
@@ -37,6 +38,8 @@ export interface PairingPanelProps {
   onApply: () => void;
   /** Apply the level only to pairs in the group that have no pairing yet. */
   onApplyMissing: () => void;
+  /** Apply the level only where it would strengthen what is already there. */
+  onApplyStrengthen: () => void;
   onSetLevel: (id: string, level: PairingLevel) => void;
   onRemove: (id: string) => void;
 }
@@ -59,6 +62,7 @@ export default function PairingPanel({
   onLevelChange,
   onApply,
   onApplyMissing,
+  onApplyStrengthen,
   onSetLevel,
   onRemove,
 }: PairingPanelProps) {
@@ -66,11 +70,15 @@ export default function PairingPanel({
   const chosen = new Set(picked);
   const pairs = pairCount(picked.length);
   const missing = missingPairs(doc, picked).length;
-  /**
-   * Only worth offering when it would do something different from Apply to all
-   * — with nothing yet paired the two are the same button.
+  const weaker = weakerPairs(doc, picked, level).length;
+  /*
+   * Each narrower button is worth offering only where it would do something the
+   * wider one does not: with nothing yet paired, all three do the same thing.
+   * Strengthen also hides when it matches missing, which is the case when no
+   * existing pair is weaker than the level chosen.
    */
   const showMissing = missing > 0 && missing < pairs;
+  const showStrengthen = weaker > 0 && weaker < pairs && weaker !== missing;
 
   /** Only meaningful for a group of two — the one pairing this would rewrite. */
   const existing =
@@ -154,6 +162,15 @@ export default function PairingPanel({
             >
               {applyLabel}
             </button>
+            {showStrengthen && (
+              <button
+                type="button"
+                onClick={onApplyStrengthen}
+                title="Raise only the pairs that are weaker than this, leaving the stronger ones alone"
+              >
+                Strengthen {weaker} pair{weaker === 1 ? '' : 's'}
+              </button>
+            )}
             {showMissing && (
               <button type="button" onClick={onApplyMissing}>
                 Apply to {missing} missing

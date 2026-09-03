@@ -598,6 +598,52 @@ export function missingPairs(
 }
 
 /**
+ * The pairs within a group that this level would strengthen: those with no
+ * pairing yet, and those already pointing the same way but less insistently.
+ *
+ * A pair already at least this strong is left as it is — which is the point, so
+ * a group of "could sit with"s can be raised without flattening the one "must
+ * sit with" among them. So is a pair pointing the other way: strengthening an
+ * avoid should never quietly turn it into a preference, or the reverse.
+ */
+export function weakerPairs(
+  doc: SeatingDoc,
+  ids: string[],
+  level: PairingLevel,
+): [string, string][] {
+  const members = [...new Set(ids)];
+  const out: [string, string][] = [];
+  for (let i = 0; i < members.length; i++) {
+    for (let j = i + 1; j < members.length; j++) {
+      const found = findPairing(doc, members[i], members[j]);
+      if (!found) {
+        out.push([members[i], members[j]]);
+        continue;
+      }
+      const sameWay = found.level > 0 === level > 0;
+      // Bigger magnitude means weaker: +++ is 1, + is 3.
+      if (sameWay && Math.abs(found.level) > Math.abs(level)) {
+        out.push([members[i], members[j]]);
+      }
+    }
+  }
+  return out;
+}
+
+/** Raise the group's weaker pairs to this level, leaving the rest alone. */
+export function strengthenGroupLevel(
+  doc: SeatingDoc,
+  ids: string[],
+  level: PairingLevel,
+): SeatingDoc {
+  let next = doc;
+  for (const [a, b] of weakerPairs(doc, ids, level)) {
+    next = addPairing(next, a, b, level);
+  }
+  return next;
+}
+
+/**
  * Give the group's unpaired pairs a level, leaving every pairing the members
  * already have between them exactly as it was. The complement of
  * `applyGroupLevel`, which overwrites those instead.

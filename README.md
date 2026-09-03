@@ -50,12 +50,17 @@ Pick **two** guests for a single pairing. Pick **three or more** and you get a c
 every pair within the group is set to the same level, so five friends who should all sit
 together is one selection and one click rather than ten separate pairings.
 
-There are two ways to apply a level to a group. **Apply to all N pairs** is the last word
+There are three ways to apply a level to a group. **Apply to all N pairs** is the last word
 on how its members relate: every pair is set to the level, overwriting whatever they had
 between them. **Apply to N missing** only fills in the pairs that have no pairing yet and
 leaves the existing ones exactly as they are — useful for widening a group without
-flattening the levels you already tuned inside it. The second button appears only when the
-two would differ; rows about to be rewritten are highlighted either way. The group stays
+flattening the levels you already tuned inside it. **Strengthen N pairs** is between the
+two: it raises the pairs that are weaker than the level chosen and leaves anything already
+stronger alone, so a group of *could sit with*s can be lifted to *should* without
+flattening the one *must* among them. It works the same among avoids, where stronger means
+more emphatic, and it never reverses a pair pointing the other way — only **Apply to all**
+does that. Each narrower button appears only where it would do something the wider one
+would not; rows about to be rewritten are highlighted whichever you use. The group stays
 picked after you apply, so a level can be tried and changed without re-ticking everyone.
 
 Whatever you tick is followed through the other two panels. The pairing list floats what
