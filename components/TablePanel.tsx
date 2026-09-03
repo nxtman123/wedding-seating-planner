@@ -1,9 +1,9 @@
 'use client';
 
-import { levelBadge, levelClass } from '@/lib/defaults';
+import { levelBadge, levelClass, levelPhrase } from '@/lib/defaults';
 import { guestName } from '@/lib/guests';
 import { conflictsAtTable, tableCount } from '@/lib/solver';
-import type { SeatingDoc } from '@/lib/types';
+import type { LevelTally, SeatingDoc } from '@/lib/types';
 
 export interface TablePanelProps {
   doc: SeatingDoc;
@@ -11,8 +11,8 @@ export interface TablePanelProps {
   selected: string[];
   /** Score of the current arrangement, or null before the first Generate. */
   score: number | null;
-  /** Pairings the current arrangement failed to honor. */
-  violations: number;
+  /** How each level fared, strongest first. Only levels in use appear. */
+  breakdown: LevelTally[];
   onSeatsChange: (seats: number) => void;
   onExtraTablesChange: (extra: number) => void;
   onGenerate: () => void;
@@ -33,7 +33,7 @@ export default function TablePanel({
   doc,
   selected,
   score,
-  violations,
+  breakdown,
   onSeatsChange,
   onExtraTablesChange,
   onGenerate,
@@ -98,17 +98,32 @@ export default function TablePanel({
       </div>
 
       {score !== null && seated > 0 && (
-        <p className="score">
-          Score <strong>{score.toLocaleString()}</strong>
-          {violations > 0 ? (
-            <span className="score-bad">
-              {' '}
-              · {violations} pairing{violations === 1 ? '' : 's'} unhonored
-            </span>
-          ) : (
-            <span className="score-ok"> · every pairing honored</span>
-          )}
-        </p>
+        <>
+          <p className="score">
+            Score <strong>{score.toLocaleString()}</strong>
+          </p>
+          {/* Per level, because one broken "must sit with" matters more than a
+              dozen missed "could"s, and a bare total hides which it was. */}
+          <ul className="score-lines">
+            {breakdown.map(({ level, violated }) => (
+              <li key={level}>
+                <span className={`level-chip ${levelClass(level)}`}>
+                  {levelBadge(level)}
+                </span>
+                {violated === 0 ? (
+                  <span className="score-ok">
+                    ✓ all {levelPhrase(level)} pairings honored
+                  </span>
+                ) : (
+                  <span className="score-bad">
+                    {violated} {levelPhrase(level)} pairing
+                    {violated === 1 ? '' : 's'} not honored
+                  </span>
+                )}
+              </li>
+            ))}
+          </ul>
+        </>
       )}
 
       {doc.tables.length === 0 ? (

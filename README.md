@@ -96,8 +96,10 @@ largest table size the app allows. At the default eight seats it is not close.
 
 **Tables** (right panel) — set the seats per table and press **Generate seating**. The
 number of tables is derived from the guest count; the *Spare tables* box adds slack on
-top when you want the room less full. The score and a per-table warning list show how
-the arrangement did, and the dots in the pairings panel mark each pairing honored or not.
+top when you want the room less full. The score comes with a line per level in
+use — "all must sit with pairings honored", "6 should sit with pairings not honored" —
+because one broken `+++` matters more than a hundred missed `+`s, and a single total hides
+which it was. Per-table warnings and the dots in the pairings panel show the detail.
 
 **Pins** — the pin after a guest's name in the tables panel locks them to that table.
 Pinned guests stay put through later **Generate** presses while everyone else is

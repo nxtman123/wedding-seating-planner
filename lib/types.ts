@@ -76,3 +76,11 @@ export interface PairingDraft {
   guests: string[];
   level: PairingLevel;
 }
+
+/** How one level fared in the current seating, for the score breakdown. */
+export interface LevelTally {
+  level: PairingLevel;
+  /** Pairings at this level, whatever became of them. */
+  total: number;
+  violated: number;
+}

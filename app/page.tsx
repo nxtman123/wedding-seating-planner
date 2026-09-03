@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { defaultDoc } from '@/lib/defaults';
+import { PAIRING_LEVELS, defaultDoc } from '@/lib/defaults';
 import {
   addGroup,
   addGuest,
@@ -74,9 +74,18 @@ export default function Page() {
     () => (doc.tables.length ? scoreAssignment(doc, doc.tables) : null),
     [doc],
   );
-  const violations = useMemo(
-    () => [...outcomes.values()].filter((o) => o === 'violated').length,
-    [outcomes],
+  /** How each level fared, so the tables panel can say which kind went wrong. */
+  const breakdown = useMemo(
+    () =>
+      PAIRING_LEVELS.map((level) => {
+        const of = doc.pairings.filter((p) => p.level === level);
+        return {
+          level,
+          total: of.length,
+          violated: of.filter((p) => outcomes.get(p.id) === 'violated').length,
+        };
+      }).filter((tally) => tally.total > 0),
+    [doc.pairings, outcomes],
   );
 
   /* ----- solving ----- */
@@ -347,7 +356,7 @@ export default function Page() {
           <TablePanel
             doc={doc}
             score={score}
-            violations={violations}
+            breakdown={breakdown}
             onSeatsChange={(n) => setDoc((d) => setSeatsPerTable(d, n))}
             onExtraTablesChange={(n) => setDoc((d) => setExtraTables(d, n))}
             selected={draft.guests}
