@@ -238,13 +238,16 @@ textarea {
 .add-row input {
   flex: 1;
 }
-/* One row for the paste toggle and the delete. The paste button is always there,
-   so the delete appearing when guests are ticked does not change the height. */
+/* The list's actions. The delete is pushed to the far end, away from the two
+   that are always there, so it is never where a habit would put your cursor. */
 .guest-actions {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  flex-wrap: wrap;
   gap: 8px;
+}
+.guest-actions .danger {
+  margin-left: auto;
 }
 
 .bulk {

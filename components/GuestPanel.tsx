@@ -15,7 +15,8 @@ export interface GuestPanelProps {
   selected: string[];
   onAdd: (name: string) => void;
   onAddMany: (text: string) => void;
-  onAddGroup: (name: string) => void;
+  /** Add an empty group at the top of the list. */
+  onAddGroup: () => void;
   onRename: (id: string, name: string) => void;
   onRenameGroup: (id: string, name: string) => void;
   onRemoveGroup: (id: string) => void;
@@ -71,7 +72,6 @@ export default function GuestPanel({
   onAddPickedToGroup,
 }: GuestPanelProps) {
   const [name, setName] = useState('');
-  const [groupName, setGroupName] = useState('');
   const [bulk, setBulk] = useState('');
   const [bulkOpen, setBulkOpen] = useState(false);
   /**
@@ -189,10 +189,6 @@ export default function GuestPanel({
   const submitGuest = () => {
     onAdd(name);
     setName('');
-  };
-  const submitGroup = () => {
-    onAddGroup(groupName);
-    setGroupName('');
   };
 
   /* ----- sections ----- */
@@ -322,29 +318,12 @@ export default function GuestPanel({
         </button>
       </div>
 
-      <div className="add-row">
-        <input
-          type="text"
-          value={groupName}
-          placeholder="Add a group"
-          aria-label="Group name"
-          onChange={(e) => setGroupName(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') submitGroup();
-          }}
-        />
-        <button
-          type="button"
-          onClick={submitGroup}
-          disabled={!groupName.trim()}
-        >
-          Add
-        </button>
-      </div>
-
       <div className="guest-actions">
         <button type="button" onClick={() => setBulkOpen((open) => !open)}>
           {bulkOpen ? 'Hide paste box' : 'Paste a list…'}
+        </button>
+        <button type="button" onClick={onAddGroup}>
+          Add a group
         </button>
         {selected.length > 0 && (
           <button type="button" className="danger" onClick={onDeletePicked}>

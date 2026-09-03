@@ -13,8 +13,9 @@ You can also **Export** / **Import** it as JSON.
 ## How it works
 
 **Guests** (left panel) — add them one at a time, or paste a whole list, one name per
-line. **Add a group** makes a named section — a family, a carful, a table's worth of
-friends. A new group appears at the top, ready to fill. Tick guests anywhere in the list
+line. **Add a group** drops an empty section at the top of the list — a family, a carful,
+a table's worth of friends. It arrives called "Group 1"; click the heading to rename it.
+Tick guests anywhere in the list
 and press **Add to group** on a group's heading to file them in, or drag them in and out
 by their grips. Groups drag too, and can sit anywhere among the loose guests rather than
 being pinned to one end. Removing a group turns its guests loose, leaving them where the

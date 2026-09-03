@@ -129,13 +129,16 @@ export function groupMembers(doc: SeatingDoc, groupId: string | null): Guest[] {
 }
 
 /**
- * Add a group at the top of the list, where an empty one is in sight and ready
- * to be filled rather than stranded below everyone. A blank name is ignored.
+ * Add an empty group at the top of the list, where it is in sight and ready to
+ * be filled rather than stranded below everyone. It comes named "Group N" for
+ * the lowest N not already taken, so the heading has something to show until it
+ * is renamed, and adding several does not produce a pile of duplicates.
  */
-export function addGroup(doc: SeatingDoc, name: string): SeatingDoc {
-  const trimmed = name.trim();
-  if (!trimmed) return doc;
-  const group: Group = { id: uid(), name: trimmed };
+export function addGroup(doc: SeatingDoc): SeatingDoc {
+  const taken = new Set(doc.groups.map((g) => g.name));
+  let n = 1;
+  while (taken.has(`Group ${n}`)) n++;
+  const group: Group = { id: uid(), name: `Group ${n}` };
   return normalize({
     ...doc,
     groups: [...doc.groups, group],

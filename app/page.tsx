@@ -240,7 +240,7 @@ export default function Page() {
             onDeletePicked={deletePicked}
             selected={draft.guests}
             onTogglePair={toggleGuestSelection}
-            onAddGroup={(n) => setDoc((d) => addGroup(d, n))}
+            onAddGroup={() => setDoc(addGroup)}
             onRenameGroup={(id, n) => setDoc((d) => renameGroup(d, id, n))}
             onRemoveGroup={dropGroup}
             onReorder={(ids, groupId, index) =>
