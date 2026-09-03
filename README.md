@@ -16,7 +16,9 @@ You can also **Export** / **Import** it as JSON.
 heading, which turns the same row into a paste box, one name per line. **Add a group** drops an empty section at the top of the list — a family, a carful,
 a table's worth of friends. Tick some guests first and the same button reads **New group
 of 3**, gathering them straight into it from wherever they were, other groups included.
-Either way it arrives called "Group 1"; click the heading to rename it.
+The group lands where the first of those guests who was not already in one sits; with
+nobody to anchor it — an empty group, or one poached wholly out of other groups — it goes
+to the top. Either way it arrives called "Group 1"; click the heading to rename it.
 Tick guests anywhere in the list
 and press **Add to group** on a group's heading to file them in, or drag them in and out
 by their grips. Groups drag too, and can sit anywhere among the loose guests rather than

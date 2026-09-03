@@ -137,21 +137,30 @@ function nextGroupName(doc: SeatingDoc): string {
 }
 
 /**
- * Add a group at the top of the list, where it is in sight and ready to be
- * filled rather than stranded below everyone, optionally taking guests straight
- * into it. Those guests come whatever group they were in before — a guest sits
- * under one group at a time, so gathering them here takes them out of there.
+ * Add a group, optionally taking guests straight into it. Those guests come
+ * whatever group they were in before — a guest sits under one group at a time,
+ * so gathering them here takes them out of there.
+ *
+ * The group lands where the first of those guests who was not already in one
+ * sits, so it appears where the work was happening. With nobody to anchor it —
+ * an empty group, or one poached entirely out of other groups — it goes to the
+ * top, in sight rather than stranded below everyone.
  */
 export function addGroup(
   doc: SeatingDoc,
   withGuests: string[] = [],
 ): SeatingDoc {
   const group: Group = { id: uid(), name: nextGroupName(doc) };
-  const next = normalize({
-    ...doc,
-    groups: [...doc.groups, group],
-    order: [group.id, ...doc.order],
-  });
+  const groupIds = new Set(doc.groups.map((g) => g.id));
+  const taking = new Set(withGuests);
+  const anchor = doc.guests.find(
+    (g) => taking.has(g.id) && isLoose(g, groupIds),
+  );
+  const at = anchor ? Math.max(0, doc.order.indexOf(anchor.id)) : 0;
+  const order = [...doc.order];
+  order.splice(at, 0, group.id);
+
+  const next = normalize({ ...doc, groups: [...doc.groups, group], order });
   return withGuests.length > 0
     ? assignToGroup(next, withGuests, group.id)
     : next;
