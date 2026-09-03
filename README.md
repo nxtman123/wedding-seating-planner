@@ -46,14 +46,17 @@ Neither apply touches pairings that reach *outside* the group, and neither ever 
 a pair. Picking guests who already agree on a level, in any order, loads that level into the
 form rather than the last one you used.
 
-| Level | Meaning | Reads as |
+| Level | Setting a group | A single pairing reads |
 | --- | --- | --- |
 | `+1` | Must sit together | A **must sit with** B |
-| `+2` | Strongly prefer together | A **should sit with** B |
-| `+3` | Nice to have together | A **could sit with** B |
-| `−3` | Prefer apart | A **could avoid** B |
-| `−2` | Strongly avoid | A **should avoid** B |
-| `−1` | Must not share a table | A **must avoid** B |
+| `+2` | Should sit together | A **should sit with** B |
+| `+3` | Could sit together | A **could sit with** B |
+| `−3` | Could avoid each other | A **could avoid** B |
+| `−2` | Should avoid each other | A **should avoid** B |
+| `−1` | Must avoid each other | A **must avoid** B |
+
+The same must / should / could ladder either way — the form speaks about the group you
+have picked, the row about the one pair it names.
 
 In the pairing list the level sits between the two names, so each row reads as a sentence
 and doubles as the control that changes it.

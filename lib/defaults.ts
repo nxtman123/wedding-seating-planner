@@ -59,20 +59,25 @@ export function levelWeight(level: PairingLevel): number {
   return level > 0 ? magnitude : -magnitude;
 }
 
+/**
+ * The level as it applies to a whole group, for the form that sets one. Uses the
+ * same must / should / could ladder as `levelPhrase`, so the two selects speak
+ * the same language — this one about the group, that one about a single pair.
+ */
 export function levelLabel(level: PairingLevel): string {
   switch (level) {
     case 1:
       return 'Must sit together';
     case 2:
-      return 'Strongly prefer together';
+      return 'Should sit together';
     case 3:
-      return 'Nice to have together';
+      return 'Could sit together';
     case -3:
-      return 'Prefer apart';
+      return 'Could avoid each other';
     case -2:
-      return 'Strongly avoid';
+      return 'Should avoid each other';
     case -1:
-      return 'Must not share a table';
+      return 'Must avoid each other';
   }
 }
 
