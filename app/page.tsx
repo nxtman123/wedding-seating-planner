@@ -27,6 +27,7 @@ import {
   seatGuestsAt,
   setPairingLevel,
   setPin,
+  setTableName,
   setTableSpec,
 } from '@/lib/guests';
 import {
@@ -363,6 +364,9 @@ export default function Page() {
             onSpecRemove={(id) => setDoc((d) => removeTableSpec(d, id))}
             onAddPickedToTable={(index) =>
               setDoc((d) => seatGuestsAt(d, draft.guests, index))
+            }
+            onRenameTable={(index, name) =>
+              setDoc((d) => setTableName(d, index, name))
             }
             selected={draft.guests}
             onGenerate={generate}

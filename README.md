@@ -97,7 +97,8 @@ largest table size the app allows. At the default eight seats it is not close.
 
 **Tables** (right panel) — describe the room a row at a time: *10 tables of 8 seats*, then
 *2 tables of 16*, then *1 table of 2* if there is an odd corner to fill. Add and remove
-rows as the venue firms up, then press **Generate seating**. The line beneath totals the
+rows as the venue firms up, then press **Generate seating**. Table headings are editable
+in place — click one to call it *Head Table* or *Kids* instead of a number. The line beneath totals the
 places against the guest list and says so plainly when the room is short; anyone who could
 not be given a seat is listed rather than squeezed in. The score comes with a line per level in
 use — "all must sit with pairings honored", "6 should sit with pairings not honored" —

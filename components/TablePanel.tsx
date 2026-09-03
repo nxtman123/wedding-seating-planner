@@ -1,7 +1,7 @@
 'use client';
 
 import { levelBadge, levelClass, levelPhrase } from '@/lib/defaults';
-import { guestName } from '@/lib/guests';
+import { guestName, tableName } from '@/lib/guests';
 import {
   conflictsAtTable,
   seatCount,
@@ -24,6 +24,7 @@ export interface TablePanelProps {
   onSpecRemove: (id: string) => void;
   /** Seat every ticked guest at this table and pin them there. */
   onAddPickedToTable: (tableIndex: number) => void;
+  onRenameTable: (tableIndex: number, name: string) => void;
   onGenerate: () => void;
   onTogglePin: (guestId: string) => void;
   onClearPins: () => void;
@@ -51,6 +52,7 @@ export default function TablePanel({
   onSpecAdd,
   onSpecRemove,
   onAddPickedToTable,
+  onRenameTable,
   onGenerate,
   onTogglePin,
   onClearPins,
@@ -193,7 +195,17 @@ export default function TablePanel({
                 }
               >
                 <div className="table-head">
-                  <h3>Table {i + 1}</h3>
+                  {/* An h3 for the outline, an invisible field inside it for
+                      editing — the input inherits the heading's own type. */}
+                  <h3>
+                    <input
+                      type="text"
+                      className="table-name"
+                      value={tableName(doc, i)}
+                      aria-label={`Name of table ${i + 1}`}
+                      onChange={(e) => onRenameTable(i, e.target.value)}
+                    />
+                  </h3>
                   {selected.length > 0 && (
                     <button
                       type="button"
@@ -233,12 +245,12 @@ export default function TablePanel({
                             title={
                               pinned
                                 ? 'Unpin — let the solver move them'
-                                : `Pin to table ${i + 1}`
+                                : `Pin to ${tableName(doc, i)}`
                             }
                             aria-label={
                               pinned
                                 ? `Unpin ${guestName(doc, id)}`
-                                : `Pin ${guestName(doc, id)} to table ${i + 1}`
+                                : `Pin ${guestName(doc, id)} to ${tableName(doc, i)}`
                             }
                             onClick={() => onTogglePin(id)}
                           >

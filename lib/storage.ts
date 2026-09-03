@@ -76,6 +76,15 @@ export function isDoc(value: unknown): value is SeatingDoc {
     if (!isPairingLevel(p.level)) return false;
   }
 
+  const names = (value as { tableNames?: unknown }).tableNames;
+  if (names !== undefined) {
+    if (!Array.isArray(names)) return false;
+    // Holes are allowed — an unnamed table simply has none.
+    if (names.some((n) => n !== null && n !== undefined && typeof n !== 'string')) {
+      return false;
+    }
+  }
+
   const specs = (value as { tableSpecs?: unknown }).tableSpecs;
   if (specs !== undefined) {
     if (!Array.isArray(specs)) return false;
@@ -171,6 +180,9 @@ function sanitize(doc: SeatingDoc): SeatingDoc {
       (p) => p.a !== p.b && ids.has(p.a) && ids.has(p.b),
     ),
     tableSpecs: roomOf(doc, guests.length),
+    tableNames: Array.isArray(doc.tableNames)
+      ? doc.tableNames.map((n) => (typeof n === 'string' ? n : (undefined as never)))
+      : [],
     pins,
     tables: doc.tables.map((t) => t.filter((id) => ids.has(id))),
   });

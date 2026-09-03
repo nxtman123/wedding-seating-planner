@@ -29,6 +29,7 @@ export function defaultDoc(): SeatingDoc {
     order: [],
     pairings: [],
     tableSpecs: [newTableSpec(10)],
+    tableNames: [],
     pins: {},
     tables: [],
   };

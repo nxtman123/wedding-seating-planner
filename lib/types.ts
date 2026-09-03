@@ -67,6 +67,12 @@ export interface SeatingDoc {
   pairings: Pairing[];
   /** The room, as rows of "N tables of M seats". Order sets table numbering. */
   tableSpecs: TableSpec[];
+  /**
+   * Names given to tables, by position. A hole means the table goes by its
+   * number. Keyed by position like `pins` and `tables` are, so re-describing the
+   * room shifts names the same way it shifts everything else.
+   */
+  tableNames: string[];
   pins: Pins;
   tables: string[][];
 }

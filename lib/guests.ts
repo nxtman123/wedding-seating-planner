@@ -398,6 +398,26 @@ export function removeTableSpec(doc: SeatingDoc, id: string): SeatingDoc {
   return { ...doc, tableSpecs: doc.tableSpecs.filter((s) => s.id !== id) };
 }
 
+/** A table's name: whatever it was given, or its number. */
+export function tableName(doc: SeatingDoc, index: number): string {
+  return doc.tableNames[index] ?? `Table ${index + 1}`;
+}
+
+/**
+ * Name a table. An empty name is kept rather than falling back, so clearing the
+ * field leaves it clear instead of refilling as the last letter is deleted.
+ */
+export function setTableName(
+  doc: SeatingDoc,
+  index: number,
+  name: string,
+): SeatingDoc {
+  const tableNames = [...doc.tableNames];
+  while (tableNames.length <= index) tableNames.push(undefined as never);
+  tableNames[index] = name;
+  return { ...doc, tableNames };
+}
+
 /**
  * Seat guests at a table and pin them there, without re-solving the room.
  *
