@@ -191,9 +191,6 @@ textarea {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  /* Room for the scrollbar without it sitting on top of the rows. */
-  padding-right: 4px;
-  margin-right: -4px;
 }
 
 /* One column below this, and the page scrolls as a whole again — three stacked
@@ -212,8 +209,6 @@ textarea {
   }
   .scroller {
     overflow-y: visible;
-    padding-right: 0;
-    margin-right: 0;
   }
 }
 .panel-header {
@@ -274,9 +269,6 @@ textarea {
   align-items: center;
   gap: 6px;
   padding: 3px 5px;
-  /* Pulled back out so the highlight can bleed past the rows without the
-     unselected ones looking indented. */
-  margin: 0 -5px;
   border-radius: 9px;
 }
 .guest-row.row-selected {
