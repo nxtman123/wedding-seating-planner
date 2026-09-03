@@ -10,6 +10,7 @@ import {
   tableSizes,
 } from '@/lib/solver';
 import type { LevelTally, SeatingDoc } from '@/lib/types';
+import PinIcon from '@/components/PinIcon';
 
 export interface TablePanelProps {
   doc: SeatingDoc;
@@ -28,19 +29,6 @@ export interface TablePanelProps {
   onGenerate: () => void;
   onTogglePin: (guestId: string) => void;
   onClearPins: () => void;
-}
-
-/**
- * A pushpin, drawn rather than an emoji so it takes the button's own color. The
- * glyph points straight down; `.pin-button svg` turns it to lean down-left, the
- * angle a pin is actually pushed in at.
- */
-function PinIcon() {
-  return (
-    <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true">
-      <path d="M14 2v6l3 3v2h-4v7l-1 1-1-1v-7H7v-2l3-3V2h4z" />
-    </svg>
-  );
 }
 
 export default function TablePanel({
@@ -206,16 +194,18 @@ export default function TablePanel({
                       onChange={(e) => onRenameTable(i, e.target.value)}
                     />
                   </h3>
-                  {selected.length > 0 && (
-                    <button
-                      type="button"
-                      className="add-picked"
-                      title="Seat the ticked guests here and pin them"
-                      onClick={() => onAddPickedToTable(i)}
-                    >
-                      Add to table
-                    </button>
-                  )}
+                  {/* Kept in the layout when there is nothing to add, so the
+                      heading does not jump as guests are ticked. */}
+                  <button
+                    type="button"
+                    className={
+                      selected.length > 0 ? 'add-picked' : 'add-picked is-idle'
+                    }
+                    title="Seat the ticked guests here and pin them"
+                    onClick={() => onAddPickedToTable(i)}
+                  >
+                    Add to table
+                  </button>
                   <span className="count">
                     {table.length}/{sizes[i]}
                   </span>

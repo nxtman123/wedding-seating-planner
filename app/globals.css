@@ -425,12 +425,17 @@ textarea {
 }
 
 /* Pinning is set in the tables panel; this only reports it back here, and only
-   for the few guests who have a pin. */
+   for the few guests who have a pin. Same pin as the buttons over there, at the
+   same lean, so the two read as one idea. */
 .pin-mark {
   flex: none;
+  display: inline-flex;
+  align-items: center;
   color: var(--accent);
-  font-size: 0.8rem;
-  line-height: 1;
+}
+.pin-mark svg,
+.pin-button svg {
+  transform: rotate(45deg);
 }
 
 /* ---------------- groups ---------------- */
@@ -496,6 +501,11 @@ textarea {
 .add-picked:hover:not(:disabled) {
   background: #f7e2e9;
   border-color: #e6c7d2;
+}
+/* Holds its place in the row when there is nothing picked to add. visibility
+   keeps the box and takes it out of the tab order and the a11y tree both. */
+.add-picked.is-idle {
+  visibility: hidden;
 }
 /* Quiet until reached for, so a subtle heading stays subtle. */
 .group-head .icon-button {
@@ -853,11 +863,6 @@ textarea {
   border-radius: 5px;
   background: none;
   color: #d5ccc3;
-}
-/* Leaning down-left, the way a pin goes into a board. Positive is clockwise on
-   screen, which takes the downward needle over to the left. */
-.pin-button svg {
-  transform: rotate(45deg);
 }
 .pin-button:hover:not(:disabled) {
   background: #f0e7e0;

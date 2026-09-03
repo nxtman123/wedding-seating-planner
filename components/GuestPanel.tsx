@@ -5,6 +5,7 @@ import type { DragEvent } from 'react';
 import { levelClass, levelPhrase } from '@/lib/defaults';
 import { groupMembers } from '@/lib/guests';
 import type { Group, Guest, PairingLevel, SeatingDoc } from '@/lib/types';
+import PinIcon from '@/components/PinIcon';
 
 export interface GuestPanelProps {
   doc: SeatingDoc;
@@ -278,7 +279,7 @@ export default function GuestPanel({
             title={`Pinned to table ${pinnedTo + 1}`}
             aria-label={`Pinned to table ${pinnedTo + 1}`}
           >
-            ◉
+            <PinIcon size={13} />
           </span>
         )}
         {tally.map(({ level, count }) => (
@@ -439,15 +440,17 @@ export default function GuestPanel({
                     aria-label="Group name"
                     onChange={(e) => onRenameGroup(group.id, e.target.value)}
                   />
-                  {selected.length > 0 && (
-                    <button
-                      type="button"
-                      className="add-picked"
-                      onClick={() => onAddPickedToGroup(group.id)}
-                    >
-                      Add to group
-                    </button>
-                  )}
+                  {/* Kept in the layout when idle, so the heading holds still
+                      as guests are ticked. */}
+                  <button
+                    type="button"
+                    className={
+                      selected.length > 0 ? 'add-picked' : 'add-picked is-idle'
+                    }
+                    onClick={() => onAddPickedToGroup(group.id)}
+                  >
+                    Add to group
+                  </button>
                   <button
                     type="button"
                     className="icon-button danger"
