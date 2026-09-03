@@ -271,9 +271,15 @@ textarea {
   padding: 3px 5px;
   border-radius: 9px;
 }
-.guest-row.row-selected {
+/* Also marks the pairing row the form is about to edit, so picking two guests
+   who are already paired points at the row it will change. */
+.guest-row.row-selected,
+.pairing-row.row-selected {
   background: #fdf3f6;
   box-shadow: inset 0 0 0 1px #f0dbe2;
+}
+.pairing-row.row-selected {
+  border-color: #f0dbe2;
 }
 
 /* The two pairing slots. Both wear the accent — the number tells them apart. */

@@ -8,6 +8,7 @@ import {
   addPairing,
   clearAllPins,
   clearPin,
+  findPairing,
   removeGuest,
   pairingCounts,
   removePairing,
@@ -69,17 +70,36 @@ export default function Page() {
   /* ----- composing a pairing ----- */
 
   /**
+   * Adopt the level of whatever pairing these two guests already have, in
+   * whichever order they were picked. Without this the form would keep showing
+   * the last level used and quietly overwrite the existing one on submit.
+   */
+  const withExistingLevel = (next: PairDraft): PairDraft => {
+    const existing = findPairing(doc, next.a, next.b);
+    return existing ? { ...next, level: existing.level } : next;
+  };
+
+  /**
    * Click a guest to drop them into a pairing slot: the first empty one, or the
    * second when both are taken. Clicking a guest who already holds a slot takes
    * them back out.
    */
   const togglePairSelection = (id: string) =>
     setDraft((d) => {
-      if (d.a === id) return { ...d, a: '' };
-      if (d.b === id) return { ...d, b: '' };
-      if (!d.a) return { ...d, a: id };
-      return { ...d, b: id };
+      if (d.a === id) return withExistingLevel({ ...d, a: '' });
+      if (d.b === id) return withExistingLevel({ ...d, b: '' });
+      if (!d.a) return withExistingLevel({ ...d, a: id });
+      return withExistingLevel({ ...d, b: id });
     });
+
+  /**
+   * Changing who is paired re-reads the existing level; changing the level
+   * itself must stick, so that case is passed through untouched.
+   */
+  const changeDraft = (next: PairDraft) =>
+    setDraft((prev) =>
+      next.a === prev.a && next.b === prev.b ? next : withExistingLevel(next),
+    );
 
   /** Commit the draft, keeping the level so a run of pairings adds quickly. */
   const submitPairing = () => {
@@ -181,7 +201,7 @@ export default function Page() {
             doc={doc}
             outcomes={outcomes}
             draft={draft}
-            onDraftChange={setDraft}
+            onDraftChange={changeDraft}
             onAdd={submitPairing}
             onSetLevel={(id, level) =>
               setDoc((d) => setPairingLevel(d, id, level))

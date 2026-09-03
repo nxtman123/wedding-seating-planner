@@ -1,5 +1,5 @@
 import { uid } from './defaults';
-import type { Guest, PairingLevel, SeatingDoc } from './types';
+import type { Guest, Pairing, PairingLevel, SeatingDoc } from './types';
 
 /* -------------------------------------------------------------------------- */
 /*  Guests                                                                     */
@@ -65,6 +65,23 @@ export function guestName(doc: SeatingDoc, id: string): string {
 /* -------------------------------------------------------------------------- */
 
 /**
+ * The pairing between two guests, given in either order, or null if they have
+ * none. Pairings are unordered, so this is the only correct way to look one up.
+ */
+export function findPairing(
+  doc: SeatingDoc,
+  a: string,
+  b: string,
+): Pairing | null {
+  if (!a || !b || a === b) return null;
+  return (
+    doc.pairings.find(
+      (p) => (p.a === a && p.b === b) || (p.a === b && p.b === a),
+    ) ?? null
+  );
+}
+
+/**
  * Add a pairing between two guests. Self-pairings are rejected, and because a
  * pairing is unordered, re-adding an existing pair just changes its level
  * rather than creating a duplicate.
@@ -76,9 +93,7 @@ export function addPairing(
   level: PairingLevel,
 ): SeatingDoc {
   if (!a || !b || a === b) return doc;
-  const existing = doc.pairings.find(
-    (p) => (p.a === a && p.b === b) || (p.a === b && p.b === a),
-  );
+  const existing = findPairing(doc, a, b);
   if (existing) return setPairingLevel(doc, existing.id, level);
   return { ...doc, pairings: [...doc.pairings, { id: uid(), a, b, level }] };
 }

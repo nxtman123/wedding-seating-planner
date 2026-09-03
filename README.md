@@ -23,6 +23,10 @@ the first click marks guest `1`, the second marks guest `2`, and clicking a mark
 guest again releases them. Then choose a level and press **Add pairing** — the level
 sticks, so a run of pairings at the same level goes quickly.
 
+Picking two guests who are already paired, in either order, loads that pairing into the
+form and highlights its row: the level box shows what they have now, and the button reads
+**Update pairing**. A pair can only ever have one level.
+
 | Level | Meaning |
 | --- | --- |
 | `+1` | Must sit together |

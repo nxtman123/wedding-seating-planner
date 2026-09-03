@@ -7,7 +7,7 @@ import {
   levelLabel,
   levelShort,
 } from '@/lib/defaults';
-import { guestName, sortedPairings } from '@/lib/guests';
+import { findPairing, guestName, sortedPairings } from '@/lib/guests';
 import type {
   PairDraft,
   PairingLevel,
@@ -52,6 +52,8 @@ export default function PairingPanel({
 }: PairingPanelProps) {
   const { a, b, level } = draft;
   const canAdd = a !== '' && b !== '' && a !== b;
+  /** Set when the two picked guests are already paired — this edits that one. */
+  const existing = findPairing(doc, a, b);
   const pairings = sortedPairings(doc);
 
   return (
@@ -106,7 +108,7 @@ export default function PairingPanel({
             ))}
           </select>
           <button type="button" onClick={onAdd} disabled={!canAdd}>
-            Add pairing
+            {existing ? 'Update pairing' : 'Add pairing'}
           </button>
         </div>
       )}
@@ -118,7 +120,12 @@ export default function PairingPanel({
       ) : (
         <ul className="list scroller">
           {pairings.map((p) => (
-            <li key={p.id} className="pairing-row">
+            <li
+              key={p.id}
+              className={
+                p.id === existing?.id ? 'pairing-row row-selected' : 'pairing-row'
+              }
+            >
               <OutcomeDot outcome={outcomes.get(p.id)} />
               <span className="pairing-names">
                 {guestName(doc, p.a)}
