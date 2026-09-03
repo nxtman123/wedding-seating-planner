@@ -744,6 +744,12 @@ textarea {
 .generating .label {
   visibility: hidden;
 }
+/* On the filled button the default chip would disappear into the accent. */
+.generate-row .primary kbd {
+  border-color: rgba(255, 255, 255, 0.45);
+  background: rgba(255, 255, 255, 0.16);
+  color: var(--accent-ink);
+}
 .spinner {
   position: absolute;
   top: 50%;

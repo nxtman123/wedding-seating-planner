@@ -107,7 +107,7 @@ export default function Page() {
    * would do nothing at all until it was looked at again.
    */
   const generate = () => {
-    if (solving) return;
+    if (solving || doc.guests.length === 0) return;
     setSolving(true);
     let started = false;
     const run = () => {
@@ -264,18 +264,34 @@ export default function Page() {
   };
 
   /**
-   * C clears the pick, wherever you are — except where the letter is being typed
-   * and with a modifier held, where it belongs to the browser.
+   * The shortcuts read the latest handler through a ref rather than closing over
+   * it, so the listener is bound once instead of being torn down and rebuilt on
+   * every keystroke typed into a guest's name.
+   */
+  const generateRef = useRef(generate);
+  useEffect(() => {
+    generateRef.current = generate;
+  });
+
+  /**
+   * C clears the pick and G generates, wherever you are — except where the
+   * letter is being typed, and with a modifier held, where it belongs to the
+   * browser.
    */
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key !== 'c' && e.key !== 'C') return;
       if (e.metaKey || e.ctrlKey || e.altKey) return;
+      const key = e.key.toLowerCase();
+      if (key !== 'c' && key !== 'g') return;
       if (takesTyping(e.target as HTMLElement | null)) return;
-      // A select would otherwise jump to the option starting with the letter —
-      // in the guest dropdown that silently adds whoever comes first under C.
+      // A select would otherwise jump to the option starting with the letter,
+      // which in a pairing row would quietly rewrite that pairing's level.
       e.preventDefault();
-      setDraft((d) => (d.guests.length ? { ...d, guests: [] } : d));
+      if (key === 'c') {
+        setDraft((d) => (d.guests.length ? { ...d, guests: [] } : d));
+      } else {
+        generateRef.current();
+      }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);

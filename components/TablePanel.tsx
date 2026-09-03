@@ -126,7 +126,9 @@ export default function TablePanel({
           {/* The label stays in the box while it spins, hidden rather than
               removed, so the button holds its size and the spinner has
               something to be centred in. */}
-          <span className="label">Generate seating</span>
+          <span className="label">
+            Generate seating <kbd>G</kbd>
+          </span>
           {solving && <span className="spinner" />}
         </button>
         {pinCount > 0 && (
