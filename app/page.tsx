@@ -23,13 +23,15 @@ import {
   solveSeating,
 } from '@/lib/solver';
 import { exportDoc, loadDoc, parseDocFile, saveDoc } from '@/lib/storage';
-import type { PairingLevel, SeatingDoc } from '@/lib/types';
+import type { PairDraft, SeatingDoc } from '@/lib/types';
 import GuestPanel from '@/components/GuestPanel';
 import PairingPanel from '@/components/PairingPanel';
 import TablePanel from '@/components/TablePanel';
 
 export default function Page() {
   const [doc, setDoc] = useState<SeatingDoc>(defaultDoc());
+  /** The pairing being composed, shared by the guest list and the pairing panel. */
+  const [draft, setDraft] = useState<PairDraft>({ a: '', b: '', level: 1 });
   const [hydrated, setHydrated] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -63,9 +65,42 @@ export default function Page() {
   const generate = () =>
     setDoc((d) => ({ ...d, tables: solveSeating(d).tables }));
 
+  /* ----- composing a pairing ----- */
+
+  /**
+   * Click a guest to drop them into a pairing slot: the first empty one, or the
+   * second when both are taken. Clicking a guest who already holds a slot takes
+   * them back out.
+   */
+  const togglePairSelection = (id: string) =>
+    setDraft((d) => {
+      if (d.a === id) return { ...d, a: '' };
+      if (d.b === id) return { ...d, b: '' };
+      if (!d.a) return { ...d, a: id };
+      return { ...d, b: id };
+    });
+
+  /** Commit the draft, keeping the level so a run of pairings adds quickly. */
+  const submitPairing = () => {
+    setDoc((d) => addPairing(d, draft.a, draft.b, draft.level));
+    setDraft((d) => ({ ...d, a: '', b: '' }));
+  };
+
+  /** Removing a guest also takes them out of any slot they were holding. */
+  const dropGuest = (id: string) => {
+    setDoc((d) => removeGuest(d, id));
+    setDraft((d) => ({
+      ...d,
+      a: d.a === id ? '' : d.a,
+      b: d.b === id ? '' : d.b,
+    }));
+  };
+
+  /* ----- pinning ----- */
+
   /**
    * Pin a guest to wherever they are sitting now, or release them. Pinning
-   * needs a seating to point at, so the button is disabled until one exists.
+   * needs a seating to point at, so this only fires from a seated row.
    */
   const togglePin = (guestId: string) =>
     setDoc((d) => {
@@ -80,6 +115,7 @@ export default function Page() {
     try {
       const text = await file.text();
       setDoc(parseDocFile(text));
+      setDraft({ a: '', b: '', level: 1 });
     } catch (e) {
       window.alert('Could not import file: ' + (e as Error).message);
     }
@@ -88,6 +124,7 @@ export default function Page() {
   const reset = () => {
     if (window.confirm('Clear the guest list, pairings and seating?')) {
       setDoc(defaultDoc());
+      setDraft({ a: '', b: '', level: 1 });
     }
   };
 
@@ -135,15 +172,16 @@ export default function Page() {
             onAdd={(name) => setDoc((d) => addGuest(d, name))}
             onAddMany={(text) => setDoc((d) => addGuestsFromText(d, text))}
             onRename={(id, name) => setDoc((d) => renameGuest(d, id, name))}
-            onRemove={(id) => setDoc((d) => removeGuest(d, id))}
-            onTogglePin={togglePin}
+            onRemove={dropGuest}
+            selected={draft}
+            onTogglePair={togglePairSelection}
           />
           <PairingPanel
             doc={doc}
             outcomes={outcomes}
-            onAdd={(a, b, level: PairingLevel) =>
-              setDoc((d) => addPairing(d, a, b, level))
-            }
+            draft={draft}
+            onDraftChange={setDraft}
+            onAdd={submitPairing}
             onSetLevel={(id, level) =>
               setDoc((d) => setPairingLevel(d, id, level))
             }

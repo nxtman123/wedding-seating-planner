@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import {
   PAIRING_LEVELS,
   levelBadge,
@@ -9,13 +8,24 @@ import {
   levelShort,
 } from '@/lib/defaults';
 import { guestName, sortedPairings } from '@/lib/guests';
-import type { PairingLevel, PairingOutcome, SeatingDoc } from '@/lib/types';
+import type {
+  PairDraft,
+  PairingLevel,
+  PairingOutcome,
+  SeatingDoc,
+} from '@/lib/types';
 
 export interface PairingPanelProps {
   doc: SeatingDoc;
   /** Pairing id -> how it fared in the current seating. Empty before a solve. */
   outcomes: Map<string, PairingOutcome>;
-  onAdd: (a: string, b: string, level: PairingLevel) => void;
+  /**
+   * The pairing being composed. Owned by the page because the guest list fills
+   * the same two slots these dropdowns do.
+   */
+  draft: PairDraft;
+  onDraftChange: (draft: PairDraft) => void;
+  onAdd: () => void;
   onSetLevel: (id: string, level: PairingLevel) => void;
   onRemove: (id: string) => void;
 }
@@ -34,22 +44,14 @@ function OutcomeDot({ outcome }: { outcome: PairingOutcome | undefined }) {
 export default function PairingPanel({
   doc,
   outcomes,
+  draft,
+  onDraftChange,
   onAdd,
   onSetLevel,
   onRemove,
 }: PairingPanelProps) {
-  const [a, setA] = useState('');
-  const [b, setB] = useState('');
-  const [level, setLevel] = useState<PairingLevel>(1);
-
+  const { a, b, level } = draft;
   const canAdd = a !== '' && b !== '' && a !== b;
-  const submit = () => {
-    if (!canAdd) return;
-    onAdd(a, b, level);
-    setA('');
-    setB('');
-  };
-
   const pairings = sortedPairings(doc);
 
   return (
@@ -66,7 +68,7 @@ export default function PairingPanel({
           <select
             value={a}
             aria-label="First guest"
-            onChange={(e) => setA(e.target.value)}
+            onChange={(e) => onDraftChange({ ...draft, a: e.target.value })}
           >
             <option value="">Guest…</option>
             {doc.guests.map((g) => (
@@ -78,7 +80,7 @@ export default function PairingPanel({
           <select
             value={b}
             aria-label="Second guest"
-            onChange={(e) => setB(e.target.value)}
+            onChange={(e) => onDraftChange({ ...draft, b: e.target.value })}
           >
             <option value="">Guest…</option>
             {doc.guests.map((g) => (
@@ -91,7 +93,10 @@ export default function PairingPanel({
             value={level}
             aria-label="Priority level"
             onChange={(e) =>
-              setLevel(Number(e.target.value) as PairingLevel)
+              onDraftChange({
+                ...draft,
+                level: Number(e.target.value) as PairingLevel,
+              })
             }
           >
             {PAIRING_LEVELS.map((l) => (
@@ -100,7 +105,7 @@ export default function PairingPanel({
               </option>
             ))}
           </select>
-          <button type="button" onClick={submit} disabled={!canAdd}>
+          <button type="button" onClick={onAdd} disabled={!canAdd}>
             Add pairing
           </button>
         </div>

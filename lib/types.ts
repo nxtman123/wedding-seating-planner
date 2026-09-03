@@ -47,3 +47,14 @@ export interface SeatingDoc {
 
 /** Whether a pairing got what it asked for in the current arrangement. */
 export type PairingOutcome = 'satisfied' | 'violated' | 'unplaced';
+
+/**
+ * The pairing being composed, held outside the document because it is transient
+ * UI state. `a` and `b` are `Guest.id`s, empty while that slot is unfilled —
+ * they are filled either from the guest list or the pairing panel's dropdowns.
+ */
+export interface PairDraft {
+  a: string;
+  b: string;
+  level: PairingLevel;
+}

@@ -7,22 +7,25 @@ export interface GuestPanelProps {
   doc: SeatingDoc;
   /** Guest id -> the table they are seated at, or undefined if unseated. */
   seats: Map<string, number>;
+  /** The two guests currently armed for a pairing; '' when the slot is empty. */
+  selected: { a: string; b: string };
   onAdd: (name: string) => void;
   onAddMany: (text: string) => void;
   onRename: (id: string, name: string) => void;
   onRemove: (id: string) => void;
-  /** Toggle the guest's pin between "locked here" and free. */
-  onTogglePin: (id: string) => void;
+  /** Put this guest in a pairing slot, or take them out of the one they hold. */
+  onTogglePair: (id: string) => void;
 }
 
 export default function GuestPanel({
   doc,
   seats,
+  selected,
   onAdd,
   onAddMany,
   onRename,
   onRemove,
-  onTogglePin,
+  onTogglePair,
 }: GuestPanelProps) {
   const [name, setName] = useState('');
   const [bulk, setBulk] = useState('');
@@ -87,6 +90,13 @@ export default function GuestPanel({
         </div>
       )}
 
+      {doc.guests.length > 1 && (
+        <p className="hint">
+          Click the circles to pick two guests, then set their level in the
+          Pairings panel.
+        </p>
+      )}
+
       {doc.guests.length === 0 ? (
         <p className="empty">No guests yet. Add a few to get started.</p>
       ) : (
@@ -94,8 +104,13 @@ export default function GuestPanel({
           {doc.guests.map((guest) => {
             const table = seats.get(guest.id);
             const pinned = doc.pins[guest.id] !== undefined;
+            const slot =
+              guest.id === selected.a ? 1 : guest.id === selected.b ? 2 : null;
             return (
-              <li key={guest.id} className="guest-row">
+              <li
+                key={guest.id}
+                className={slot ? 'guest-row row-selected' : 'guest-row'}
+              >
                 <input
                   type="text"
                   className="name-input"
@@ -104,23 +119,36 @@ export default function GuestPanel({
                   onChange={(e) => onRename(guest.id, e.target.value)}
                 />
                 {table !== undefined && (
-                  <span className="table-badge">T{table + 1}</span>
+                  <span
+                    className={pinned ? 'table-badge badge-pinned' : 'table-badge'}
+                    title={
+                      pinned
+                        ? `Pinned to table ${table + 1}`
+                        : `Seated at table ${table + 1}`
+                    }
+                  >
+                    T{table + 1}
+                  </span>
                 )}
                 <button
                   type="button"
-                  className={pinned ? 'icon-button pin-on' : 'icon-button'}
-                  title={
-                    pinned
-                      ? 'Unpin — let the solver move them'
-                      : table === undefined
-                        ? 'Generate a seating first, then pin'
-                        : `Pin to table ${table + 1}`
+                  className={
+                    slot ? `icon-button pair-slot-${slot}` : 'icon-button'
                   }
-                  aria-label={pinned ? 'Unpin guest' : 'Pin guest to table'}
-                  disabled={!pinned && table === undefined}
-                  onClick={() => onTogglePin(guest.id)}
+                  title={
+                    slot
+                      ? `Guest ${slot} of the pairing — click to clear`
+                      : 'Pick for a pairing'
+                  }
+                  aria-label={
+                    slot
+                      ? `Clear ${guest.name} from the pairing`
+                      : `Pick ${guest.name} for a pairing`
+                  }
+                  aria-pressed={slot !== null}
+                  onClick={() => onTogglePair(guest.id)}
                 >
-                  {pinned ? '◉' : '○'}
+                  {slot ?? '○'}
                 </button>
                 <button
                   type="button"

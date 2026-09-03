@@ -15,7 +15,11 @@ You can also **Export** / **Import** it as JSON.
 **Guests** (left panel) — add them one at a time, or paste a whole list, one name per
 line. Pasting again only adds names that aren't already there.
 
-**Pairings** (middle panel) — pick two guests and how strongly they belong together:
+**Pairings** (middle panel) — say how strongly two guests belong together. Pick the
+pair either from the two dropdowns here, or by clicking the circles in the guest list:
+the first click marks guest `1`, the second marks guest `2`, and clicking a marked
+guest again releases them. Then choose a level and press **Add pairing** — the level
+sticks, so a run of pairings at the same level goes quickly.
 
 | Level | Meaning |
 | --- | --- |
@@ -36,8 +40,9 @@ number of tables is derived from the guest count; the *Spare tables* box adds sl
 top when you want the room less full. The score and a per-table warning list show how
 the arrangement did, and the dots in the pairings panel mark each pairing honored or not.
 
-**Pins** — the ○ next to any guest locks them to the table they're currently at. Pinned
-guests stay put through later **Generate** presses while everyone else is rearranged.
+**Pins** — the ○ next to a seated guest in the tables panel locks them to that table.
+Pinned guests stay put through later **Generate** presses while everyone else is
+rearranged, and their table badge in the guest list fills in to show it.
 
 ## Develop
 
