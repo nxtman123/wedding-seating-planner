@@ -450,7 +450,8 @@ button.small {
    a short label, so the row needs no separate badge beside the names. */
 .level-select {
   flex: none;
-  width: 122px;
+  /* Fits the longest option, "+++ should sit with", without clipping. */
+  width: 152px;
   padding: 3px 2px 3px 7px;
   font-size: 0.8rem;
   font-weight: 600;
