@@ -64,8 +64,12 @@ export default function TablePanel({
         <span className="count">{tables}</span>
       </div>
 
-      {/* The room, a row at a time, so a few sixteens can sit beside the eights. */}
-      <ul className="room-rows">
+      {/* Describing the room and reading the result are two jobs. Side by side
+          while the panel is wide enough for both, stacked when it is not. */}
+      <div className="table-setup">
+        <div className="setup-room">
+          {/* The room, a row at a time, so a few sixteens can sit beside the eights. */}
+          <ul className="room-rows">
         {doc.tableSpecs.map((spec) => (
           <li key={spec.id}>
             <input
@@ -116,7 +120,10 @@ export default function TablePanel({
         .
       </p>
 
-      <div className="generate-row">
+        </div>
+
+        <div className="setup-outcome">
+          <div className="generate-row">
         <button
           type="button"
           className={solving ? 'primary generating' : 'primary'}
@@ -158,9 +165,11 @@ export default function TablePanel({
                     } not honored`}
               </li>
             ))}
-          </ul>
-        </>
-      )}
+              </ul>
+            </>
+          )}
+        </div>
+      </div>
 
       {unseated.length > 0 && doc.tables.length > 0 && (
         <div className="unseated">
