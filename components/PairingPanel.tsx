@@ -159,7 +159,7 @@ export default function PairingPanel({
           >
             {PAIRING_LEVELS.map((l) => (
               <option key={l} value={l}>
-                {levelBadge(l)} · {levelLabel(l)}
+                {levelBadge(l)} {levelLabel(l)}
               </option>
             ))}
           </select>
