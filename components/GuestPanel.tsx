@@ -16,8 +16,8 @@ export interface GuestPanelProps {
   onRemove: (id: string) => void;
   /** Put this guest in the group being composed, or take them back out. */
   onTogglePair: (id: string) => void;
-  /** Move a guest so they sit before `index` in the list. */
-  onReorder: (id: string, index: number) => void;
+  /** Move guests so they sit together before `index` in the list. */
+  onReorder: (ids: string[], index: number) => void;
 }
 
 /** "3 pairings — 2 together, 1 apart", for the badge's tooltip. */
@@ -48,11 +48,20 @@ export default function GuestPanel({
    * draggable row would fight selecting the name inside it.
    */
   const [armed, setArmed] = useState<string | null>(null);
-  const [dragging, setDragging] = useState<string | null>(null);
+  /**
+   * The guests a drag is carrying. Dragging a ticked row takes the whole
+   * selection along, gaps and all; dragging an unticked row takes only it and
+   * leaves the selection alone.
+   */
+  const [moving, setMoving] = useState<string[] | null>(null);
   /** Where the row would land: an insertion point, 0 through guests.length. */
   const [dropAt, setDropAt] = useState<number | null>(null);
 
   const chosen = new Set(selected);
+
+  /** What dragging this row would carry: the whole ticked set, or just it. */
+  const carriedBy = (id: string) =>
+    chosen.has(id) && selected.length > 1 ? selected : [id];
 
   const submit = () => {
     onAdd(name);
@@ -61,7 +70,7 @@ export default function GuestPanel({
 
   const endDrag = () => {
     setArmed(null);
-    setDragging(null);
+    setMoving(null);
     setDropAt(null);
   };
 
@@ -78,7 +87,7 @@ export default function GuestPanel({
    */
   const drop = (e: DragEvent<HTMLElement>, index: number) => {
     e.preventDefault();
-    if (dragging !== null) onReorder(dragging, index);
+    if (moving !== null) onReorder(moving, index);
     endDrag();
   };
 
@@ -169,7 +178,7 @@ export default function GuestPanel({
             const className = [
               'guest-row',
               picked ? 'row-selected' : '',
-              dragging === guest.id ? 'row-dragging' : '',
+              moving?.includes(guest.id) ? 'row-dragging' : '',
               dropAt === index ? 'drop-before' : '',
               dropAt === doc.guests.length && last ? 'drop-after' : '',
             ]
@@ -181,13 +190,13 @@ export default function GuestPanel({
                 className={className}
                 draggable={armed === guest.id}
                 onDragStart={(e) => {
-                  setDragging(guest.id);
+                  setMoving(carriedBy(guest.id));
                   e.dataTransfer.effectAllowed = 'move';
                   e.dataTransfer.setData('text/plain', guest.id);
                 }}
                 onDragEnd={endDrag}
                 onDragOver={(e) => {
-                  if (!dragging) return;
+                  if (!moving) return;
                   e.preventDefault();
                   e.dataTransfer.dropEffect = 'move';
                   setDropAt(insertionFor(e, index));
@@ -196,7 +205,11 @@ export default function GuestPanel({
               >
                 <span
                   className="drag-handle"
-                  title="Drag to reorder"
+                  title={
+                    carriedBy(guest.id).length > 1
+                      ? `Drag to move all ${selected.length} ticked guests`
+                      : 'Drag to reorder'
+                  }
                   aria-hidden="true"
                   onMouseDown={() => setArmed(guest.id)}
                   onMouseUp={() => setArmed(null)}

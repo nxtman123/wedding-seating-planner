@@ -14,7 +14,9 @@ You can also **Export** / **Import** it as JSON.
 
 **Guests** (left panel) — add them one at a time, or paste a whole list, one name per
 line. Drag a row by its grip to reorder the list — a line shows where it will land, and
-nothing shifts until you drop. The badge on a row counts
+nothing shifts until you drop. Dragging a ticked row carries the whole ticked selection
+with it: they lift out of wherever they are, gaps and all, and land together at the line
+in the order they had. Dragging an unticked row moves just that row. The badge on a row counts
 the pairings that guest is caught up in, so it's easy to spot who you've already placed
 and who is still floating; hover it for the split between together and apart.
 

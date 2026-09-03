@@ -10,7 +10,7 @@ import {
   clearPin,
   commonLevel,
   fillGroupLevel,
-  moveGuest,
+  moveGuests,
   removeGuest,
   pairingCounts,
   removePairing,
@@ -198,7 +198,7 @@ export default function Page() {
             onRemove={dropGuest}
             selected={draft.guests}
             onTogglePair={toggleGuestSelection}
-            onReorder={(id, index) => setDoc((d) => moveGuest(d, id, index))}
+            onReorder={(ids, index) => setDoc((d) => moveGuests(d, ids, index))}
           />
           <PairingPanel
             doc={doc}

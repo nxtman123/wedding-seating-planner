@@ -56,25 +56,29 @@ export function removeGuest(doc: SeatingDoc, id: string): SeatingDoc {
 }
 
 /**
- * Move a guest so they sit before position `index` in the list, where `index` is
+ * Move guests so they sit together before position `index`, where `index` is
  * counted against the list as it stands now — `guests.length` means the end.
- * Lifting the guest out shifts everything after them up by one, so a target
- * below the guest's old spot is adjusted for that.
+ *
+ * The guests need not be adjacent: they are lifted out of wherever they are and
+ * land as one contiguous block, keeping their order relative to each other.
+ * Lifting them out shifts the insertion point up by however many of them were
+ * above it, which is what `above` corrects for.
  */
-export function moveGuest(
+export function moveGuests(
   doc: SeatingDoc,
-  id: string,
+  ids: string[],
   index: number,
 ): SeatingDoc {
-  const from = doc.guests.findIndex((g) => g.id === id);
-  if (from < 0) return doc;
+  const moving = new Set(ids);
+  if (moving.size === 0) return doc;
   const target = Math.max(0, Math.min(doc.guests.length, index));
-  // Dropping just above or just below where they already are changes nothing.
-  if (target === from || target === from + 1) return doc;
-  const guests = [...doc.guests];
-  const [moved] = guests.splice(from, 1);
-  guests.splice(target > from ? target - 1 : target, 0, moved);
-  return { ...doc, guests };
+  const above = doc.guests
+    .slice(0, target)
+    .filter((g) => moving.has(g.id)).length;
+  const block = doc.guests.filter((g) => moving.has(g.id));
+  const rest = doc.guests.filter((g) => !moving.has(g.id));
+  const at = target - above;
+  return { ...doc, guests: [...rest.slice(0, at), ...block, ...rest.slice(at)] };
 }
 
 /** Look up a display name, falling back for ids that no longer exist. */
