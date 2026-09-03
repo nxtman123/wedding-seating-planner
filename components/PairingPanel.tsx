@@ -34,7 +34,6 @@ export interface PairingPanelProps {
   draft: PairingDraft;
   onToggleGuest: (id: string) => void;
   onLevelChange: (level: PairingLevel) => void;
-  onClear: () => void;
   /** Apply the level to every pair in the group, overwriting what exists. */
   onApply: () => void;
   /** Apply the level only to pairs in the group that have no pairing yet. */
@@ -60,7 +59,6 @@ export default function PairingPanel({
   draft,
   onToggleGuest,
   onLevelChange,
-  onClear,
   onApply,
   onApplyMissing,
   onSetLevel,
@@ -199,11 +197,6 @@ export default function PairingPanel({
             {showMissing && (
               <button type="button" onClick={onApplyMissing}>
                 Apply to {missing} missing
-              </button>
-            )}
-            {picked.length > 0 && (
-              <button type="button" onClick={onClear}>
-                Clear
               </button>
             )}
           </div>

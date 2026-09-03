@@ -173,6 +173,30 @@ export default function Page() {
       return table === undefined ? d : setPin(d, guestId, table);
     });
 
+  /**
+   * C clears the pick, wherever you are — except while typing, where it is just
+   * the letter, and with a modifier held, where it belongs to the browser.
+   */
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'c' && e.key !== 'C') return;
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      const el = e.target as HTMLElement | null;
+      const tag = el?.tagName;
+      if (
+        tag === 'INPUT' ||
+        tag === 'TEXTAREA' ||
+        tag === 'SELECT' ||
+        el?.isContentEditable
+      ) {
+        return;
+      }
+      setDraft((d) => (d.guests.length ? { ...d, guests: [] } : d));
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
   /* ----- import / export ----- */
 
   const doImport = async (file: File) => {
@@ -203,6 +227,14 @@ export default function Page() {
           </p>
         </div>
         <div className="toolbar">
+          <button
+            type="button"
+            onClick={clearSelection}
+            disabled={draft.guests.length === 0}
+            title="Clear the picked guests"
+          >
+            Clear selection <kbd>C</kbd>
+          </button>
           <button type="button" onClick={() => exportDoc(doc)}>
             Export
           </button>
@@ -263,7 +295,6 @@ export default function Page() {
             draft={draft}
             onToggleGuest={toggleGuestSelection}
             onLevelChange={setDraftLevel}
-            onClear={clearSelection}
             onApply={applyToGroup}
             onApplyMissing={applyToMissing}
             onSetLevel={(id, level) =>

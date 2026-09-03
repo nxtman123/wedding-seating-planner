@@ -71,6 +71,21 @@ body {
   color: var(--muted);
 }
 
+/* The key that does the same thing as the button it sits in. */
+kbd {
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1;
+  padding: 3px 5px;
+  margin-left: 7px;
+  border: 1px solid var(--border);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  background: var(--surface-2);
+  color: var(--muted);
+}
+
 /* ---------------- controls ---------------- */
 button {
   font: inherit;

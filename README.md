@@ -37,6 +37,9 @@ ticking them in the guest list, or from the dropdown here; unticking takes a gue
 out. Order of picking carries no meaning. Then choose a level and press the button — the level sticks, so a run at the same level goes
 quickly.
 
+**Clear selection** in the top bar drops the pick, as does pressing <kbd>C</kbd> anywhere
+outside a text field.
+
 Pick **two** guests for a single pairing. Pick **three or more** and you get a clique:
 every pair within the group is set to the same level, so five friends who should all sit
 together is one selection and one click rather than ten separate pairings.
