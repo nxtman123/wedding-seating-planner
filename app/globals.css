@@ -407,8 +407,11 @@ textarea {
   color: var(--text);
 }
 
+/* Reads as a sentence — name, relation, name — with the relation in a column of
+   its own so the dropdowns line up down the list. */
 .pairing-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 8px;
   padding: 5px 8px;
@@ -416,24 +419,24 @@ textarea {
   border: 1px solid var(--border);
   border-radius: 8px;
 }
+.pairing-name {
+  font-size: 0.92rem;
+  min-width: 0;
+}
+/* Pulled up against the relation so the phrase holds together. */
+.pairing-name-a {
+  text-align: right;
+}
 /* Separates the pairings floated to the top from the rest of the list. */
 .after-focus {
   margin-top: 14px;
 }
 
-.pairing-names {
-  flex: 1;
-  font-size: 0.92rem;
-  min-width: 0;
-}
-.joiner {
-  color: var(--muted);
-}
 /* The row's level dropdown doubles as its chip: it carries the level color and
    a short label, so the row needs no separate badge beside the names. */
 .level-select {
   flex: none;
-  width: 108px;
+  width: 122px;
   padding: 3px 2px 3px 7px;
   font-size: 0.8rem;
   font-weight: 600;

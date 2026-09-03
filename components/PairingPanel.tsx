@@ -5,7 +5,7 @@ import {
   levelBadge,
   levelClass,
   levelLabel,
-  levelShort,
+  levelPhrase,
 } from '@/lib/defaults';
 import {
   findPairing,
@@ -216,17 +216,14 @@ export default function PairingPanel({
                 .join(' ')}
             >
               <OutcomeDot outcome={outcomes.get(p.id)} />
-              <span className="pairing-names">
+              {/* Reads as a sentence: name, relation, name. */}
+              <span className="pairing-name pairing-name-a">
                 {guestName(doc, p.a)}
-                <span className="joiner">
-                  {p.level > 0 ? ' with ' : ' away from '}
-                </span>
-                {guestName(doc, p.b)}
               </span>
               <select
                 className={`level-select ${levelClass(p.level)}`}
                 value={p.level}
-                aria-label="Priority level"
+                aria-label={`${guestName(doc, p.a)} and ${guestName(doc, p.b)}`}
                 title={levelLabel(p.level)}
                 onChange={(e) =>
                   onSetLevel(p.id, Number(e.target.value) as PairingLevel)
@@ -234,10 +231,11 @@ export default function PairingPanel({
               >
                 {PAIRING_LEVELS.map((l) => (
                   <option key={l} value={l}>
-                    {levelShort(l)}
+                    {levelPhrase(l)}
                   </option>
                 ))}
               </select>
+              <span className="pairing-name">{guestName(doc, p.b)}</span>
               <button
                 type="button"
                 className="icon-button danger"

@@ -82,11 +82,26 @@ export function levelBadge(level: PairingLevel): string {
 }
 
 /**
- * Short form for the in-row dropdown, e.g. "+1 together". Long enough to read
- * without a legend, short enough not to crowd the names beside it.
+ * The level as a relation, for the dropdown that sits between the two names in
+ * a pairing row: "Ken Tiel · must sit with · Dora Tiel". Parallel on both sides
+ * of zero — must / should / could, sit with / avoid — so the ladder is legible
+ * without a key.
  */
-export function levelShort(level: PairingLevel): string {
-  return `${levelBadge(level)} ${level > 0 ? 'together' : 'apart'}`;
+export function levelPhrase(level: PairingLevel): string {
+  switch (level) {
+    case 1:
+      return 'must sit with';
+    case 2:
+      return 'should sit with';
+    case 3:
+      return 'could sit with';
+    case -3:
+      return 'could avoid';
+    case -2:
+      return 'should avoid';
+    case -1:
+      return 'must avoid';
+  }
 }
 
 /** CSS modifier class for a level chip — `.level-pos-1` … `.level-neg-3`. */

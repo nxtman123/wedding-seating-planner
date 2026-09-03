@@ -46,14 +46,17 @@ Neither apply touches pairings that reach *outside* the group, and neither ever 
 a pair. Picking guests who already agree on a level, in any order, loads that level into the
 form rather than the last one you used.
 
-| Level | Meaning |
-| --- | --- |
-| `+1` | Must sit together |
-| `+2` | Strongly prefer together |
-| `+3` | Nice to have together |
-| `−3` | Prefer apart |
-| `−2` | Strongly avoid |
-| `−1` | Must not share a table |
+| Level | Meaning | Reads as |
+| --- | --- | --- |
+| `+1` | Must sit together | A **must sit with** B |
+| `+2` | Strongly prefer together | A **should sit with** B |
+| `+3` | Nice to have together | A **could sit with** B |
+| `−3` | Prefer apart | A **could avoid** B |
+| `−2` | Strongly avoid | A **should avoid** B |
+| `−1` | Must not share a table | A **must avoid** B |
+
+In the pairing list the level sits between the two names, so each row reads as a sentence
+and doubles as the control that changes it.
 
 The levels are weights, not rules — the solver maximizes the total, so it will always
 produce a seating even when the pairings contradict each other. Each level is worth 20×
