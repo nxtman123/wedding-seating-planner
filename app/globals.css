@@ -33,10 +33,15 @@ body {
 }
 
 /* No width cap: given a wide screen the three panels take it, which is what the
-   pairing rows want — they are the widest thing here. */
+   pairing rows want — they are the widest thing here.
+ *
+ * The side gutters are wide enough to put a thumb in. Where the page scrolls
+ * between rows, that strip is the only place a drag reaches the page rather than
+ * one of the panels, which swallow the gesture into their own lists. It scales
+ * with the window so it stays generous on a laptop without eating a phone. */
 .app {
   height: 100dvh;
-  padding: 24px 20px 20px;
+  padding: 24px clamp(16px, 4vw, 44px) 20px;
   display: flex;
   flex-direction: column;
   gap: 0;
@@ -194,7 +199,7 @@ textarea {
  * so getting from the guests to the tables is one flick rather than a trip past
  * three hundred pairings.
  */
-@media (max-width: 1400px) {
+@media (max-width: 1540px) {
   html,
   body {
     height: auto;
@@ -213,7 +218,7 @@ textarea {
 }
 
 /* One at a time, still a viewport tall each. */
-@media (max-width: 760px) {
+@media (max-width: 912px) {
   .panels {
     grid-template-columns: 1fr;
   }
