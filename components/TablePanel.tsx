@@ -106,20 +106,15 @@ export default function TablePanel({
               dozen missed "could"s, and a bare total hides which it was. */}
           <ul className="score-lines">
             {breakdown.map(({ level, violated }) => (
-              <li key={level}>
-                <span className={`level-chip ${levelClass(level)}`}>
-                  {levelBadge(level)}
-                </span>
-                {violated === 0 ? (
-                  <span className="score-ok">
-                    ✓ all {levelPhrase(level)} pairings honored
-                  </span>
-                ) : (
-                  <span className="score-bad">
-                    {violated} {levelPhrase(level)} pairing
-                    {violated === 1 ? '' : 's'} not honored
-                  </span>
-                )}
+              <li
+                key={level}
+                className={violated === 0 ? 'score-ok' : 'score-bad'}
+              >
+                {violated === 0
+                  ? `✓ all ${levelPhrase(level)} pairings honored`
+                  : `${violated} ${levelPhrase(level)} pairing${
+                      violated === 1 ? '' : 's'
+                    } not honored`}
               </li>
             ))}
           </ul>

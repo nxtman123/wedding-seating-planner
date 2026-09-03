@@ -728,12 +728,6 @@ textarea {
   gap: 3px;
   font-size: 0.84rem;
 }
-.score-lines li {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-}
-
 .score-ok {
   color: var(--ok);
 }
