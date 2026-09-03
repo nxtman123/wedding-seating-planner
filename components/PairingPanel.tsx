@@ -40,6 +40,8 @@ export interface PairingPanelProps {
   onApplyMissing: () => void;
   /** Apply the level only where it would strengthen what is already there. */
   onApplyStrengthen: () => void;
+  /** Drop every pairing between members of the group. */
+  onRemoveInside: () => void;
   onSetLevel: (id: string, level: PairingLevel) => void;
   onRemove: (id: string) => void;
 }
@@ -63,6 +65,7 @@ export default function PairingPanel({
   onApply,
   onApplyMissing,
   onApplyStrengthen,
+  onRemoveInside,
   onSetLevel,
   onRemove,
 }: PairingPanelProps) {
@@ -79,6 +82,8 @@ export default function PairingPanel({
    */
   const showMissing = missing > 0 && missing < pairs;
   const showStrengthen = weaker > 0 && weaker < pairs && weaker !== missing;
+  /** How many pairings sit inside the group — what there is to take away. */
+  const insideCount = pairs - missing;
 
   /** Only meaningful for a group of two — the one pairing this would rewrite. */
   const existing =
@@ -174,6 +179,16 @@ export default function PairingPanel({
             {showMissing && (
               <button type="button" onClick={onApplyMissing}>
                 Apply to {missing} missing
+              </button>
+            )}
+            {insideCount > 0 && (
+              <button
+                type="button"
+                className="danger"
+                onClick={onRemoveInside}
+                title="Delete the pairings between these guests, leaving the ones that reach outside"
+              >
+                Remove {insideCount} pairing{insideCount === 1 ? '' : 's'}
               </button>
             )}
           </div>

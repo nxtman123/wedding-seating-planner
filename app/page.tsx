@@ -23,6 +23,7 @@ import {
   removePairing,
   renameGroup,
   renameGuest,
+  removeGroupPairings,
   removeTableSpec,
   seatGuestsAt,
   setPairingLevel,
@@ -156,6 +157,10 @@ export default function Page() {
   /** Raise only the pairs weaker than the level shown, leaving stronger ones. */
   const applyToWeaker = () =>
     setDoc((d) => strengthenGroupLevel(d, draft.guests, draft.level));
+
+  /** Drop the pairings inside the group, keeping the ones reaching outside it. */
+  const removeInside = () =>
+    setDoc((d) => removeGroupPairings(d, draft.guests));
 
   /**
    * Delete whoever is ticked. Guests can only be removed this way now, so the
@@ -353,6 +358,7 @@ export default function Page() {
             onApply={applyToGroup}
             onApplyMissing={applyToMissing}
             onApplyStrengthen={applyToWeaker}
+            onRemoveInside={removeInside}
             onSetLevel={(id, level) =>
               setDoc((d) => setPairingLevel(d, id, level))
             }

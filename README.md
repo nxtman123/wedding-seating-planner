@@ -60,7 +60,9 @@ stronger alone, so a group of *could sit with*s can be lifted to *should* withou
 flattening the one *must* among them. It works the same among avoids, where stronger means
 more emphatic, and it never reverses a pair pointing the other way — only **Apply to all**
 does that. Each narrower button appears only where it would do something the wider one
-would not; rows about to be rewritten are highlighted whichever you use. The group stays
+would not; rows about to be rewritten are highlighted whichever you use. At the end of the
+row, **Remove N pairings** deletes the pairings *between* the picked guests, leaving the
+ones that reach out of the group alone. The group stays
 picked after you apply, so a level can be tried and changed without re-ticking everyone.
 
 Whatever you tick is followed through the other two panels. The pairing list floats what

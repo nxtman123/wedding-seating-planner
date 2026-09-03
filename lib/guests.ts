@@ -630,6 +630,24 @@ export function weakerPairs(
   return out;
 }
 
+/**
+ * Drop every pairing between members of a group, leaving the ones that reach
+ * outside it. The counterpart to applying a level to a clique.
+ */
+export function removeGroupPairings(
+  doc: SeatingDoc,
+  ids: string[],
+): SeatingDoc {
+  const members = new Set(ids);
+  if (members.size < 2) return doc;
+  return {
+    ...doc,
+    pairings: doc.pairings.filter(
+      (p) => !(members.has(p.a) && members.has(p.b)),
+    ),
+  };
+}
+
 /** Raise the group's weaker pairs to this level, leaving the rest alone. */
 export function strengthenGroupLevel(
   doc: SeatingDoc,
