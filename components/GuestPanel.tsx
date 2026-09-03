@@ -22,8 +22,11 @@ export interface GuestPanelProps {
   onRemoveGroup: (id: string) => void;
   /** Delete every ticked guest, after confirming. */
   onDeletePicked: () => void;
-  /** Put this guest in the group being composed, or take them back out. */
-  onTogglePair: (id: string) => void;
+  /**
+   * Put this guest in the group being composed, or take them back out. With
+   * `extend`, take everyone between them and the last one ticked instead.
+   */
+  onTogglePair: (id: string, extend?: boolean) => void;
   /** Move guests under `groupId`, sitting before `index` in the list. */
   onReorder: (ids: string[], groupId: string | null, index: number) => void;
   /** Move a group so it sits before `index` among the groups. */
@@ -261,9 +264,12 @@ export default function GuestPanel({
           type="checkbox"
           className="pair-check"
           checked={picked}
-          title="Pick for a pairing or group"
+          title="Pick for a pairing or group — shift-click to take a run of them"
           aria-label={`Pick ${guest.name} for a pairing`}
-          onChange={() => onTogglePair(guest.id)}
+          /* The work happens on click, which carries the shift key and covers
+             the keyboard too; change exists only to keep this controlled. */
+          onChange={() => {}}
+          onClick={(e) => onTogglePair(guest.id, e.shiftKey)}
         />
         <input
           type="text"

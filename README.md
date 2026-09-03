@@ -36,7 +36,9 @@ and who is still floating; hover it for the split between together and apart.
 
 **Pairings** (middle panel) — say how strongly guests belong together. Pick them by
 ticking them in the guest list, or from the dropdown here; unticking takes a guest back
-out. Order of picking carries no meaning. Then choose a level and press the button — the level sticks, so a run at the same level goes
+out. Shift-clicking a checkbox reaches back to the last one you ticked and takes everyone
+between them, across group boundaries and all — it only ever adds, so a selection can be
+built out of several runs. Order of picking carries no meaning. Then choose a level and press the button — the level sticks, so a run at the same level goes
 quickly.
 
 **Clear selection** in the top bar drops the pick, as does pressing <kbd>C</kbd> anywhere

@@ -44,6 +44,8 @@ export default function Page() {
   const [doc, setDoc] = useState<SeatingDoc>(defaultDoc());
   /** The group being composed, shared by the guest list and the pairing panel. */
   const [draft, setDraft] = useState<PairingDraft>({ guests: [], level: 1 });
+  /** The last guest ticked on their own, which a shift-click reaches back to. */
+  const [anchor, setAnchor] = useState<string | null>(null);
   const [hydrated, setHydrated] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -94,16 +96,37 @@ export default function Page() {
     return shared === null ? next : { ...next, level: shared };
   };
 
-  /** Put a guest in the group, or take them back out. */
-  const toggleGuestSelection = (id: string) =>
-    setDraft((d) =>
-      withCommonLevel({
+  /**
+   * Put a guest in the group, or take them back out. Shift reaches back to the
+   * last guest ticked on their own and takes everyone between them, in the order
+   * the list draws — which `doc.guests` is kept in, so the range is what you see
+   * between the two, group members included.
+   *
+   * A range only ever adds. Nothing is unticked by reaching over it, so a
+   * selection can be built out of several runs.
+   */
+  const toggleGuestSelection = (id: string, extend = false) => {
+    setDraft((d) => {
+      const ids = doc.guests.map((g) => g.id);
+      const from = anchor ? ids.indexOf(anchor) : -1;
+      const to = ids.indexOf(id);
+      if (extend && from >= 0 && to >= 0 && from !== to) {
+        const [lo, hi] = from < to ? [from, to] : [to, from];
+        const merged = [...d.guests];
+        for (const gid of ids.slice(lo, hi + 1)) {
+          if (!merged.includes(gid)) merged.push(gid);
+        }
+        return withCommonLevel({ ...d, guests: merged });
+      }
+      return withCommonLevel({
         ...d,
         guests: d.guests.includes(id)
           ? d.guests.filter((g) => g !== id)
           : [...d.guests, id],
-      }),
-    );
+      });
+    });
+    setAnchor(id);
+  };
 
   const setDraftLevel = (level: PairingLevel) =>
     setDraft((d) => ({ ...d, level }));
