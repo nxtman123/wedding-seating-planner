@@ -58,7 +58,7 @@ export default function TablePanel({
   const chosen = new Set(selected);
 
   return (
-    <section className="panel">
+    <section className="panel panel-tables">
       <div className="panel-header">
         <h2>Tables</h2>
         <span className="count">{tables}</span>

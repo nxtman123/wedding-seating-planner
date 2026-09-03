@@ -32,10 +32,10 @@ body {
   line-height: 1.4;
 }
 
+/* No width cap: given a wide screen the three panels take it, which is what the
+   pairing rows want — they are the widest thing here. */
 .app {
-  max-width: 1600px;
   height: 100dvh;
-  margin: 0 auto;
   padding: 24px 20px 20px;
   display: flex;
   flex-direction: column;
@@ -173,7 +173,8 @@ textarea {
 
 /* ---------------- panels ---------------- */
 
-/* Guests are narrow, pairings need room for two names, tables are widest. */
+/* Guests are narrow, pairings need room for two names, tables are widest. Three
+   abreast fills the viewport exactly, so nothing scrolls but the panels. */
 .panels {
   flex: 1;
   min-height: 0;
@@ -181,6 +182,41 @@ textarea {
   grid-template-columns: 1fr 1.25fr 1.4fr;
   gap: 16px;
   align-items: stretch;
+}
+
+/*
+ * Too narrow for three, so the tables drop to a row of their own beneath the
+ * guests and the pairings — the pair worth keeping side by side, since picking
+ * guests is what drives the pairing list.
+ *
+ * Rows become a fixed share of the viewport rather than growing with content:
+ * each panel still scrolls its own list, and the page scrolls between the rows,
+ * so getting from the guests to the tables is one flick rather than a trip past
+ * three hundred pairings.
+ */
+@media (max-width: 1400px) {
+  html,
+  body {
+    height: auto;
+  }
+  .app {
+    height: auto;
+  }
+  .panels {
+    flex: none;
+    grid-template-columns: 1fr 1.25fr;
+    grid-auto-rows: 85dvh;
+  }
+  .panel-tables {
+    grid-column: 1 / -1;
+  }
+}
+
+/* One at a time, still a viewport tall each. */
+@media (max-width: 760px) {
+  .panels {
+    grid-template-columns: 1fr;
+  }
 }
 
 .panel {
@@ -203,24 +239,6 @@ textarea {
   overflow-y: auto;
 }
 
-/* One column below this, and the page scrolls as a whole again — three stacked
-   panels each with their own scrollbar would be unusable. */
-@media (max-width: 1100px) {
-  html,
-  body {
-    height: auto;
-  }
-  .app {
-    height: auto;
-    padding-bottom: 64px;
-  }
-  .panels {
-    grid-template-columns: 1fr;
-  }
-  .scroller {
-    overflow-y: visible;
-  }
-}
 .panel-header {
   display: flex;
   align-items: baseline;
