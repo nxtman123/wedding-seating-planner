@@ -68,8 +68,9 @@ someone you did tick is paired with them. Meanwhile the tables holding the
 picked guests are highlighted, with a dot at each picked seat.
 
 Neither apply touches pairings that reach *outside* the group, and neither ever duplicates
-a pair. Picking guests who already agree on a level, in any order, loads that level into the
-form rather than the last one you used.
+a pair. The level box stays where you put it as you tick and untick — it is the level you
+are about to apply, not a readout of what the pick already has, so a run of groups can all
+be set at one level without resetting it each time.
 
 | Strength | Setting a group | A single pairing reads |
 | --- | --- | --- |

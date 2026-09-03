@@ -491,26 +491,3 @@ export function fillGroupLevel(
   }
   return next;
 }
-
-/**
- * The level every pair in a group already shares, or null when the group is
- * smaller than two, has a pair with no pairing, or mixes levels. Lets the form
- * show what a group agrees on instead of whatever level was last used.
- */
-export function commonLevel(
-  doc: SeatingDoc,
-  ids: string[],
-): PairingLevel | null {
-  const members = [...new Set(ids)];
-  if (members.length < 2) return null;
-  let shared: PairingLevel | null = null;
-  for (let i = 0; i < members.length; i++) {
-    for (let j = i + 1; j < members.length; j++) {
-      const found = findPairing(doc, members[i], members[j]);
-      if (!found) return null;
-      if (shared === null) shared = found.level;
-      else if (shared !== found.level) return null;
-    }
-  }
-  return shared;
-}

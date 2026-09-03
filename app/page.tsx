@@ -10,7 +10,6 @@ import {
   assignToGroup,
   clearAllPins,
   clearPin,
-  commonLevel,
   fillGroupLevel,
   guestName,
   linkedGuests,
@@ -96,16 +95,6 @@ export default function Page() {
   /* ----- composing a pairing ----- */
 
   /**
-   * Adopt the level a group already agrees on, so re-picking people who are
-   * already linked shows what they have rather than the last level used. A
-   * group that mixes levels, or has an unpaired pair, is left alone.
-   */
-  const withCommonLevel = (next: PairingDraft): PairingDraft => {
-    const shared = commonLevel(doc, next.guests);
-    return shared === null ? next : { ...next, level: shared };
-  };
-
-  /**
    * Put a guest in the group, or take them back out. Shift reaches back to the
    * last guest ticked on their own and takes everyone between them, in the order
    * the list draws — which `doc.guests` is kept in, so the range is what you see
@@ -125,18 +114,24 @@ export default function Page() {
         for (const gid of ids.slice(lo, hi + 1)) {
           if (!merged.includes(gid)) merged.push(gid);
         }
-        return withCommonLevel({ ...d, guests: merged });
+        return { ...d, guests: merged };
       }
-      return withCommonLevel({
+      return {
         ...d,
         guests: d.guests.includes(id)
           ? d.guests.filter((g) => g !== id)
           : [...d.guests, id],
-      });
+      };
     });
     setAnchor(id);
   };
 
+  /**
+   * The only thing that moves the level. Picking guests deliberately leaves it
+   * alone: it is the level you are about to apply, not a readout of what the
+   * pick already has, and having it shift underneath you loses the setting you
+   * chose for the run of groups you are working through.
+   */
   const setDraftLevel = (level: PairingLevel) =>
     setDraft((d) => ({ ...d, level }));
 
