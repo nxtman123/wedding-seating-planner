@@ -561,41 +561,6 @@ textarea {
   flex: none;
 }
 
-/* The picked group, in the order picked. */
-.chips {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-.chip {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  padding: 3px 4px 3px 9px;
-  font-size: 0.85rem;
-  background: #fdf3f6;
-  border: 1px solid #f0dbe2;
-  border-radius: 999px;
-}
-.chip-remove {
-  padding: 0;
-  width: 17px;
-  height: 17px;
-  line-height: 1;
-  font-size: 0.8rem;
-  border: 0;
-  border-radius: 50%;
-  background: none;
-  color: var(--muted);
-}
-.chip-remove:hover:not(:disabled) {
-  background: #f0dbe2;
-  color: var(--text);
-}
-
 /* Reads as a sentence — name, relation, name — with the relation in a column of
    its own so the dropdowns line up down the list. */
 .pairing-row {

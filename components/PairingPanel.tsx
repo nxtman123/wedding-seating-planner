@@ -28,11 +28,10 @@ export interface PairingPanelProps {
   /** Pairing id -> how it fared in the current seating. Empty before a solve. */
   outcomes: Map<string, PairingOutcome>;
   /**
-   * The group being composed. Owned by the page because the guest list and the
-   * chips here pick from the same set.
+   * The group being composed. Owned by the page, and picked entirely in the
+   * guest list — this panel only sets the level and applies it.
    */
   draft: PairingDraft;
-  onToggleGuest: (id: string) => void;
   onLevelChange: (level: PairingLevel) => void;
   /** Apply the level to every pair in the group, overwriting what exists. */
   onApply: () => void;
@@ -57,7 +56,6 @@ export default function PairingPanel({
   doc,
   outcomes,
   draft,
-  onToggleGuest,
   onLevelChange,
   onApply,
   onApplyMissing,
@@ -133,44 +131,6 @@ export default function PairingPanel({
         <p className="empty">Add at least two guests to pair them up.</p>
       ) : (
         <div className="add-pairing">
-          {picked.length > 0 && (
-            <ul className="chips">
-              {picked.map((id) => (
-                <li key={id} className="chip">
-                  {guestName(doc, id)}
-                  <button
-                    type="button"
-                    className="chip-remove"
-                    title="Take out of the group"
-                    aria-label={`Take ${guestName(doc, id)} out of the group`}
-                    onClick={() => onToggleGuest(id)}
-                  >
-                    &times;
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-
-          <select
-            value=""
-            aria-label="Add a guest to the group"
-            onChange={(e) => {
-              if (e.target.value) onToggleGuest(e.target.value);
-            }}
-          >
-            <option value="">
-              {picked.length === 0 ? 'Pick a guest…' : 'Add another guest…'}
-            </option>
-            {doc.guests
-              .filter((g) => !chosen.has(g.id))
-              .map((g) => (
-                <option key={g.id} value={g.id}>
-                  {g.name}
-                </option>
-              ))}
-          </select>
-
           <select
             value={level}
             aria-label="Priority level"

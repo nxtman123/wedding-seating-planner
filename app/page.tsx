@@ -344,7 +344,6 @@ export default function Page() {
             doc={doc}
             outcomes={outcomes}
             draft={draft}
-            onToggleGuest={toggleGuestSelection}
             onLevelChange={setDraftLevel}
             onApply={applyToGroup}
             onApplyMissing={applyToMissing}
