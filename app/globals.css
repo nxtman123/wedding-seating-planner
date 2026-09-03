@@ -313,6 +313,14 @@ textarea {
   border-color: #f0dbe2;
 }
 
+/* The band of pairings reaching out of the pick: same treatment, stepped back,
+   so the two bands read as related without competing. */
+.pairing-row.row-adjacent {
+  background: #fdf9fb;
+  border-color: #f7ecf0;
+  box-shadow: inset 0 0 0 1px #f7ecf0;
+}
+
 /* Picks a guest into the group. Order of picking carries no meaning, so this is
    a plain checkbox rather than anything numbered. */
 .pair-check {
@@ -421,7 +429,7 @@ textarea {
 .pairing-name-a {
   text-align: right;
 }
-/* Separates the pairings floated to the top from the rest of the list. */
+/* Separates one floated band from the next. */
 .after-focus {
   margin-top: 14px;
 }

@@ -41,10 +41,12 @@ flattening the levels you already tuned inside it. The second button appears onl
 two would differ; rows about to be rewritten are highlighted either way. The group stays
 picked after you apply, so a level can be tried and changed without re-ticking everyone.
 
-Whatever you tick is followed through the other two panels: the pairings it concerns float
-to the top of the pairing list above a gap, and the tables holding those guests are
-highlighted with a dot at each picked seat. Ticking a single guest surfaces every pairing
-they are in; ticking several surfaces the pairings inside that group.
+Whatever you tick is followed through the other two panels. The pairing list floats what
+the pick concerns to the top in two bands, each above a gap: first the pairings *inside*
+the group — the ones an Apply would rewrite — then the ones *reaching out* of it, tying
+those guests to everyone else. Ticking a single guest just empties the first band, since
+nothing can be inside a group of one. Meanwhile the tables holding those guests are
+highlighted, with a dot at each picked seat.
 
 Neither apply touches pairings that reach *outside* the group, and neither ever duplicates
 a pair. Picking guests who already agree on a level, in any order, loads that level into the

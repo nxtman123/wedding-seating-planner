@@ -87,20 +87,29 @@ export default function PairingPanel({
         ? 'Update pairing'
         : 'Add pairing';
 
-  /**
-   * The pairings the current pick is about. One guest picked means every pairing
-   * they are in; two or more means the pairings inside that group, which are the
-   * ones an Apply would rewrite.
-   */
-  const inFocus = (p: Pairing) =>
-    picked.length === 1
-      ? p.a === picked[0] || p.b === picked[0]
-      : chosen.has(p.a) && chosen.has(p.b);
+  /** Both ends picked — the pairings an Apply would rewrite. */
+  const inside = (p: Pairing) => chosen.has(p.a) && chosen.has(p.b);
+  /** Exactly one end picked — how the group is tied to everyone else. */
+  const reachingOut = (p: Pairing) => chosen.has(p.a) !== chosen.has(p.b);
 
-  // Floated to the top rather than filtered, so nothing goes missing.
+  /*
+   * Three bands, floated rather than filtered so nothing goes missing: the
+   * pairings inside the pick, then the ones reaching out of it, then the rest.
+   * Picking a single guest simply empties the first band, which is why it needs
+   * no special case — everything they are in reaches out of a group of one.
+   */
   const sorted = sortedPairings(doc);
-  const focused = sorted.filter(inFocus);
-  const pairings = [...focused, ...sorted.filter((p) => !inFocus(p))];
+  const bandInside = sorted.filter(inside);
+  const bandOut = sorted.filter(reachingOut);
+  const bandRest = sorted.filter((p) => !inside(p) && !reachingOut(p));
+  const pairings = [...bandInside, ...bandOut, ...bandRest];
+
+  /** Row indexes that open a gap, i.e. that start a band after a non-empty one. */
+  const bandBreaks = new Set<number>();
+  if (bandInside.length && bandOut.length) bandBreaks.add(bandInside.length);
+  if ((bandInside.length || bandOut.length) && bandRest.length) {
+    bandBreaks.add(bandInside.length + bandOut.length);
+  }
 
   /**
    * Which row's level dropdown is about to open, if any.
@@ -212,9 +221,12 @@ export default function PairingPanel({
               key={p.id}
               className={[
                 'pairing-row',
-                i < focused.length ? 'row-selected' : '',
-                // Opens a gap under the floated block.
-                i === focused.length && focused.length > 0 ? 'after-focus' : '',
+                i < bandInside.length
+                  ? 'row-selected'
+                  : i < bandInside.length + bandOut.length
+                    ? 'row-adjacent'
+                    : '',
+                bandBreaks.has(i) ? 'after-focus' : '',
               ]
                 .filter(Boolean)
                 .join(' ')}
