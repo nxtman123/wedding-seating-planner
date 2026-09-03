@@ -21,6 +21,7 @@ html,
 body {
   margin: 0;
   padding: 0;
+  height: 100%;
 }
 
 body {
@@ -33,12 +34,17 @@ body {
 
 .app {
   max-width: 1600px;
+  height: 100dvh;
   margin: 0 auto;
-  padding: 24px 20px 64px;
+  padding: 24px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
 }
 
 /* ---------------- header / toolbar ---------------- */
 .app-header {
+  flex: none;
   display: flex;
   flex-wrap: wrap;
   gap: 16px;
@@ -159,18 +165,16 @@ textarea {
 
 /* Guests are narrow, pairings need room for two names, tables are widest. */
 .panels {
+  flex: 1;
+  min-height: 0;
   display: grid;
   grid-template-columns: 1fr 1.25fr 1.4fr;
   gap: 16px;
-  align-items: start;
-}
-@media (max-width: 1100px) {
-  .panels {
-    grid-template-columns: 1fr;
-  }
+  align-items: stretch;
 }
 
 .panel {
+  min-height: 0;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -179,6 +183,38 @@ textarea {
   border-radius: var(--radius);
   box-shadow: var(--shadow);
   padding: 16px;
+}
+
+/* Each panel's controls stay put and only its list scrolls, so all three
+   columns stay side by side however long the guest list gets. */
+.scroller {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  /* Room for the scrollbar without it sitting on top of the rows. */
+  padding-right: 4px;
+  margin-right: -4px;
+}
+
+/* One column below this, and the page scrolls as a whole again — three stacked
+   panels each with their own scrollbar would be unusable. */
+@media (max-width: 1100px) {
+  html,
+  body {
+    height: auto;
+  }
+  .app {
+    height: auto;
+    padding-bottom: 64px;
+  }
+  .panels {
+    grid-template-columns: 1fr;
+  }
+  .scroller {
+    overflow-y: visible;
+    padding-right: 0;
+    margin-right: 0;
+  }
 }
 .panel-header {
   display: flex;

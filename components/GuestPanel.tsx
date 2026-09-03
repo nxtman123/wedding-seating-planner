@@ -90,7 +90,7 @@ export default function GuestPanel({
       {doc.guests.length === 0 ? (
         <p className="empty">No guests yet. Add a few to get started.</p>
       ) : (
-        <ul className="list">
+        <ul className="list scroller">
           {doc.guests.map((guest) => {
             const table = seats.get(guest.id);
             const pinned = doc.pins[guest.id] !== undefined;

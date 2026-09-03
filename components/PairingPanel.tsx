@@ -111,7 +111,7 @@ export default function PairingPanel({
           No pairings yet. Everyone will be seated arbitrarily.
         </p>
       ) : (
-        <ul className="list">
+        <ul className="list scroller">
           {pairings.map((p) => (
             <li key={p.id} className="pairing-row">
               <OutcomeDot outcome={outcomes.get(p.id)} />

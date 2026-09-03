@@ -104,7 +104,7 @@ export default function TablePanel({
           pairings are in.
         </p>
       ) : (
-        <div className="tables">
+        <div className="tables scroller">
           {doc.tables.map((table, i) => {
             const conflicts = conflictsAtTable(doc, doc.tables, i);
             return (
