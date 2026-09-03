@@ -198,16 +198,6 @@ export default function PairingPanel({
               </button>
             )}
           </div>
-
-          {picked.length > 2 && (
-            <p className="hint">
-              {missing === pairs
-                ? `All ${pairs} pairs get ${levelBadge(level)}.`
-                : missing === 0
-                  ? `Overwrites all ${pairs} existing pairings with ${levelBadge(level)}.`
-                  : `${pairs - missing} of these pairs already exist — apply to all overwrites them, apply to missing leaves them as they are.`}
-            </p>
-          )}
         </div>
       )}
 
