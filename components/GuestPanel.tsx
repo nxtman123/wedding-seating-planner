@@ -52,6 +52,8 @@ export default function GuestPanel({
   /** Where the row would land: an insertion point, 0 through guests.length. */
   const [dropAt, setDropAt] = useState<number | null>(null);
 
+  const chosen = new Set(selected);
+
   const submit = () => {
     onAdd(name);
     setName('');
@@ -136,8 +138,8 @@ export default function GuestPanel({
 
       {doc.guests.length > 1 && (
         <p className="hint">
-          Click the circles to pick guests — two for a single pairing, or a
-          whole group to link them all at one level.
+          Tick guests to pick them — two for a single pairing, or a whole group
+          to link them all at one level.
         </p>
       )}
 
@@ -162,12 +164,11 @@ export default function GuestPanel({
             const count = counts.get(guest.id) ?? { together: 0, apart: 0 };
             const total = count.together + count.apart;
             const pinnedTo = doc.pins[guest.id];
-            const picked = selected.indexOf(guest.id);
-            const slot = picked >= 0 ? picked + 1 : null;
+            const picked = chosen.has(guest.id);
             const last = index === doc.guests.length - 1;
             const className = [
               'guest-row',
-              slot ? 'row-selected' : '',
+              picked ? 'row-selected' : '',
               dragging === guest.id ? 'row-dragging' : '',
               dropAt === index ? 'drop-before' : '',
               dropAt === doc.guests.length && last ? 'drop-after' : '',
@@ -203,6 +204,14 @@ export default function GuestPanel({
                   ⠿
                 </span>
                 <input
+                  type="checkbox"
+                  className="pair-check"
+                  checked={picked}
+                  title="Pick for a pairing or group"
+                  aria-label={`Pick ${guest.name} for a pairing`}
+                  onChange={() => onTogglePair(guest.id)}
+                />
+                <input
                   type="text"
                   className="name-input"
                   value={guest.name}
@@ -223,24 +232,6 @@ export default function GuestPanel({
                     {total}
                   </span>
                 )}
-                <button
-                  type="button"
-                  className={slot ? 'icon-button pair-slot' : 'icon-button'}
-                  title={
-                    slot
-                      ? `Guest ${slot} of the group — click to take out`
-                      : 'Pick for a pairing or group'
-                  }
-                  aria-label={
-                    slot
-                      ? `Take ${guest.name} out of the group`
-                      : `Pick ${guest.name} for a pairing`
-                  }
-                  aria-pressed={slot !== null}
-                  onClick={() => onTogglePair(guest.id)}
-                >
-                  {slot ?? '○'}
-                </button>
                 <button
                   type="button"
                   className="icon-button danger"

@@ -100,9 +100,8 @@ export default function PairingPanel({
         <div className="add-pairing">
           {picked.length > 0 && (
             <ul className="chips">
-              {picked.map((id, i) => (
+              {picked.map((id) => (
                 <li key={id} className="chip">
-                  <span className="chip-index">{i + 1}</span>
                   {guestName(doc, id)}
                   <button
                     type="button"

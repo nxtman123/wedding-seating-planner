@@ -19,9 +19,8 @@ the pairings that guest is caught up in, so it's easy to spot who you've already
 and who is still floating; hover it for the split between together and apart.
 
 **Pairings** (middle panel) — say how strongly guests belong together. Pick them by
-clicking the circles in the guest list, or from the dropdown here; each pick is numbered
-in the order you made it, and clicking a picked guest again takes them back out. Then
-choose a level and press the button — the level sticks, so a run at the same level goes
+ticking them in the guest list, or from the dropdown here; unticking takes a guest back
+out. Order of picking carries no meaning. Then choose a level and press the button — the level sticks, so a run at the same level goes
 quickly.
 
 Pick **two** guests for a single pairing. Pick **three or more** and you get a clique:

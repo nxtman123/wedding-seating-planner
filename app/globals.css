@@ -138,7 +138,7 @@ button.primary:hover:not(:disabled) {
   background: #fdf3f6;
 }
 
-input,
+input:not([type='checkbox']),
 select,
 textarea {
   font: inherit;
@@ -322,17 +322,15 @@ textarea {
   border-color: #f0dbe2;
 }
 
-/* A guest picked into the group. The number is the order they were picked in. */
-.pair-slot {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: var(--accent-ink);
-  font-size: 0.78rem;
-  font-weight: 600;
-}
-.pair-slot:hover:not(:disabled) {
-  background: #9d5c6f;
-  border-color: #9d5c6f;
+/* Picks a guest into the group. Order of picking carries no meaning, so this is
+   a plain checkbox rather than anything numbered. */
+.pair-check {
+  flex: none;
+  width: 15px;
+  height: 15px;
+  margin: 0;
+  accent-color: var(--accent);
+  cursor: pointer;
 }
 .name-input {
   flex: 1;
@@ -390,24 +388,11 @@ textarea {
   display: flex;
   align-items: center;
   gap: 5px;
-  padding: 3px 4px 3px 5px;
+  padding: 3px 4px 3px 9px;
   font-size: 0.85rem;
   background: #fdf3f6;
   border: 1px solid #f0dbe2;
   border-radius: 999px;
-}
-.chip-index {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 17px;
-  height: 17px;
-  border-radius: 50%;
-  background: var(--accent);
-  color: var(--accent-ink);
-  font-size: 0.68rem;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
 }
 .chip-remove {
   padding: 0;
