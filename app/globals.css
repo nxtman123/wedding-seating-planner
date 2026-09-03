@@ -796,6 +796,11 @@ textarea {
   background: none;
   color: #d5ccc3;
 }
+/* Leaning down-left, the way a pin goes into a board. Positive is clockwise on
+   screen, which takes the downward needle over to the left. */
+.pin-button svg {
+  transform: rotate(45deg);
+}
 .pin-button:hover:not(:disabled) {
   background: #f0e7e0;
   color: var(--text);

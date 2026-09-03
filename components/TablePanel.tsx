@@ -20,10 +20,14 @@ export interface TablePanelProps {
   onClearPins: () => void;
 }
 
-/** A pushpin, drawn rather than an emoji so it takes the button's own color. */
+/**
+ * A pushpin, drawn rather than an emoji so it takes the button's own color. The
+ * glyph points straight down; `.pin-button svg` turns it to lean down-left, the
+ * angle a pin is actually pushed in at.
+ */
 function PinIcon() {
   return (
-    <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor" aria-hidden="true">
+    <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true">
       <path d="M14 2v6l3 3v2h-4v7l-1 1-1-1v-7H7v-2l3-3V2h4z" />
     </svg>
   );
