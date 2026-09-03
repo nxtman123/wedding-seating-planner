@@ -33,6 +33,16 @@ export interface Pairing {
   level: PairingLevel;
 }
 
+/**
+ * A row of the room: `count` tables that seat `seats` each. Several rows make a
+ * room of mixed sizes — ten eights and a pair of sixteens, say.
+ */
+export interface TableSpec {
+  id: string;
+  count: number;
+  seats: number;
+}
+
 /** Guest id -> table index, for guests locked in place before a solve. */
 export type Pins = Record<string, number>;
 
@@ -55,10 +65,8 @@ export interface SeatingDoc {
   groups: Group[];
   order: string[];
   pairings: Pairing[];
-  /** Seats at every table. Circular tables, so this is just a capacity. */
-  seatsPerTable: number;
-  /** Slack tables beyond the minimum needed to fit everyone. */
-  extraTables: number;
+  /** The room, as rows of "N tables of M seats". Order sets table numbering. */
+  tableSpecs: TableSpec[];
   pins: Pins;
   tables: string[][];
 }

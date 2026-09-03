@@ -1,11 +1,19 @@
 import {
   DEFAULT_SEATS_PER_TABLE,
+  MAX_SEATS_PER_TABLE,
   defaultDoc,
   isPairingLevel,
+  newTableSpec,
   uid,
 } from './defaults';
 import { normalize } from './guests';
-import type { Group, Guest, Pairing, SeatingDoc } from './types';
+import type {
+  Group,
+  Guest,
+  Pairing,
+  SeatingDoc,
+  TableSpec,
+} from './types';
 
 const KEY = 'wedding-seating/v1';
 
@@ -23,7 +31,11 @@ function isRecord(value: unknown): value is Record<string, unknown> {
  */
 export function isDoc(value: unknown): value is SeatingDoc {
   if (!isRecord(value)) return false;
-  const { guests, pairings, seatsPerTable, extraTables, pins, tables } = value;
+  const { guests, pairings, pins, tables } = value;
+  const { seatsPerTable, extraTables } = value as {
+    seatsPerTable?: unknown;
+    extraTables?: unknown;
+  };
 
   if (!Array.isArray(guests)) return false;
   const ids = new Set<string>();
@@ -64,10 +76,24 @@ export function isDoc(value: unknown): value is SeatingDoc {
     if (!isPairingLevel(p.level)) return false;
   }
 
-  if (typeof seatsPerTable !== 'number' || !Number.isFinite(seatsPerTable)) {
+  const specs = (value as { tableSpecs?: unknown }).tableSpecs;
+  if (specs !== undefined) {
+    if (!Array.isArray(specs)) return false;
+    for (const spec of specs) {
+      if (!isRecord(spec)) return false;
+      if (typeof spec.id !== 'string') return false;
+      if (typeof spec.count !== 'number' || !Number.isFinite(spec.count)) {
+        return false;
+      }
+      if (typeof spec.seats !== 'number' || !Number.isFinite(spec.seats)) {
+        return false;
+      }
+    }
+  }
+  if (seatsPerTable !== undefined && typeof seatsPerTable !== 'number') {
     return false;
   }
-  if (typeof extraTables !== 'number' || !Number.isFinite(extraTables)) {
+  if (extraTables !== undefined && typeof extraTables !== 'number') {
     return false;
   }
 
@@ -83,6 +109,38 @@ export function isDoc(value: unknown): value is SeatingDoc {
   }
 
   return true;
+}
+
+/**
+ * The room, from whichever shape the document carries it in. Documents written
+ * before the room had rows hold a seat size and a count of spare tables; those
+ * become the single row they described. A document with neither gets a room big
+ * enough for the guests it has, so nobody is left standing on load.
+ */
+function roomOf(
+  doc: SeatingDoc & { seatsPerTable?: unknown; extraTables?: unknown },
+  guestCount: number,
+): TableSpec[] {
+  if (Array.isArray(doc.tableSpecs) && doc.tableSpecs.length > 0) {
+    return doc.tableSpecs.map((spec) => ({
+      id: typeof spec.id === 'string' ? spec.id : uid(),
+      count: Math.max(0, Math.min(200, Math.round(spec.count) || 0)),
+      seats: Math.max(
+        1,
+        Math.min(MAX_SEATS_PER_TABLE, Math.round(spec.seats) || 1),
+      ),
+    }));
+  }
+  const seats =
+    typeof doc.seatsPerTable === 'number' && doc.seatsPerTable >= 1
+      ? Math.max(1, Math.min(MAX_SEATS_PER_TABLE, Math.round(doc.seatsPerTable)))
+      : DEFAULT_SEATS_PER_TABLE;
+  const spare =
+    typeof doc.extraTables === 'number'
+      ? Math.max(0, Math.min(50, Math.round(doc.extraTables)))
+      : 0;
+  const count = Math.max(1, Math.ceil(guestCount / seats)) + spare;
+  return [{ ...newTableSpec(count, seats) }];
 }
 
 /**
@@ -112,11 +170,7 @@ function sanitize(doc: SeatingDoc): SeatingDoc {
     pairings: doc.pairings.filter(
       (p) => p.a !== p.b && ids.has(p.a) && ids.has(p.b),
     ),
-    seatsPerTable: Math.max(
-      1,
-      Math.min(20, Math.round(doc.seatsPerTable) || DEFAULT_SEATS_PER_TABLE),
-    ),
-    extraTables: Math.max(0, Math.min(50, Math.round(doc.extraTables) || 0)),
+    tableSpecs: roomOf(doc, guests.length),
     pins,
     tables: doc.tables.map((t) => t.filter((id) => ids.has(id))),
   });

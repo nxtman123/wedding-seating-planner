@@ -1,4 +1,9 @@
-import { PAIRING_LEVELS, uid } from './defaults';
+import {
+  MAX_SEATS_PER_TABLE,
+  PAIRING_LEVELS,
+  newTableSpec,
+  uid,
+} from './defaults';
 import type { Group, Guest, Pairing, PairingLevel, SeatingDoc } from './types';
 
 /* -------------------------------------------------------------------------- */
@@ -347,14 +352,49 @@ export function sortedPairings(doc: SeatingDoc) {
 /*  Room and pins                                                              */
 /* -------------------------------------------------------------------------- */
 
-export function setSeatsPerTable(doc: SeatingDoc, seats: number): SeatingDoc {
-  const clamped = Math.max(1, Math.min(20, Math.round(seats) || 1));
-  return { ...doc, seatsPerTable: clamped };
+/** Add a row to the room: N tables of M seats. */
+export function addTableSpec(doc: SeatingDoc): SeatingDoc {
+  return { ...doc, tableSpecs: [...doc.tableSpecs, newTableSpec()] };
 }
 
-export function setExtraTables(doc: SeatingDoc, extra: number): SeatingDoc {
-  const clamped = Math.max(0, Math.min(50, Math.round(extra) || 0));
-  return { ...doc, extraTables: clamped };
+/**
+ * Change a row's table count or seat size. Both are clamped: a row of zero
+ * tables is allowed, since it is a natural stop on the way to typing a number,
+ * but a table of zero seats is not.
+ */
+export function setTableSpec(
+  doc: SeatingDoc,
+  id: string,
+  patch: { count?: number; seats?: number },
+): SeatingDoc {
+  return {
+    ...doc,
+    tableSpecs: doc.tableSpecs.map((spec) =>
+      spec.id === id
+        ? {
+            ...spec,
+            count:
+              patch.count === undefined
+                ? spec.count
+                : Math.max(0, Math.min(200, Math.round(patch.count) || 0)),
+            seats:
+              patch.seats === undefined
+                ? spec.seats
+                : Math.max(
+                    1,
+                    Math.min(
+                      MAX_SEATS_PER_TABLE,
+                      Math.round(patch.seats) || 1,
+                    ),
+                  ),
+          }
+        : spec,
+    ),
+  };
+}
+
+export function removeTableSpec(doc: SeatingDoc, id: string): SeatingDoc {
+  return { ...doc, tableSpecs: doc.tableSpecs.filter((s) => s.id !== id) };
 }
 
 /** Lock a guest to the table they are currently seated at. */

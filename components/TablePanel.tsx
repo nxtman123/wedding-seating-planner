@@ -2,7 +2,13 @@
 
 import { levelBadge, levelClass, levelPhrase } from '@/lib/defaults';
 import { guestName } from '@/lib/guests';
-import { conflictsAtTable, tableCount } from '@/lib/solver';
+import {
+  conflictsAtTable,
+  seatCount,
+  seatIndex,
+  tableCount,
+  tableSizes,
+} from '@/lib/solver';
 import type { LevelTally, SeatingDoc } from '@/lib/types';
 
 export interface TablePanelProps {
@@ -13,8 +19,9 @@ export interface TablePanelProps {
   score: number | null;
   /** How each level fared, strongest first. Only levels in use appear. */
   breakdown: LevelTally[];
-  onSeatsChange: (seats: number) => void;
-  onExtraTablesChange: (extra: number) => void;
+  onSpecChange: (id: string, patch: { count?: number; seats?: number }) => void;
+  onSpecAdd: () => void;
+  onSpecRemove: (id: string) => void;
   onGenerate: () => void;
   onTogglePin: (guestId: string) => void;
   onClearPins: () => void;
@@ -38,14 +45,19 @@ export default function TablePanel({
   selected,
   score,
   breakdown,
-  onSeatsChange,
-  onExtraTablesChange,
+  onSpecChange,
+  onSpecAdd,
+  onSpecRemove,
   onGenerate,
   onTogglePin,
   onClearPins,
 }: TablePanelProps) {
   const tables = tableCount(doc);
+  const sizes = tableSizes(doc);
+  const seats = seatCount(doc);
   const seated = doc.tables.reduce((n, t) => n + t.length, 0);
+  const placed = seatIndex(doc.tables);
+  const unseated = doc.guests.filter((g) => !placed.has(g.id));
   const pinCount = Object.keys(doc.pins).length;
   const chosen = new Set(selected);
 
@@ -56,33 +68,56 @@ export default function TablePanel({
         <span className="count">{tables}</span>
       </div>
 
-      <div className="room-controls">
-        <label>
-          Seats per table
-          <input
-            type="number"
-            min={1}
-            max={20}
-            value={doc.seatsPerTable}
-            onChange={(e) => onSeatsChange(Number(e.target.value))}
-          />
-        </label>
-        <label>
-          Spare tables
-          <input
-            type="number"
-            min={0}
-            max={50}
-            value={doc.extraTables}
-            onChange={(e) => onExtraTablesChange(Number(e.target.value))}
-          />
-        </label>
-      </div>
+      {/* The room, a row at a time, so a few sixteens can sit beside the eights. */}
+      <ul className="room-rows">
+        {doc.tableSpecs.map((spec) => (
+          <li key={spec.id}>
+            <input
+              type="number"
+              min={0}
+              max={200}
+              value={spec.count}
+              aria-label="How many tables"
+              onChange={(e) =>
+                onSpecChange(spec.id, { count: Number(e.target.value) })
+              }
+            />
+            <span>{spec.count === 1 ? 'table of' : 'tables of'}</span>
+            <input
+              type="number"
+              min={1}
+              max={20}
+              value={spec.seats}
+              aria-label="Seats at each"
+              onChange={(e) =>
+                onSpecChange(spec.id, { seats: Number(e.target.value) })
+              }
+            />
+            <span>{spec.seats === 1 ? 'seat' : 'seats'}</span>
+            <button
+              type="button"
+              className="icon-button danger"
+              title="Remove this row"
+              aria-label={`Remove the row of ${spec.count} tables of ${spec.seats}`}
+              onClick={() => onSpecRemove(spec.id)}
+            >
+              &times;
+            </button>
+          </li>
+        ))}
+      </ul>
+      <button type="button" className="room-add" onClick={onSpecAdd}>
+        Add a row
+      </button>
 
-      <p className="hint">
-        {tables} table{tables === 1 ? '' : 's'} &times; {doc.seatsPerTable} seats
-        = {tables * doc.seatsPerTable} places for {doc.guests.length} guest
-        {doc.guests.length === 1 ? '' : 's'}.
+      <p className={seats < doc.guests.length ? 'hint hint-short' : 'hint'}>
+        {tables} table{tables === 1 ? '' : 's'}, {seats} place
+        {seats === 1 ? '' : 's'} for {doc.guests.length} guest
+        {doc.guests.length === 1 ? '' : 's'}
+        {seats < doc.guests.length
+          ? ` — ${doc.guests.length - seats} short`
+          : ''}
+        .
       </p>
 
       <div className="generate-row">
@@ -125,6 +160,16 @@ export default function TablePanel({
         </>
       )}
 
+      {unseated.length > 0 && doc.tables.length > 0 && (
+        <div className="unseated">
+          <h3>
+            Nowhere to sit
+            <span className="count">{unseated.length}</span>
+          </h3>
+          <p>{unseated.map((g) => g.name).join(', ')}</p>
+        </div>
+      )}
+
       {doc.tables.length === 0 ? (
         <p className="empty">
           No seating yet. Press <em>Generate seating</em> once your guests and
@@ -147,7 +192,7 @@ export default function TablePanel({
                 <div className="table-head">
                   <h3>Table {i + 1}</h3>
                   <span className="count">
-                    {table.length}/{doc.seatsPerTable}
+                    {table.length}/{sizes[i]}
                   </span>
                 </div>
                 {table.length === 0 ? (

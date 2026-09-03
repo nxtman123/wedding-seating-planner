@@ -6,14 +6,25 @@ import type { PairingLevel, PairingOutcome, SeatingDoc } from './types';
 /* -------------------------------------------------------------------------- */
 
 /**
- * How many tables the room needs: enough to seat everyone, plus whatever slack
- * the user asked for. Derived rather than stored, so adding guests grows the
- * room on its own.
+ * The room as a flat list of capacities, one per table, in the order its rows
+ * are written — so table numbering follows the editor. A row of "2 tables of 16"
+ * becomes two entries of 16.
  */
+export function tableSizes(doc: SeatingDoc): number[] {
+  return doc.tableSpecs.flatMap((spec) =>
+    Array.from({ length: Math.max(0, Math.floor(spec.count)) }, () =>
+      Math.max(1, Math.floor(spec.seats)),
+    ),
+  );
+}
+
 export function tableCount(doc: SeatingDoc): number {
-  const seats = Math.max(1, doc.seatsPerTable);
-  const minimum = Math.max(1, Math.ceil(doc.guests.length / seats));
-  return minimum + Math.max(0, doc.extraTables);
+  return tableSizes(doc).length;
+}
+
+/** Every seat in the room, which may be fewer than there are guests. */
+export function seatCount(doc: SeatingDoc): number {
+  return tableSizes(doc).reduce((n, seats) => n + seats, 0);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -126,13 +137,13 @@ function mulberry32(seed: number): () => number {
  * guests are then treated as free rather than frozen somewhere they never asked
  * to sit.
  */
-function resolvePins(doc: SeatingDoc, capacity: number, tables: number) {
+function resolvePins(doc: SeatingDoc, sizes: number[]) {
   const honored = new Map<string, number>();
-  const used = new Array<number>(tables).fill(0);
+  const used = new Array<number>(sizes.length).fill(0);
   for (const guest of doc.guests) {
     const pinned = doc.pins[guest.id];
-    if (pinned === undefined || pinned < 0 || pinned >= tables) continue;
-    if (used[pinned] >= capacity) continue;
+    if (pinned === undefined || pinned < 0 || pinned >= sizes.length) continue;
+    if (used[pinned] >= sizes[pinned]) continue;
     used[pinned]++;
     honored.set(guest.id, pinned);
   }
@@ -148,11 +159,11 @@ function resolvePins(doc: SeatingDoc, capacity: number, tables: number) {
 function seedAssignment(
   doc: SeatingDoc,
   rng: () => number,
-  capacity: number,
-  tables: number,
+  sizes: number[],
   honored: Map<string, number>,
 ): string[][] {
-  const seating: string[][] = Array.from({ length: tables }, () => []);
+  const seating: string[][] = sizes.map(() => []);
+  const biggest = Math.max(1, ...sizes);
 
   // Pins go down first and never move.
   for (const [id, table] of honored) seating[table].push(id);
@@ -187,7 +198,8 @@ function seedAssignment(
     const ra = find(p.a);
     const rb = find(p.b);
     if (ra === rb) continue;
-    if (size.get(ra)! + size.get(rb)! > capacity) continue;
+    // A cluster can only ever fit if it fits the largest table in the room.
+    if (size.get(ra)! + size.get(rb)! > biggest) continue;
     parent.set(rb, ra);
     size.set(ra, size.get(ra)! + size.get(rb)!);
   }
@@ -206,8 +218,8 @@ function seedAssignment(
     // fill up before empty ones get broken open.
     let best = -1;
     let bestRoom = Infinity;
-    for (let i = 0; i < tables; i++) {
-      const room = capacity - seating[i].length;
+    for (let i = 0; i < sizes.length; i++) {
+      const room = sizes[i] - seating[i].length;
       if (room >= cluster.length && room < bestRoom) {
         best = i;
         bestRoom = room;
@@ -218,9 +230,11 @@ function seedAssignment(
       continue;
     }
     // Cluster doesn't fit anywhere whole — scatter it into whatever is open.
+    // A guest with nowhere left to sit is dropped: the room is short of seats,
+    // which the panel reports rather than the solver papering over.
     for (const id of cluster) {
-      const target = seating.findIndex((t) => t.length < capacity);
-      seating[target >= 0 ? target : 0].push(id);
+      const target = seating.findIndex((t, i) => t.length < sizes[i]);
+      if (target >= 0) seating[target].push(id);
     }
   }
 
@@ -284,15 +298,21 @@ function improve(
   seating: string[][],
   affinities: Affinities,
   movable: string[],
-  capacity: number,
+  sizes: number[],
   rng: () => number,
   iterations: number,
   deadline: number,
 ): number {
-  if (movable.length === 0 || seating.length < 2) {
+  const seat = seatIndex(seating);
+  /*
+   * Only guests who actually got a seat can be moved around. When the room has
+   * fewer seats than guests the seeding leaves the remainder out, and reaching
+   * for one of those here would be reaching into a table that does not exist.
+   */
+  const inPlay = movable.filter((id) => seat.has(id));
+  if (inPlay.length === 0 || seating.length < 2) {
     return scoreAssignment(doc, seating);
   }
-  const seat = seatIndex(seating);
   let score = scoreAssignment(doc, seating);
 
   const remove = (table: number, guest: string) => {
@@ -310,13 +330,13 @@ function improve(
 
     const temp =
       startTemp * Math.pow(endTemp / startTemp, step / iterations);
-    const guest = movable[(rng() * movable.length) | 0];
+    const guest = inPlay[(rng() * inPlay.length) | 0];
     const from = seat.get(guest)!;
 
     if (rng() < 0.5) {
       // Move into a table with a spare seat.
       const to = (rng() * seating.length) | 0;
-      if (to === from || seating[to].length >= capacity) continue;
+      if (to === from || seating[to].length >= sizes[to]) continue;
       const delta = moveDelta(affinities, seat, guest, from, to);
       if (delta >= 0 || rng() < Math.exp(delta / temp)) {
         remove(from, guest);
@@ -326,7 +346,7 @@ function improve(
       }
     } else {
       // Swap with another movable guest at a different table.
-      const partner = movable[(rng() * movable.length) | 0];
+      const partner = inPlay[(rng() * inPlay.length) | 0];
       if (partner === guest) continue;
       const to = seat.get(partner)!;
       if (to === from) continue;
@@ -347,10 +367,10 @@ function improve(
   let improved = true;
   while (improved && Date.now() <= deadline) {
     improved = false;
-    for (const guest of movable) {
+    for (const guest of inPlay) {
       const from = seat.get(guest)!;
       for (let to = 0; to < seating.length; to++) {
-        if (to === from || seating[to].length >= capacity) continue;
+        if (to === from || seating[to].length >= sizes[to]) continue;
         const delta = moveDelta(affinities, seat, guest, from, to);
         if (delta > 0) {
           remove(from, guest);
@@ -362,8 +382,8 @@ function improve(
         }
       }
     }
-    for (const guest of movable) {
-      for (const partner of movable) {
+    for (const guest of inPlay) {
+      for (const partner of inPlay) {
         if (partner === guest) continue;
         if (seat.get(partner) === seat.get(guest)) continue;
         const delta = swapDelta(affinities, seat, guest, partner);
@@ -413,10 +433,9 @@ export function solveSeating(
   doc: SeatingDoc,
   options: SolveOptions = {},
 ): SolveResult {
-  const tables = tableCount(doc);
-  const capacity = Math.max(1, doc.seatsPerTable);
-  if (doc.guests.length === 0) {
-    return { tables: Array.from({ length: tables }, () => []), score: 0 };
+  const sizes = tableSizes(doc);
+  if (doc.guests.length === 0 || sizes.length === 0) {
+    return { tables: sizes.map(() => []), score: 0 };
   }
 
   const restarts = options.restarts ?? 8;
@@ -426,7 +445,7 @@ export function solveSeating(
   const iterations = 20000 + doc.guests.length * 400;
   const perRestart = budgetMs / restarts;
 
-  const honored = resolvePins(doc, capacity, tables);
+  const honored = resolvePins(doc, sizes);
   const movable = doc.guests.map((g) => g.id).filter((id) => !honored.has(id));
 
   let best: string[][] | null = null;
@@ -434,13 +453,13 @@ export function solveSeating(
 
   for (let restart = 0; restart < restarts; restart++) {
     const rng = mulberry32(seed + restart * 0x9e3779b9);
-    const seating = seedAssignment(doc, rng, capacity, tables, honored);
+    const seating = seedAssignment(doc, rng, sizes, honored);
     const score = improve(
       doc,
       seating,
       affinities,
       movable,
-      capacity,
+      sizes,
       rng,
       iterations,
       Date.now() + perRestart,
@@ -451,7 +470,7 @@ export function solveSeating(
     }
   }
 
-  const result = best ?? Array.from({ length: tables }, () => []);
+  const result = best ?? sizes.map(() => []);
   // Stable presentation: guests appear at a table in guest-list order.
   const order = new Map(doc.guests.map((g, i) => [g.id, i]));
   for (const table of result) {

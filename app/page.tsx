@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { PAIRING_LEVELS, defaultDoc } from '@/lib/defaults';
 import {
   addGroup,
+  addTableSpec,
   addGuest,
   addGuestsFromText,
   applyGroupLevel,
@@ -22,10 +23,10 @@ import {
   removePairing,
   renameGroup,
   renameGuest,
-  setExtraTables,
+  removeTableSpec,
   setPairingLevel,
   setPin,
-  setSeatsPerTable,
+  setTableSpec,
 } from '@/lib/guests';
 import {
   pairingOutcomes,
@@ -354,8 +355,11 @@ export default function Page() {
             doc={doc}
             score={score}
             breakdown={breakdown}
-            onSeatsChange={(n) => setDoc((d) => setSeatsPerTable(d, n))}
-            onExtraTablesChange={(n) => setDoc((d) => setExtraTables(d, n))}
+            onSpecChange={(id, patch) =>
+              setDoc((d) => setTableSpec(d, id, patch))
+            }
+            onSpecAdd={() => setDoc(addTableSpec)}
+            onSpecRemove={(id) => setDoc((d) => removeTableSpec(d, id))}
             selected={draft.guests}
             onGenerate={generate}
             onTogglePin={togglePin}

@@ -1,4 +1,4 @@
-import type { PairingLevel, SeatingDoc } from './types';
+import type { PairingLevel, SeatingDoc, TableSpec } from './types';
 
 /** Unique id helper (browser + node both expose crypto.randomUUID). */
 export function uid(): string {
@@ -10,6 +10,17 @@ export function uid(): string {
 
 export const DEFAULT_SEATS_PER_TABLE = 8;
 
+/** Largest table the room editor will accept, and the widest a level can span. */
+export const MAX_SEATS_PER_TABLE = 20;
+
+/** A fresh row for the room editor. */
+export function newTableSpec(
+  count = 1,
+  seats = DEFAULT_SEATS_PER_TABLE,
+): TableSpec {
+  return { id: uid(), count, seats };
+}
+
 /** An empty document. Also what Reset restores. */
 export function defaultDoc(): SeatingDoc {
   return {
@@ -17,8 +28,7 @@ export function defaultDoc(): SeatingDoc {
     groups: [],
     order: [],
     pairings: [],
-    seatsPerTable: DEFAULT_SEATS_PER_TABLE,
-    extraTables: 0,
+    tableSpecs: [newTableSpec(10)],
     pins: {},
     tables: [],
   };
