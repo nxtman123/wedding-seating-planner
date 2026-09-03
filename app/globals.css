@@ -443,11 +443,16 @@ textarea {
   border-color: transparent;
 }
 
+/* Runs of signs rather than numbers, so they need a floor to stay square-ish:
+   a lone "+" is a third the width of "+++". */
 .level-chip {
   flex: none;
+  /* The width of "+++", so a stack of chips aligns whatever their strength. */
+  min-width: 42px;
+  text-align: center;
   font-size: 0.78rem;
   font-weight: 600;
-  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
   border-radius: 6px;
   padding: 2px 7px;
   border: 1px solid transparent;

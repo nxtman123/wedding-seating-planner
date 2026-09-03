@@ -46,14 +46,14 @@ Neither apply touches pairings that reach *outside* the group, and neither ever 
 a pair. Picking guests who already agree on a level, in any order, loads that level into the
 form rather than the last one you used.
 
-| Level | Setting a group | A single pairing reads |
+| Strength | Setting a group | A single pairing reads |
 | --- | --- | --- |
-| `+1` | Must sit together | A **must sit with** B |
-| `+2` | Should sit together | A **should sit with** B |
-| `+3` | Could sit together | A **could sit with** B |
-| `−3` | Could avoid each other | A **could avoid** B |
-| `−2` | Should avoid each other | A **should avoid** B |
-| `−1` | Must avoid each other | A **must avoid** B |
+| `+++` | Must sit together | A **must sit with** B |
+| `++` | Should sit together | A **should sit with** B |
+| `+` | Could sit together | A **could sit with** B |
+| `−` | Could avoid each other | A **could avoid** B |
+| `−−` | Should avoid each other | A **should avoid** B |
+| `−−−` | Must avoid each other | A **must avoid** B |
 
 The same must / should / could ladder either way — the form speaks about the group you
 have picked, the row about the one pair it names.

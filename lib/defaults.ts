@@ -81,9 +81,14 @@ export function levelLabel(level: PairingLevel): string {
   }
 }
 
-/** Compact form for the chip on a pairing row, e.g. "+1" or "−2". */
+/**
+ * The level as a run of signs, strongest first: `+++` down to `+`, and `−` down
+ * to `−−−`. Reads the right way round, unlike the levels themselves, where 1 is
+ * the strongest and 3 the weakest.
+ */
 export function levelBadge(level: PairingLevel): string {
-  return level > 0 ? `+${level}` : `−${Math.abs(level)}`;
+  const strength = 4 - Math.abs(level);
+  return (level > 0 ? '+' : '−').repeat(strength);
 }
 
 /**
