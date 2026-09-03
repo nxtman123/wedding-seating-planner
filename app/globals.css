@@ -350,11 +350,13 @@ textarea {
 }
 
 /* Marks a guest named by one of the floated pairings — the picked guests, and
-   whoever their pairings reach out to. */
+   whoever their pairings reach out to. Filled rather than tinted so it separates
+   from the quiet badges around it; the deeper accent clears 4.5:1 against white,
+   which the lighter one does not. */
 .pair-badge.badge-linked {
-  color: var(--accent);
-  background: #fdf3f6;
-  border-color: #f0dbe2;
+  color: var(--accent-ink);
+  background: #9d5c6f;
+  border-color: #9d5c6f;
   font-weight: 600;
 }
 
