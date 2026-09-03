@@ -261,7 +261,7 @@ textarea {
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
 }
 
 /* ---------------- guests ---------------- */
@@ -290,13 +290,15 @@ textarea {
   margin-left: auto;
 }
 
+/* The padding only shows as the highlight on a ticked row, so it is kept to
+   what that needs — anything more is dead space on every other row. */
 .guest-row {
   position: relative;
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 3px 5px;
-  border-radius: 9px;
+  padding: 1px 4px;
+  border-radius: 6px;
 }
 
 /* Where a dragged row would land. Drawn absolutely, in the gap between rows, so
@@ -317,16 +319,16 @@ textarea {
 }
 .guest-row.drop-before::before,
 .group-empty.drop-before::before {
-  top: -4px;
+  top: -3px;
 }
 .guest-row.drop-after::after {
-  bottom: -4px;
+  bottom: -3px;
 }
 .entry.drop-before::before {
-  top: -4px;
+  top: -3px;
 }
 .entry.drop-after::after {
-  bottom: -4px;
+  bottom: -3px;
 }
 /* A group carries a wide margin of its own, so its line sits within that rather
    than way out in the gap, where it would read as belonging to the row above. */
@@ -395,7 +397,7 @@ textarea {
    worth of specificity. */
 .guest-row .name-input {
   flex: 1;
-  padding: 4px 6px;
+  padding: 3px 6px;
   border: 0;
   border-radius: 0;
   background: none;
@@ -408,15 +410,15 @@ textarea {
    stays quiet and only the well-connected guests draw the eye. */
 .pair-badge {
   flex: none;
-  min-width: 25px;
+  min-width: 20px;
   text-align: center;
   font-size: 0.78rem;
   font-variant-numeric: tabular-nums;
   color: var(--muted);
   background: var(--surface-2);
   border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 2px 6px;
+  border-radius: 5px;
+  padding: 0 4px;
 }
 
 /* Marks a guest named by one of the floated pairings — the picked guests, and
@@ -441,12 +443,12 @@ textarea {
 
 /* ---------------- groups ---------------- */
 
-/* The same 6px between top-level entries that .list puts between a group's
+/* The same spacing between top-level entries that .list puts between a group's
    members, so guests are evenly spaced whether or not they sit in a group. */
 .sections {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
 }
 
 /* A top-level row of the list: a loose guest, or a whole group. */
