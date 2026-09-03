@@ -551,6 +551,14 @@ textarea {
   font-style: italic;
 }
 
+/* Full width at the foot of its card, below the seats and any warning. Pushed
+   down so it lines up across cards of differing height. */
+.table-card .add-picked {
+  width: 100%;
+  margin-top: auto;
+  padding: 5px 9px;
+}
+
 /* A drop landing at the end of a group's members: the indicator needs something
    to hang under, since there is no following row to mark. */
 .drop-tail {
@@ -832,8 +840,8 @@ textarea {
   border-radius: 10px;
   padding: 10px 12px;
 }
-/* Heading, then the "add the pick here" button, then the count at the far end —
-   the same shape a group heading has. */
+/* Just the name and the count: at these card widths there was no room for a
+   button between them, and it squeezed both. It sits at the foot instead. */
 .table-head {
   display: flex;
   align-items: baseline;

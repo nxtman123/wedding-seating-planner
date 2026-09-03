@@ -203,18 +203,6 @@ export default function TablePanel({
                       onChange={(e) => onRenameTable(i, e.target.value)}
                     />
                   </h3>
-                  {/* Kept in the layout when there is nothing to add, so the
-                      heading does not jump as guests are ticked. */}
-                  <button
-                    type="button"
-                    className={
-                      selected.length > 0 ? 'add-picked' : 'add-picked is-idle'
-                    }
-                    title="Seat the ticked guests here and pin them"
-                    onClick={() => onAddPickedToTable(i)}
-                  >
-                    Add to table
-                  </button>
                   <span className="count">
                     {table.length}/{sizes[i]}
                   </span>
@@ -274,6 +262,20 @@ export default function TablePanel({
                     ))}
                   </ul>
                 )}
+                {/* Kept in the layout when there is nothing to add, so ticking a
+                    guest does not lengthen every card at once. */}
+                <button
+                  type="button"
+                  className={
+                    selected.length > 0 ? 'add-picked' : 'add-picked is-idle'
+                  }
+                  title="Seat the ticked guests here and pin them"
+                  onClick={() => onAddPickedToTable(i)}
+                >
+                  {selected.length > 1
+                    ? `Add ${selected.length} to table`
+                    : 'Add to table'}
+                </button>
               </div>
             );
           })}
