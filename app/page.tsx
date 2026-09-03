@@ -10,8 +10,9 @@ import {
   clearPin,
   commonLevel,
   fillGroupLevel,
+  guestName,
   moveGuests,
-  removeGuest,
+  removeGuests,
   pairingCounts,
   removePairing,
   renameGuest,
@@ -109,10 +110,23 @@ export default function Page() {
   const applyToMissing = () =>
     setDoc((d) => fillGroupLevel(d, draft.guests, draft.level));
 
-  /** Removing a guest also takes them out of the group being composed. */
-  const dropGuest = (id: string) => {
-    setDoc((d) => removeGuest(d, id));
-    setDraft((d) => ({ ...d, guests: d.guests.filter((g) => g !== id) }));
+  /**
+   * Delete whoever is ticked. Guests can only be removed this way now, so the
+   * confirm names them — there is no per-row control to slip on.
+   */
+  const deletePicked = () => {
+    const going = draft.guests;
+    if (going.length === 0) return;
+    const names = going.map((id) => guestName(doc, id));
+    const shown = names.slice(0, 8).join(', ');
+    const rest = names.length > 8 ? `, and ${names.length - 8} more` : '';
+    const who =
+      names.length === 1 ? names[0] : `these ${names.length} guests: ${shown}${rest}`;
+    if (!window.confirm(`Delete ${who}? Their pairings and seats go too.`)) {
+      return;
+    }
+    setDoc((d) => removeGuests(d, going));
+    setDraft((d) => ({ ...d, guests: [] }));
   };
 
   /* ----- pinning ----- */
@@ -191,7 +205,7 @@ export default function Page() {
             onAdd={(name) => setDoc((d) => addGuest(d, name))}
             onAddMany={(text) => setDoc((d) => addGuestsFromText(d, text))}
             onRename={(id, name) => setDoc((d) => renameGuest(d, id, name))}
-            onRemove={dropGuest}
+            onDeletePicked={deletePicked}
             selected={draft.guests}
             onTogglePair={toggleGuestSelection}
             onReorder={(ids, index) => setDoc((d) => moveGuests(d, ids, index))}

@@ -253,6 +253,20 @@ textarea {
 .add-row input {
   flex: 1;
 }
+/* One row for the paste toggle and the delete, so the delete appearing when
+   guests are ticked does not push the list down. */
+.guest-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 26px;
+}
+button.small {
+  padding: 3px 9px;
+  font-size: 0.82rem;
+}
+
 .bulk {
   display: flex;
   flex-direction: column;

@@ -42,16 +42,18 @@ export function renameGuest(
   };
 }
 
-/** Remove a guest along with every pairing, pin and seat that referenced them. */
-export function removeGuest(doc: SeatingDoc, id: string): SeatingDoc {
+/** Remove guests along with every pairing, pin and seat that referenced them. */
+export function removeGuests(doc: SeatingDoc, ids: string[]): SeatingDoc {
+  const going = new Set(ids);
+  if (going.size === 0) return doc;
   const pins = { ...doc.pins };
-  delete pins[id];
+  for (const id of going) delete pins[id];
   return {
     ...doc,
-    guests: doc.guests.filter((g) => g.id !== id),
-    pairings: doc.pairings.filter((p) => p.a !== id && p.b !== id),
+    guests: doc.guests.filter((g) => !going.has(g.id)),
+    pairings: doc.pairings.filter((p) => !going.has(p.a) && !going.has(p.b)),
     pins,
-    tables: doc.tables.map((t) => t.filter((g) => g !== id)),
+    tables: doc.tables.map((t) => t.filter((id) => !going.has(id))),
   };
 }
 

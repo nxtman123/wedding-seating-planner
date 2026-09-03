@@ -13,7 +13,8 @@ export interface GuestPanelProps {
   onAdd: (name: string) => void;
   onAddMany: (text: string) => void;
   onRename: (id: string, name: string) => void;
-  onRemove: (id: string) => void;
+  /** Delete every ticked guest, after confirming. */
+  onDeletePicked: () => void;
   /** Put this guest in the group being composed, or take them back out. */
   onTogglePair: (id: string) => void;
   /** Move guests so they sit together before `index` in the list. */
@@ -36,7 +37,7 @@ export default function GuestPanel({
   onAdd,
   onAddMany,
   onRename,
-  onRemove,
+  onDeletePicked,
   onTogglePair,
   onReorder,
 }: GuestPanelProps) {
@@ -124,13 +125,22 @@ export default function GuestPanel({
         </button>
       </div>
 
-      <button
-        type="button"
-        className="link-button"
-        onClick={() => setBulkOpen((open) => !open)}
-      >
-        {bulkOpen ? 'Hide paste box' : 'Paste a list…'}
-      </button>
+      <div className="guest-actions">
+        <button
+          type="button"
+          className="link-button"
+          onClick={() => setBulkOpen((open) => !open)}
+        >
+          {bulkOpen ? 'Hide paste box' : 'Paste a list…'}
+        </button>
+        {selected.length > 0 && (
+          <button type="button" className="danger small" onClick={onDeletePicked}>
+            {selected.length === 1
+              ? 'Delete guest'
+              : `Delete ${selected.length} guests`}
+          </button>
+        )}
+      </div>
 
       {bulkOpen && (
         <div className="bulk">
@@ -153,13 +163,6 @@ export default function GuestPanel({
             Add these guests
           </button>
         </div>
-      )}
-
-      {doc.guests.length > 1 && (
-        <p className="hint">
-          Tick guests to pick them — two for a single pairing, or a whole group
-          to link them all at one level.
-        </p>
       )}
 
       {doc.guests.length === 0 ? (
@@ -244,15 +247,6 @@ export default function GuestPanel({
                     {total}
                   </span>
                 )}
-                <button
-                  type="button"
-                  className="icon-button danger"
-                  title="Remove guest"
-                  aria-label={`Remove ${guest.name}`}
-                  onClick={() => onRemove(guest.id)}
-                >
-                  &times;
-                </button>
               </li>
             );
           })}
