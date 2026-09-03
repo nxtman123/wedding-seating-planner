@@ -590,9 +590,10 @@ textarea {
    a short label, so the row needs no separate badge beside the names. */
 .level-select {
   flex: none;
-  /* Sized for the phrase alone, which is all the row shows. The open list is
-     wider — the browser sizes the popup to its own contents. */
-  width: 128px;
+  /* Sized for the longest phrase it shows, "prefers to sit with" at 110px, with
+     a few pixels spare so a different font rendering cannot clip it. The open
+     list is wider — the browser sizes the popup to its own contents. */
+  width: 144px;
   padding: 3px 2px 3px 7px;
   font-size: 0.8rem;
   font-weight: 600;

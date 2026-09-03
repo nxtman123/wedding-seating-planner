@@ -83,10 +83,10 @@ be set at one level without resetting it each time.
 | --- | --- | --- | --- |
 | `++++` | 8000 | Must sit together | A **must sit with** B |
 | `+++` | 400 | Should sit together | A **should sit with** B |
-| `++` | 20 | Would like to sit together | A **would like to sit with** B |
+| `++` | 20 | Prefers to sit together | A **prefers to sit with** B |
 | `+` | 1 | Could sit together | A **could sit with** B |
 | `−` | −1 | Could avoid each other | A **could avoid** B |
-| `−−` | −20 | Would rather avoid each other | A **would rather avoid** B |
+| `−−` | −20 | Prefers to avoid each other | A **prefers to avoid** B |
 | `−−−` | −400 | Should avoid each other | A **should avoid** B |
 | `−−−−` | −8000 | Must avoid each other | A **must avoid** B |
 

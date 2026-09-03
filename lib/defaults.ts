@@ -96,13 +96,13 @@ export function levelLabel(level: PairingLevel): string {
     case 2:
       return 'Should sit together';
     case 3:
-      return 'Would like to sit together';
+      return 'Prefers to sit together';
     case 4:
       return 'Could sit together';
     case -4:
       return 'Could avoid each other';
     case -3:
-      return 'Would rather avoid each other';
+      return 'Prefers to avoid each other';
     case -2:
       return 'Should avoid each other';
     case -1:
@@ -133,13 +133,13 @@ export function levelPhrase(level: PairingLevel): string {
     case 2:
       return 'should sit with';
     case 3:
-      return 'would like to sit with';
+      return 'prefers to sit with';
     case 4:
       return 'could sit with';
     case -4:
       return 'could avoid';
     case -3:
-      return 'would rather avoid';
+      return 'prefers to avoid';
     case -2:
       return 'should avoid';
     case -1:
