@@ -12,8 +12,8 @@ You can also **Export** / **Import** it as JSON.
 
 ## How it works
 
-**Guests** (left panel) — add them one at a time, or paste a whole list, one name per
-line. **Add a group** drops an empty section at the top of the list — a family, a carful,
+**Guests** (left panel) — add them one at a time, or hit **Paste a list** beside the
+heading, which turns the same row into a paste box, one name per line. **Add a group** drops an empty section at the top of the list — a family, a carful,
 a table's worth of friends. It arrives called "Group 1"; click the heading to rename it.
 Tick guests anywhere in the list
 and press **Add to group** on a group's heading to file them in, or drag them in and out

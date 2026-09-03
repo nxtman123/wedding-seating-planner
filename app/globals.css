@@ -71,6 +71,21 @@ body {
   color: var(--muted);
 }
 
+/* A control that reads as prose — for a switch that sits inside a heading. */
+.link-button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font-size: 0.85rem;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.link-button:hover:not(:disabled) {
+  background: none;
+  color: #9d5c6f;
+}
+
 /* The key that does the same thing as the button it sits in. */
 kbd {
   font: inherit;
@@ -209,13 +224,17 @@ textarea {
 .panel-header {
   display: flex;
   align-items: baseline;
-  justify-content: space-between;
-  gap: 8px;
+  gap: 10px;
 }
 .panel-header h2 {
   margin: 0;
   font-size: 1.05rem;
   letter-spacing: 0.01em;
+}
+/* Pushed to the far end so anything between it and the heading sits by the
+   heading, where it reads as part of it. */
+.panel-header .count {
+  margin-left: auto;
 }
 .count {
   font-size: 0.85rem;
@@ -253,6 +272,12 @@ textarea {
 .add-row input {
   flex: 1;
 }
+/* The paste box takes the row over: textarea across, button beneath, rather than
+   a tall field with a button stranded at the top of it. */
+.add-row-bulk {
+  flex-direction: column;
+  align-items: stretch;
+}
 /* The list's actions. The delete is pushed to the far end, away from the two
    that are always there, so it is never where a habit would put your cursor. */
 .guest-actions {
@@ -263,12 +288,6 @@ textarea {
 }
 .guest-actions .danger {
   margin-left: auto;
-}
-
-.bulk {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
 }
 
 .guest-row {

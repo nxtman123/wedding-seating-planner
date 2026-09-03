@@ -299,29 +299,61 @@ export default function GuestPanel({
     <section className="panel">
       <div className="panel-header">
         <h2>Guests</h2>
+        <button
+          type="button"
+          className="link-button"
+          onClick={() => setBulkOpen((open) => !open)}
+        >
+          {bulkOpen ? 'Add one at a time' : 'Paste a list'}
+        </button>
         <span className="count">{doc.guests.length}</span>
       </div>
 
-      <div className="add-row">
-        <input
-          type="text"
-          value={name}
-          placeholder="Add a guest"
-          aria-label="Guest name"
-          onChange={(e) => setName(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') submitGuest();
-          }}
-        />
-        <button type="button" onClick={submitGuest} disabled={!name.trim()}>
-          Add
-        </button>
+      {/* One row, in one of two modes: a name and Add, or a paste box and Add
+          these. Swapping in place keeps the panel from growing a second form. */}
+      <div className={bulkOpen ? 'add-row add-row-bulk' : 'add-row'}>
+        {bulkOpen ? (
+          <>
+            <textarea
+              rows={6}
+              value={bulk}
+              placeholder="One name per line"
+              aria-label="Paste guest names, one per line"
+              autoFocus
+              onChange={(e) => setBulk(e.target.value)}
+            />
+            <button
+              type="button"
+              onClick={() => {
+                onAddMany(bulk);
+                setBulk('');
+                setBulkOpen(false);
+              }}
+              disabled={!bulk.trim()}
+            >
+              Add these guests
+            </button>
+          </>
+        ) : (
+          <>
+            <input
+              type="text"
+              value={name}
+              placeholder="Add a guest"
+              aria-label="Guest name"
+              onChange={(e) => setName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') submitGuest();
+              }}
+            />
+            <button type="button" onClick={submitGuest} disabled={!name.trim()}>
+              Add
+            </button>
+          </>
+        )}
       </div>
 
       <div className="guest-actions">
-        <button type="button" onClick={() => setBulkOpen((open) => !open)}>
-          {bulkOpen ? 'Hide paste box' : 'Paste a list…'}
-        </button>
         <button type="button" onClick={onAddGroup}>
           Add a group
         </button>
@@ -333,29 +365,6 @@ export default function GuestPanel({
           </button>
         )}
       </div>
-
-      {bulkOpen && (
-        <div className="bulk">
-          <textarea
-            rows={6}
-            value={bulk}
-            placeholder={'One name per line'}
-            aria-label="Paste guest names, one per line"
-            onChange={(e) => setBulk(e.target.value)}
-          />
-          <button
-            type="button"
-            onClick={() => {
-              onAddMany(bulk);
-              setBulk('');
-              setBulkOpen(false);
-            }}
-            disabled={!bulk.trim()}
-          >
-            Add these guests
-          </button>
-        </div>
-      )}
 
       {doc.guests.length === 0 && doc.groups.length === 0 ? (
         <p className="empty">No guests yet. Add a few to get started.</p>
