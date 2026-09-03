@@ -174,23 +174,42 @@ export default function Page() {
     });
 
   /**
-   * C clears the pick, wherever you are — except while typing, where it is just
-   * the letter, and with a modifier held, where it belongs to the browser.
+   * Where a letter key means the letter rather than a shortcut: anything you
+   * type into, and a select, where it jumps to the option starting with it.
+   * Notably not a checkbox — clicking one leaves it focused, and that is exactly
+   * when clearing the pick is wanted.
+   */
+  const takesTyping = (el: HTMLElement | null): boolean => {
+    if (!el) return false;
+    if (el.isContentEditable) return true;
+    const tag = el.tagName;
+    if (tag === 'TEXTAREA' || tag === 'SELECT') return true;
+    if (tag !== 'INPUT') return false;
+    return [
+      'text',
+      'search',
+      'url',
+      'tel',
+      'email',
+      'password',
+      'number',
+      'date',
+      'datetime-local',
+      'month',
+      'week',
+      'time',
+    ].includes((el as HTMLInputElement).type);
+  };
+
+  /**
+   * C clears the pick, wherever you are — except where the letter is being typed
+   * and with a modifier held, where it belongs to the browser.
    */
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== 'c' && e.key !== 'C') return;
       if (e.metaKey || e.ctrlKey || e.altKey) return;
-      const el = e.target as HTMLElement | null;
-      const tag = el?.tagName;
-      if (
-        tag === 'INPUT' ||
-        tag === 'TEXTAREA' ||
-        tag === 'SELECT' ||
-        el?.isContentEditable
-      ) {
-        return;
-      }
+      if (takesTyping(e.target as HTMLElement | null)) return;
       setDraft((d) => (d.guests.length ? { ...d, guests: [] } : d));
     };
     window.addEventListener('keydown', onKey);
