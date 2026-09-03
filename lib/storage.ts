@@ -41,6 +41,12 @@ export function isDoc(value: unknown): value is SeatingDoc {
     ids.add(g.id);
   }
 
+  const listOrder = (value as { order?: unknown }).order;
+  if (listOrder !== undefined) {
+    if (!Array.isArray(listOrder)) return false;
+    if (listOrder.some((id) => typeof id !== 'string')) return false;
+  }
+
   const groups = (value as { groups?: unknown }).groups;
   if (groups !== undefined) {
     if (!Array.isArray(groups)) return false;
@@ -92,6 +98,8 @@ function sanitize(doc: SeatingDoc): SeatingDoc {
   // Documents predating groups have neither field; a groupId with no group left
   // to point at is turned loose rather than stranding the guest.
   const groups: Group[] = doc.groups ?? [];
+  // Absent before the list could interleave groups; normalize rebuilds it.
+  const order: string[] = Array.isArray(doc.order) ? doc.order : [];
   const known = new Set(groups.map((g) => g.id));
   const guests: Guest[] = doc.guests.map((g) => ({
     ...g,
@@ -100,6 +108,7 @@ function sanitize(doc: SeatingDoc): SeatingDoc {
   return normalize({
     guests,
     groups,
+    order,
     pairings: doc.pairings.filter(
       (p) => p.a !== p.b && ids.has(p.a) && ids.has(p.b),
     ),
@@ -188,10 +197,14 @@ function reIdDoc(doc: SeatingDoc): SeatingDoc {
     const next = remap.get(id);
     if (next) pins[next] = table;
   }
+  const order = doc.order
+    .map((id) => remap.get(id) ?? groupRemap.get(id))
+    .filter((id): id is string => !!id);
   return {
     ...doc,
     guests,
     groups,
+    order,
     pairings,
     pins,
     tables: doc.tables.map((t) =>

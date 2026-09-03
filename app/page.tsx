@@ -14,8 +14,9 @@ import {
   fillGroupLevel,
   guestName,
   linkedGuests,
-  moveGroup,
-  moveGuestsInto,
+  moveGroupToList,
+  moveGuestsIntoGroup,
+  moveGuestsToList,
   pairingCounts,
   removeGroup,
   removeGuests,
@@ -243,10 +244,14 @@ export default function Page() {
             onRenameGroup={(id, n) => setDoc((d) => renameGroup(d, id, n))}
             onRemoveGroup={dropGroup}
             onReorder={(ids, groupId, index) =>
-              setDoc((d) => moveGuestsInto(d, ids, groupId, index))
+              setDoc((d) =>
+                groupId === null
+                  ? moveGuestsToList(d, ids, index)
+                  : moveGuestsIntoGroup(d, ids, groupId, index),
+              )
             }
             onReorderGroup={(id, index) =>
-              setDoc((d) => moveGroup(d, id, index))
+              setDoc((d) => moveGroupToList(d, id, index))
             }
             onAddPickedToGroup={(groupId) =>
               setDoc((d) => assignToGroup(d, draft.guests, groupId))

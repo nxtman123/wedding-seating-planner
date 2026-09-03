@@ -14,10 +14,11 @@ You can also **Export** / **Import** it as JSON.
 
 **Guests** (left panel) — add them one at a time, or paste a whole list, one name per
 line. **Add a group** makes a named section — a family, a carful, a table's worth of
-friends. Tick guests anywhere in the list and press **Add to group** on a group's heading
-to file them in, or drag them in and out by their grips; groups can be dragged to reorder
-too. Loose guests sit above the groups, so whoever is not yet filed stays at the top where
-you are working. Removing a group turns its guests loose rather than deleting them.
+friends. A new group appears at the top, ready to fill. Tick guests anywhere in the list
+and press **Add to group** on a group's heading to file them in, or drag them in and out
+by their grips. Groups drag too, and can sit anywhere among the loose guests rather than
+being pinned to one end. Removing a group turns its guests loose, leaving them where the
+group was.
 
 Drag a row by its grip to reorder the list — a line shows where it will land, and
 nothing shifts until you drop. Ticking guests and pressing **Delete guests** removes them,

@@ -39,10 +39,11 @@ export type Pins = Record<string, number>;
 /**
  * The whole document.
  *
- * `guests` is held in the order the list draws it: the loose guests first, then
- * each group's members in `groups` order. Keeping that canonical means a
- * position in the list is just an index into `guests`, and grouping never needs
- * a second source of order to disagree with.
+ * `order` is the guest list as drawn: a sequence of top-level entries, each
+ * either a loose guest's id or a group's id, so a group can sit anywhere among
+ * the loose guests. Guests inside a group are not in `order` — their sequence
+ * comes from their relative order in `guests`, which is itself kept flattened to
+ * match what `order` draws.
  *
  * `tables` is the last arrangement the solver produced —
  * an array of tables, each holding the ids of the guests seated there. It is
@@ -52,6 +53,7 @@ export type Pins = Record<string, number>;
 export interface SeatingDoc {
   guests: Guest[];
   groups: Group[];
+  order: string[];
   pairings: Pairing[];
   /** Seats at every table. Circular tables, so this is just a capacity. */
   seatsPerTable: number;

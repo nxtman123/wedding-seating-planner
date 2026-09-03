@@ -265,7 +265,10 @@ textarea {
 /* Where a dragged row would land. Drawn absolutely, in the gap between rows, so
    showing it moves nothing — the list stays exactly where it was. */
 .guest-row.drop-before::before,
-.guest-row.drop-after::after {
+.guest-row.drop-after::after,
+.entry.drop-before::before,
+.entry.drop-after::after,
+.group-empty.drop-before::before {
   content: '';
   position: absolute;
   left: 4px;
@@ -275,11 +278,19 @@ textarea {
   background: var(--accent);
   pointer-events: none;
 }
-.guest-row.drop-before::before {
+.guest-row.drop-before::before,
+.group-empty.drop-before::before {
   top: -4px;
 }
 .guest-row.drop-after::after {
   bottom: -4px;
+}
+/* A group entry carries its own padding, so its line sits inside that. */
+.entry.drop-before::before {
+  top: 6px;
+}
+.entry.drop-after::after {
+  bottom: 0;
 }
 .guest-row.row-dragging {
   opacity: 0.4;
@@ -376,35 +387,43 @@ textarea {
   flex-direction: column;
 }
 
-/* Flush and flat — no border or panel of its own. The space above and below is
-   what sets a group apart from the loose guests and from the next group. */
-.group-section {
+/* A top-level row of the list: a loose guest, or a whole group. */
+.entry {
   position: relative;
-  padding: 16px 0 2px;
+}
+
+/* Flush and flat — no border or panel of its own. The space above and below is
+   what sets a group apart from the guests and groups around it. */
+.group-section {
+  padding: 18px 0 4px;
 }
 .group-head {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   gap: 6px;
-  padding: 0 5px 7px;
+  padding: 0 5px 5px;
 }
-/* Reads as a caption until you go to change it. */
-.group-name {
+
+/* A heading that happens to be editable, not a field: no box and no field
+   padding, set smaller and softer than the names below it so it reads as a
+   section label. Only the caret on focus says otherwise. */
+/* Outweighs the global input rule, whose :not() lends it a class's worth of
+   specificity — a bare .group-name would lose to it. */
+.group-head .group-name {
   flex: 1;
   min-width: 0;
-  padding: 3px 6px;
-  border-color: transparent;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
   background: none;
   color: var(--muted);
-  font-size: 0.76rem;
-  font-weight: 700;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
 }
-.group-name:hover,
-.group-name:focus {
-  border-color: var(--border);
-  background: var(--surface);
+.group-head .group-name:focus-visible {
+  outline: none;
+  box-shadow: inset 0 -1px 0 0 var(--accent);
 }
 .group-add {
   flex: none;
@@ -433,29 +452,28 @@ textarea {
   color: var(--danger);
 }
 .group-empty {
+  position: relative;
   padding: 4px 8px 6px;
   color: var(--muted);
   font-size: 0.82rem;
   font-style: italic;
 }
 
-/* Where a dragged group would land, drawn in its own padding. */
-.group-drop-before::before,
-.group-drop-after::after {
+/* A drop landing at the end of a group's members: the indicator needs something
+   to hang under, since there is no following row to mark. */
+.drop-tail {
+  position: relative;
+  height: 0;
+}
+.drop-tail::before {
   content: '';
   position: absolute;
   left: 4px;
   right: 4px;
+  top: 2px;
   height: 2px;
   border-radius: 1px;
   background: var(--accent);
-  pointer-events: none;
-}
-.group-drop-before::before {
-  top: 7px;
-}
-.group-drop-after::after {
-  bottom: -6px;
 }
 
 /* ---------------- pairings ---------------- */

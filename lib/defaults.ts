@@ -15,6 +15,7 @@ export function defaultDoc(): SeatingDoc {
   return {
     guests: [],
     groups: [],
+    order: [],
     pairings: [],
     seatsPerTable: DEFAULT_SEATS_PER_TABLE,
     extraTables: 0,

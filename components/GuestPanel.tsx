@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import type { DragEvent } from 'react';
 import { groupMembers } from '@/lib/guests';
-import type { SeatingDoc } from '@/lib/types';
+import type { Group, Guest, SeatingDoc } from '@/lib/types';
 
 export interface GuestPanelProps {
   doc: SeatingDoc;
@@ -40,13 +40,13 @@ function countTitle(count: { together: number; apart: number }): string {
   return `${total} pairing${total === 1 ? '' : 's'} — ${parts.join(', ')}`;
 }
 
-/** Where a drop would land: a position in the list, under a given group. */
-interface DropPoint {
-  groupId: string | null;
-  /** Index into `doc.guests`, which the list draws in order. */
-  index: number;
-  y: number;
-}
+/**
+ * Where a drop would land: between two top-level entries, or between two members
+ * of a group. Groups can only take the first kind; guests can take either.
+ */
+type DropPoint =
+  | { kind: 'top'; index: number; y: number }
+  | { kind: 'member'; groupId: string; index: number; y: number };
 
 /** What a drag is carrying. */
 type Cargo =
@@ -82,8 +82,6 @@ export default function GuestPanel({
   const [cargo, setCargo] = useState<Cargo | null>(null);
   /** Where the drop would land, for the indicator line. */
   const [dropAt, setDropAt] = useState<DropPoint | null>(null);
-  /** For a group drag, the index among groups the drop would land at. */
-  const [groupDropAt, setGroupDropAt] = useState<number | null>(null);
 
   const chosen = new Set(selected);
 
@@ -95,48 +93,69 @@ export default function GuestPanel({
     setArmed(null);
     setCargo(null);
     setDropAt(null);
-    setGroupDropAt(null);
   };
 
   /**
-   * Every place a guest could land, read off the rendered sections. Sections are
-   * padded apart and one may be empty, so rather than asking what is under the
-   * cursor the drop resolves to the nearest of these — which makes the whole
+   * Every place a drop could land, read off what is rendered. Entries are padded
+   * apart and a group may be empty, so rather than asking what sits under the
+   * cursor the drop resolves to the nearest of these — which keeps the whole
    * list live, padding included.
+   *
+   * `top` points come from the boundaries between top-level entries; `member`
+   * points from the rows inside each group. A dragged group ignores the second
+   * kind, since a group cannot go inside another.
    */
-  const dropPoints = (list: HTMLElement): DropPoint[] => {
+  const dropPoints = (list: HTMLElement, forGroup: boolean): DropPoint[] => {
     const points: DropPoint[] = [];
-    for (const section of list.querySelectorAll<HTMLElement>('[data-group]')) {
-      const groupId = section.dataset.group || null;
-      const start = Number(section.dataset.start);
-      const rows = [...section.querySelectorAll<HTMLElement>('.guest-row')];
-      if (rows.length === 0) {
-        const box = section.getBoundingClientRect();
-        points.push({ groupId, index: start, y: box.top + box.height / 2 });
-        continue;
+    const entries = [
+      ...list.querySelectorAll<HTMLElement>(':scope > [data-entry]'),
+    ];
+    entries.forEach((entry, i) => {
+      const box = entry.getBoundingClientRect();
+      points.push({ kind: 'top', index: i, y: box.top });
+      if (i === entries.length - 1) {
+        points.push({ kind: 'top', index: entries.length, y: box.bottom });
       }
-      rows.forEach((row, i) => {
+      const groupId = entry.dataset.group;
+      if (forGroup || !groupId) return;
+      const rows = [...entry.querySelectorAll<HTMLElement>('.guest-row')];
+      if (rows.length === 0) {
+        const body = entry.querySelector<HTMLElement>('.list');
+        const b = (body ?? entry).getBoundingClientRect();
         points.push({
+          kind: 'member',
           groupId,
-          index: start + i,
+          index: 0,
+          y: b.top + b.height / 2,
+        });
+        return;
+      }
+      rows.forEach((row, j) => {
+        points.push({
+          kind: 'member',
+          groupId,
+          index: j,
           y: row.getBoundingClientRect().top,
         });
       });
       points.push({
+        kind: 'member',
         groupId,
-        index: start + rows.length,
+        index: rows.length,
         y: rows[rows.length - 1].getBoundingClientRect().bottom,
       });
-    }
+    });
     return points;
   };
 
   /** Nearest insertion point to the pointer. */
-  const pointFor = (e: DragEvent<HTMLElement>): DropPoint | null => {
-    const points = dropPoints(e.currentTarget);
+  const pointFor = (
+    e: DragEvent<HTMLElement>,
+    forGroup: boolean,
+  ): DropPoint | null => {
     let best: DropPoint | null = null;
     let bestGap = Infinity;
-    for (const p of points) {
+    for (const p of dropPoints(e.currentTarget, forGroup)) {
       const gap = Math.abs(e.clientY - p.y);
       if (gap < bestGap) {
         bestGap = gap;
@@ -146,33 +165,23 @@ export default function GuestPanel({
     return best;
   };
 
-  /** Where a dragged group would land, among the group headings. */
-  const groupIndexFor = (e: DragEvent<HTMLElement>): number => {
-    const heads = [
-      ...e.currentTarget.querySelectorAll<HTMLElement>('.group-section'),
-    ];
-    for (let i = 0; i < heads.length; i++) {
-      const box = heads[i].getBoundingClientRect();
-      if (e.clientY < box.top + box.height / 2) return i;
-    }
-    return heads.length;
-  };
-
   const over = (e: DragEvent<HTMLElement>) => {
     if (!cargo) return;
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
-    if (cargo.kind === 'group') setGroupDropAt(groupIndexFor(e));
-    else setDropAt(pointFor(e));
+    setDropAt(pointFor(e, cargo.kind === 'group'));
   };
 
   const drop = (e: DragEvent<HTMLElement>) => {
     e.preventDefault();
-    if (cargo?.kind === 'group') {
-      onReorderGroup(cargo.id, groupIndexFor(e));
-    } else if (cargo?.kind === 'guests') {
-      const point = pointFor(e);
-      if (point) onReorder(cargo.ids, point.groupId, point.index);
+    const point = pointFor(e, cargo?.kind === 'group');
+    if (point) {
+      if (cargo?.kind === 'group' && point.kind === 'top') {
+        onReorderGroup(cargo.id, point.index);
+      } else if (cargo?.kind === 'guests') {
+        if (point.kind === 'top') onReorder(cargo.ids, null, point.index);
+        else onReorder(cargo.ids, point.groupId, point.index);
+      }
     }
     endDrag();
   };
@@ -188,14 +197,25 @@ export default function GuestPanel({
 
   /* ----- sections ----- */
 
-  const loose = groupMembers(doc, null);
-  const sections = [
-    { group: null, members: loose },
-    ...doc.groups.map((g) => ({ group: g, members: groupMembers(doc, g.id) })),
-  ];
+  /** The list as drawn: each top-level entry is a loose guest or a group. */
+  type Entry =
+    | { group: Group; guest: null; members: Guest[] }
+    | { group: null; guest: Guest; members: Guest[] };
+  const byId = new Map(doc.guests.map((g) => [g.id, g]));
+  const entries: Entry[] = doc.order.flatMap((id): Entry[] => {
+    const group = doc.groups.find((g) => g.id === id);
+    if (group) {
+      return [{ group, guest: null, members: groupMembers(doc, group.id) }];
+    }
+    const guest = byId.get(id);
+    return guest ? [{ group: null, guest, members: [] }] : [];
+  });
 
-  /** Renders one guest, given its index into `doc.guests`. */
-  const guestRow = (guest: SeatingDoc['guests'][number], index: number) => {
+  /**
+   * One guest row. `mark` is the drop indicator to draw above it, if the pending
+   * drop would land there.
+   */
+  const guestRow = (guest: Guest, mark: boolean) => {
     const count = counts.get(guest.id) ?? { together: 0, apart: 0 };
     const total = count.together + count.apart;
     const pinnedTo = doc.pins[guest.id];
@@ -205,7 +225,7 @@ export default function GuestPanel({
       'guest-row',
       picked ? 'row-selected' : '',
       moving ? 'row-dragging' : '',
-      dropAt?.index === index ? 'drop-before' : '',
+      mark ? 'drop-before' : '',
     ]
       .filter(Boolean)
       .join(' ');
@@ -278,8 +298,6 @@ export default function GuestPanel({
       </li>
     );
   };
-
-  let cursor = 0;
 
   return (
     <section className="panel">
@@ -364,87 +382,119 @@ export default function GuestPanel({
         <p className="empty">No guests yet. Add a few to get started.</p>
       ) : (
         <div className="scroller sections" onDragOver={over} onDrop={drop}>
-          {sections.map(({ group, members }, sectionIndex) => {
-            const start = cursor;
-            cursor += members.length;
-            const dragging = cargo?.kind === 'group' && cargo.id === group?.id;
-            // Group headings are the boundaries a dragged group lands between.
-            const groupPos = sectionIndex - 1;
+          {entries.map(({ group, guest, members }, i) => {
+            const topMark = dropAt?.kind === 'top' && dropAt.index === i;
+            const lastMark =
+              dropAt?.kind === 'top' &&
+              dropAt.index === entries.length &&
+              i === entries.length - 1;
+
+            if (guest) {
+              return (
+                <div
+                  key={guest.id}
+                  data-entry=""
+                  className={[
+                    'entry',
+                    topMark ? 'drop-before' : '',
+                    lastMark ? 'drop-after' : '',
+                  ]
+                    .filter(Boolean)
+                    .join(' ')}
+                >
+                  <ul className="list">{guestRow(guest, false)}</ul>
+                </div>
+              );
+            }
+            if (!group) return null;
+
+            const dragging = cargo?.kind === 'group' && cargo.id === group.id;
             return (
               <div
-                key={group?.id ?? 'loose'}
-                data-group={group?.id ?? ''}
-                data-start={start}
+                key={group.id}
+                data-entry=""
+                data-group={group.id}
                 className={[
-                  group ? 'group-section' : 'loose-section',
+                  'entry',
+                  'group-section',
                   dragging ? 'row-dragging' : '',
-                  group && groupDropAt === groupPos ? 'group-drop-before' : '',
-                  group &&
-                  groupDropAt === doc.groups.length &&
-                  groupPos === doc.groups.length - 1
-                    ? 'group-drop-after'
-                    : '',
+                  topMark ? 'drop-before' : '',
+                  lastMark ? 'drop-after' : '',
                 ]
                   .filter(Boolean)
                   .join(' ')}
-                draggable={group ? armed === group.id : undefined}
-                onDragStart={
-                  group
-                    ? (e) => {
-                        // Only the section itself, never a row bubbling up.
-                        if (e.target !== e.currentTarget) return;
-                        setCargo({ kind: 'group', id: group.id });
-                        e.dataTransfer.effectAllowed = 'move';
-                        e.dataTransfer.setData('text/plain', group.id);
-                      }
-                    : undefined
-                }
-                onDragEnd={group ? endDrag : undefined}
+                draggable={armed === group.id}
+                onDragStart={(e) => {
+                  // Only the section itself, never a row bubbling up.
+                  if (e.target !== e.currentTarget) return;
+                  setCargo({ kind: 'group', id: group.id });
+                  e.dataTransfer.effectAllowed = 'move';
+                  e.dataTransfer.setData('text/plain', group.id);
+                }}
+                onDragEnd={endDrag}
               >
-                {group && (
-                  <div className="group-head">
-                    <span
-                      className="drag-handle"
-                      title="Drag to reorder the group"
-                      aria-hidden="true"
-                      onMouseDown={() => setArmed(group.id)}
-                      onMouseUp={() => setArmed(null)}
-                    >
-                      ⠿
-                    </span>
-                    <input
-                      type="text"
-                      className="group-name"
-                      value={group.name}
-                      aria-label="Group name"
-                      onChange={(e) => onRenameGroup(group.id, e.target.value)}
-                    />
-                    <span className="count">{members.length}</span>
-                    {selected.length > 0 && (
-                      <button
-                        type="button"
-                        className="group-add"
-                        onClick={() => onAddPickedToGroup(group.id)}
-                      >
-                        Add to group
-                      </button>
-                    )}
+                <div className="group-head">
+                  <span
+                    className="drag-handle"
+                    title="Drag to reorder the group"
+                    aria-hidden="true"
+                    onMouseDown={() => setArmed(group.id)}
+                    onMouseUp={() => setArmed(null)}
+                  >
+                    ⠿
+                  </span>
+                  <input
+                    type="text"
+                    className="group-name"
+                    value={group.name}
+                    aria-label="Group name"
+                    onChange={(e) => onRenameGroup(group.id, e.target.value)}
+                  />
+                  {selected.length > 0 && (
                     <button
                       type="button"
-                      className="icon-button danger"
-                      title="Remove the group and turn its guests loose"
-                      aria-label={`Remove the group ${group.name}`}
-                      onClick={() => onRemoveGroup(group.id)}
+                      className="group-add"
+                      onClick={() => onAddPickedToGroup(group.id)}
                     >
-                      &times;
+                      Add to group
                     </button>
-                  </div>
-                )}
-                <ul className="list">
-                  {members.map((guest, i) => guestRow(guest, start + i))}
-                  {members.length === 0 && group && (
-                    <li className="group-empty">Drag guests here</li>
                   )}
+                  <button
+                    type="button"
+                    className="icon-button danger"
+                    title="Remove the group and turn its guests loose"
+                    aria-label={`Remove the group ${group.name}`}
+                    onClick={() => onRemoveGroup(group.id)}
+                  >
+                    &times;
+                  </button>
+                </div>
+                <ul className="list">
+                  {members.map((m, j) =>
+                    guestRow(
+                      m,
+                      dropAt?.kind === 'member' &&
+                        dropAt.groupId === group.id &&
+                        dropAt.index === j,
+                    ),
+                  )}
+                  {members.length === 0 && (
+                    <li
+                      className={
+                        dropAt?.kind === 'member' && dropAt.groupId === group.id
+                          ? 'group-empty drop-before'
+                          : 'group-empty'
+                      }
+                    >
+                      Drag guests here
+                    </li>
+                  )}
+                  {members.length > 0 &&
+                    dropAt?.kind === 'member' &&
+                    dropAt.groupId === group.id &&
+                    dropAt.index === members.length && (
+                      <li className="drop-tail" aria-hidden="true" />
+                    )}
                 </ul>
               </div>
             );
