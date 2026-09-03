@@ -5,8 +5,8 @@ import type { SeatingDoc } from '@/lib/types';
 
 export interface GuestPanelProps {
   doc: SeatingDoc;
-  /** Guest id -> the table they are seated at, or undefined if unseated. */
-  seats: Map<string, number>;
+  /** Guest id -> how many pairings they appear in, by direction. */
+  counts: Map<string, { together: number; apart: number }>;
   /** The two guests currently armed for a pairing; '' when the slot is empty. */
   selected: { a: string; b: string };
   onAdd: (name: string) => void;
@@ -17,9 +17,18 @@ export interface GuestPanelProps {
   onTogglePair: (id: string) => void;
 }
 
+/** "3 pairings — 2 together, 1 apart", for the badge's tooltip. */
+function countTitle(count: { together: number; apart: number }): string {
+  const total = count.together + count.apart;
+  const parts: string[] = [];
+  if (count.together) parts.push(`${count.together} together`);
+  if (count.apart) parts.push(`${count.apart} apart`);
+  return `${total} pairing${total === 1 ? '' : 's'} — ${parts.join(', ')}`;
+}
+
 export default function GuestPanel({
   doc,
-  seats,
+  counts,
   selected,
   onAdd,
   onAddMany,
@@ -102,8 +111,9 @@ export default function GuestPanel({
       ) : (
         <ul className="list scroller">
           {doc.guests.map((guest) => {
-            const table = seats.get(guest.id);
-            const pinned = doc.pins[guest.id] !== undefined;
+            const count = counts.get(guest.id) ?? { together: 0, apart: 0 };
+            const total = count.together + count.apart;
+            const pinnedTo = doc.pins[guest.id];
             const slot =
               guest.id === selected.a ? 1 : guest.id === selected.b ? 2 : null;
             return (
@@ -118,16 +128,18 @@ export default function GuestPanel({
                   aria-label="Guest name"
                   onChange={(e) => onRename(guest.id, e.target.value)}
                 />
-                {table !== undefined && (
+                {pinnedTo !== undefined && (
                   <span
-                    className={pinned ? 'table-badge badge-pinned' : 'table-badge'}
-                    title={
-                      pinned
-                        ? `Pinned to table ${table + 1}`
-                        : `Seated at table ${table + 1}`
-                    }
+                    className="pin-mark"
+                    title={`Pinned to table ${pinnedTo + 1}`}
+                    aria-label={`Pinned to table ${pinnedTo + 1}`}
                   >
-                    T{table + 1}
+                    ◉
+                  </span>
+                )}
+                {total > 0 && (
+                  <span className="pair-badge" title={countTitle(count)}>
+                    {total}
                   </span>
                 )}
                 <button

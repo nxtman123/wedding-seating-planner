@@ -13,7 +13,9 @@ You can also **Export** / **Import** it as JSON.
 ## How it works
 
 **Guests** (left panel) — add them one at a time, or paste a whole list, one name per
-line. Pasting again only adds names that aren't already there.
+line. Pasting again only adds names that aren't already there. The badge on a row counts
+the pairings that guest is caught up in, so it's easy to spot who you've already placed
+and who is still floating; hover it for the split between together and apart.
 
 **Pairings** (middle panel) — say how strongly two guests belong together. Pick the
 pair either from the two dropdowns here, or by clicking the circles in the guest list:
@@ -42,7 +44,8 @@ the arrangement did, and the dots in the pairings panel mark each pairing honore
 
 **Pins** — the ○ next to a seated guest in the tables panel locks them to that table.
 Pinned guests stay put through later **Generate** presses while everyone else is
-rearranged, and their table badge in the guest list fills in to show it.
+rearranged. Pinned guests are marked with a ◉ in the guest list too, so you can see at a
+glance who is held down without hunting through the tables.
 
 ## Develop
 

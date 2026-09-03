@@ -136,3 +136,23 @@ export function clearPin(doc: SeatingDoc, guestId: string): SeatingDoc {
 export function clearAllPins(doc: SeatingDoc): SeatingDoc {
   return { ...doc, pins: {} };
 }
+
+/**
+ * Guest id -> how many pairings they appear in, split by direction. Guests with
+ * no pairings are present with zeroes, so callers can look up any guest.
+ */
+export function pairingCounts(
+  doc: SeatingDoc,
+): Map<string, { together: number; apart: number }> {
+  const counts = new Map<string, { together: number; apart: number }>();
+  for (const g of doc.guests) counts.set(g.id, { together: 0, apart: 0 });
+  for (const p of doc.pairings) {
+    for (const id of [p.a, p.b]) {
+      const c = counts.get(id);
+      if (!c) continue;
+      if (p.level > 0) c.together++;
+      else c.apart++;
+    }
+  }
+  return counts;
+}

@@ -9,6 +9,7 @@ import {
   clearAllPins,
   clearPin,
   removeGuest,
+  pairingCounts,
   removePairing,
   renameGuest,
   setExtraTables,
@@ -46,7 +47,7 @@ export default function Page() {
 
   /* ----- derived views of the current seating ----- */
 
-  const seats = useMemo(() => seatIndex(doc.tables), [doc.tables]);
+  const counts = useMemo(() => pairingCounts(doc), [doc]);
   const outcomes = useMemo(
     () => (doc.tables.length ? pairingOutcomes(doc, doc.tables) : new Map()),
     [doc],
@@ -168,7 +169,7 @@ export default function Page() {
         <div className="panels">
           <GuestPanel
             doc={doc}
-            seats={seats}
+            counts={counts}
             onAdd={(name) => setDoc((d) => addGuest(d, name))}
             onAddMany={(text) => setDoc((d) => addGuestsFromText(d, text))}
             onRename={(id, name) => setDoc((d) => renameGuest(d, id, name))}

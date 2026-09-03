@@ -301,23 +301,28 @@ textarea {
 .name-input {
   flex: 1;
 }
-.table-badge {
+/* How many pairings a guest is caught up in. Hidden at zero, so the column
+   stays quiet and only the well-connected guests draw the eye. */
+.pair-badge {
   flex: none;
-  font-size: 0.8rem;
+  min-width: 25px;
+  text-align: center;
+  font-size: 0.78rem;
   font-variant-numeric: tabular-nums;
-  color: var(--accent);
-  background: #fdf3f6;
-  border: 1px solid #f0dbe2;
+  color: var(--muted);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
   border-radius: 6px;
-  padding: 2px 7px;
+  padding: 2px 6px;
 }
-/* Pinning now lives in the tables panel, so the badge is what carries the
-   pinned state back to the guest list. */
-.badge-pinned {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: var(--accent-ink);
-  font-weight: 600;
+
+/* Pinning is set in the tables panel; this only reports it back here, and only
+   for the few guests who have a pin. */
+.pin-mark {
+  flex: none;
+  color: var(--accent);
+  font-size: 0.8rem;
+  line-height: 1;
 }
 
 /* ---------------- pairings ---------------- */
