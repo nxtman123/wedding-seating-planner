@@ -51,6 +51,8 @@ export default function Page() {
   /** The last guest ticked on their own, which a shift-click reaches back to. */
   const [anchor, setAnchor] = useState<string | null>(null);
   const [hydrated, setHydrated] = useState(false);
+  /** True while the solver has the thread, so the button can say so. */
+  const [solving, setSolving] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -94,8 +96,29 @@ export default function Page() {
 
   /* ----- solving ----- */
 
-  const generate = () =>
-    setDoc((d) => ({ ...d, tables: solveSeating(d).tables }));
+  /**
+   * The solver runs on the main thread and holds it for the whole solve, so the
+   * spinner has to reach the screen before it starts — hence waiting two frames
+   * rather than one, since the first callback runs before the paint it was
+   * queued for.
+   *
+   * A timer races those frames, because a hidden tab is not painting and never
+   * calls back: without it, pressing Generate with the tab in the background
+   * would do nothing at all until it was looked at again.
+   */
+  const generate = () => {
+    if (solving) return;
+    setSolving(true);
+    let started = false;
+    const run = () => {
+      if (started) return;
+      started = true;
+      setDoc((d) => ({ ...d, tables: solveSeating(d).tables }));
+      setSolving(false);
+    };
+    requestAnimationFrame(() => requestAnimationFrame(run));
+    window.setTimeout(run, 60);
+  };
 
   /* ----- composing a pairing ----- */
 
@@ -381,6 +404,7 @@ export default function Page() {
             }
             selected={draft.guests}
             onGenerate={generate}
+            solving={solving}
             onTogglePin={togglePin}
             onClearPins={() => setDoc(clearAllPins)}
           />

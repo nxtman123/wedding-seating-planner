@@ -27,6 +27,8 @@ export interface TablePanelProps {
   onAddPickedToTable: (tableIndex: number) => void;
   onRenameTable: (tableIndex: number, name: string) => void;
   onGenerate: () => void;
+  /** True while the solver is working, so the button can show it. */
+  solving: boolean;
   onTogglePin: (guestId: string) => void;
   onClearPins: () => void;
 }
@@ -42,6 +44,7 @@ export default function TablePanel({
   onAddPickedToTable,
   onRenameTable,
   onGenerate,
+  solving,
   onTogglePin,
   onClearPins,
 }: TablePanelProps) {
@@ -118,8 +121,11 @@ export default function TablePanel({
           type="button"
           className="primary"
           onClick={onGenerate}
-          disabled={doc.guests.length === 0}
+          disabled={solving || doc.guests.length === 0}
         >
+          {/* Always in the layout, so starting a solve does not resize the
+              button under the cursor. */}
+          <span className={solving ? 'spinner' : 'spinner is-idle'} />
           Generate seating
         </button>
         {pinCount > 0 && (
