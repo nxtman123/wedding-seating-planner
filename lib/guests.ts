@@ -4,6 +4,7 @@ import {
   newTableSpec,
   uid,
 } from './defaults';
+import { tableSizes } from './solver';
 import type { Group, Guest, Pairing, PairingLevel, SeatingDoc } from './types';
 
 /* -------------------------------------------------------------------------- */
@@ -395,6 +396,67 @@ export function setTableSpec(
 
 export function removeTableSpec(doc: SeatingDoc, id: string): SeatingDoc {
   return { ...doc, tableSpecs: doc.tableSpecs.filter((s) => s.id !== id) };
+}
+
+/**
+ * Seat guests at a table and pin them there, without re-solving the room.
+ *
+ * They leave wherever they were sitting. If the table cannot hold them all,
+ * whoever was there unpinned gives up their seat first — moved to the first
+ * table with room, or left standing when there is none. Arrivals beyond the
+ * table's capacity are left standing too, and unpinned: pinning someone to a
+ * table with no seat for them would be a promise the solver cannot keep.
+ */
+export function seatGuestsAt(
+  doc: SeatingDoc,
+  ids: string[],
+  tableIndex: number,
+): SeatingDoc {
+  const arriving = [...new Set(ids)];
+  const moving = new Set(arriving);
+  const sizes = tableSizes(doc);
+  if (arriving.length === 0 || tableIndex < 0 || tableIndex >= sizes.length) {
+    return doc;
+  }
+
+  // Lift the arrivals out of wherever they sit, keeping the room's shape.
+  const tables: string[][] = sizes.map((_, i) =>
+    (doc.tables[i] ?? []).filter((id) => !moving.has(id)),
+  );
+  const pins = { ...doc.pins };
+
+  // Make room by moving out whoever is there but not pinned there.
+  const bumped: string[] = [];
+  const room = () => sizes[tableIndex] - tables[tableIndex].length;
+  while (room() < arriving.length) {
+    const victim = [...tables[tableIndex]]
+      .reverse()
+      .find((id) => pins[id] === undefined);
+    if (victim === undefined) break;
+    tables[tableIndex] = tables[tableIndex].filter((id) => id !== victim);
+    bumped.push(victim);
+  }
+
+  const taken = arriving.slice(0, Math.max(0, room()));
+  const standing = arriving.slice(taken.length);
+  tables[tableIndex] = [...tables[tableIndex], ...taken];
+  for (const id of taken) pins[id] = tableIndex;
+  for (const id of standing) delete pins[id];
+
+  for (const id of bumped) {
+    const spot = tables.findIndex((t, i) => t.length < sizes[i]);
+    if (spot >= 0) tables[spot].push(id);
+  }
+
+  // Keep each table in guest-list order, as the solver leaves them.
+  const rank = new Map(doc.guests.map((g, i) => [g.id, i]));
+  return {
+    ...doc,
+    pins,
+    tables: tables.map((t) =>
+      [...t].sort((a, b) => (rank.get(a) ?? 0) - (rank.get(b) ?? 0)),
+    ),
+  };
 }
 
 /** Lock a guest to the table they are currently seated at. */

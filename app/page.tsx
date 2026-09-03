@@ -24,6 +24,7 @@ import {
   renameGroup,
   renameGuest,
   removeTableSpec,
+  seatGuestsAt,
   setPairingLevel,
   setPin,
   setTableSpec,
@@ -360,6 +361,9 @@ export default function Page() {
             }
             onSpecAdd={() => setDoc(addTableSpec)}
             onSpecRemove={(id) => setDoc((d) => removeTableSpec(d, id))}
+            onAddPickedToTable={(index) =>
+              setDoc((d) => seatGuestsAt(d, draft.guests, index))
+            }
             selected={draft.guests}
             onGenerate={generate}
             onTogglePin={togglePin}

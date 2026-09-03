@@ -442,7 +442,7 @@ export default function GuestPanel({
                   {selected.length > 0 && (
                     <button
                       type="button"
-                      className="group-add"
+                      className="add-picked"
                       onClick={() => onAddPickedToGroup(group.id)}
                     >
                       Add to group

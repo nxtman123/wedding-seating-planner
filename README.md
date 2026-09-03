@@ -104,6 +104,11 @@ use — "all must sit with pairings honored", "6 should sit with pairings not ho
 because one broken `+++` matters more than a hundred missed `+`s, and a single total hides
 which it was. Per-table warnings and the dots in the pairings panel show the detail.
 
+Ticking guests puts an **Add to table** button on every table heading: it seats them there
+and pins them, taking them off whatever table they were at. If the table cannot hold them
+all, whoever was sitting there unpinned gives up their seat first, and any arrival still
+without one is left in *Nowhere to sit* rather than pinned to a table with no room.
+
 **Pins** — the pin after a guest's name in the tables panel locks them to that table.
 Pinned guests stay put through later **Generate** presses while everyone else is
 rearranged, and are marked in the guest list too, so you can see at a glance who is held

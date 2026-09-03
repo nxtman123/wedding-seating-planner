@@ -22,6 +22,8 @@ export interface TablePanelProps {
   onSpecChange: (id: string, patch: { count?: number; seats?: number }) => void;
   onSpecAdd: () => void;
   onSpecRemove: (id: string) => void;
+  /** Seat every ticked guest at this table and pin them there. */
+  onAddPickedToTable: (tableIndex: number) => void;
   onGenerate: () => void;
   onTogglePin: (guestId: string) => void;
   onClearPins: () => void;
@@ -48,6 +50,7 @@ export default function TablePanel({
   onSpecChange,
   onSpecAdd,
   onSpecRemove,
+  onAddPickedToTable,
   onGenerate,
   onTogglePin,
   onClearPins,
@@ -107,7 +110,7 @@ export default function TablePanel({
         ))}
       </ul>
       <button type="button" className="room-add" onClick={onSpecAdd}>
-        Add a row
+        Add more tables
       </button>
 
       <p className={seats < doc.guests.length ? 'hint hint-short' : 'hint'}>
@@ -191,6 +194,16 @@ export default function TablePanel({
               >
                 <div className="table-head">
                   <h3>Table {i + 1}</h3>
+                  {selected.length > 0 && (
+                    <button
+                      type="button"
+                      className="add-picked"
+                      title="Seat the ticked guests here and pin them"
+                      onClick={() => onAddPickedToTable(i)}
+                    >
+                      Add to table
+                    </button>
+                  )}
                   <span className="count">
                     {table.length}/{sizes[i]}
                   </span>
