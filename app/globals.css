@@ -462,11 +462,13 @@ textarea {
 .group-section {
   padding: 26px 0 24px;
 }
+/* The horizontal padding matches .guest-row's, so the heading's grip sits in the
+   same column as the grips on the rows below it. */
 .group-head {
   display: flex;
   align-items: baseline;
   gap: 6px;
-  padding: 0 5px 5px;
+  padding: 0 4px 5px;
 }
 
 /* A heading that happens to be editable, not a field: no box and no field
