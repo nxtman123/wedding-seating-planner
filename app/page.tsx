@@ -99,19 +99,15 @@ export default function Page() {
 
   /**
    * Give every pair in the group the level shown. Two guests is the ordinary
-   * one-pairing case; more is a clique. The level is kept afterwards so a run
-   * of groups at the same level goes quickly.
+   * one-pairing case; more is a clique. The group is left picked afterwards, so
+   * a level can be tried and changed without re-ticking everyone.
    */
-  const applyToGroup = () => {
+  const applyToGroup = () =>
     setDoc((d) => applyGroupLevel(d, draft.guests, draft.level));
-    setDraft((d) => ({ ...d, guests: [] }));
-  };
 
   /** Fill in only the pairs the group is missing, leaving the rest as they are. */
-  const applyToMissing = () => {
+  const applyToMissing = () =>
     setDoc((d) => fillGroupLevel(d, draft.guests, draft.level));
-    setDraft((d) => ({ ...d, guests: [] }));
-  };
 
   /** Removing a guest also takes them out of the group being composed. */
   const dropGuest = (id: string) => {
@@ -220,6 +216,7 @@ export default function Page() {
             violations={violations}
             onSeatsChange={(n) => setDoc((d) => setSeatsPerTable(d, n))}
             onExtraTablesChange={(n) => setDoc((d) => setExtraTables(d, n))}
+            selected={draft.guests}
             onGenerate={generate}
             onTogglePin={togglePin}
             onClearPins={() => setDoc(clearAllPins)}

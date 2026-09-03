@@ -34,10 +34,16 @@ on how its members relate: every pair is set to the level, overwriting whatever 
 between them. **Apply to N missing** only fills in the pairs that have no pairing yet and
 leaves the existing ones exactly as they are — useful for widening a group without
 flattening the levels you already tuned inside it. The second button appears only when the
-two would differ; rows about to be rewritten are highlighted either way.
+two would differ; rows about to be rewritten are highlighted either way. The group stays
+picked after you apply, so a level can be tried and changed without re-ticking everyone.
 
-Neither touches pairings that reach *outside* the group, and neither ever duplicates a
-pair. Picking guests who already agree on a level, in any order, loads that level into the
+Whatever you tick is followed through the other two panels: the pairings it concerns float
+to the top of the pairing list above a gap, and the tables holding those guests are
+highlighted with a dot at each picked seat. Ticking a single guest surfaces every pairing
+they are in; ticking several surfaces the pairings inside that group.
+
+Neither apply touches pairings that reach *outside* the group, and neither ever duplicates
+a pair. Picking guests who already agree on a level, in any order, loads that level into the
 form rather than the last one you used.
 
 | Level | Meaning |
@@ -55,17 +61,17 @@ the one below it, which matters more than it looks: a group applied to N guests 
 N-choose-2 pairings, and every guest at a table of S seats holds S-1 of them, so a large
 low-level group could otherwise outvote a high-level pairing on sheer volume. At 20× no
 level can be outvoted by a whole table's worth of the level beneath it, even at the
-largest table size the app allows. At the usual six seats it is not close.
+largest table size the app allows. At the default eight seats it is not close.
 
 **Tables** (right panel) — set the seats per table and press **Generate seating**. The
 number of tables is derived from the guest count; the *Spare tables* box adds slack on
 top when you want the room less full. The score and a per-table warning list show how
 the arrangement did, and the dots in the pairings panel mark each pairing honored or not.
 
-**Pins** — the ○ next to a seated guest in the tables panel locks them to that table.
+**Pins** — the pin after a guest's name in the tables panel locks them to that table.
 Pinned guests stay put through later **Generate** presses while everyone else is
-rearranged. Pinned guests are marked with a ◉ in the guest list too, so you can see at a
-glance who is held down without hunting through the tables.
+rearranged, and are marked in the guest list too, so you can see at a glance who is held
+down without hunting through the tables.
 
 ## Develop
 

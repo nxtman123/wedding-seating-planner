@@ -8,7 +8,7 @@ export function uid(): string {
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
 }
 
-export const DEFAULT_SEATS_PER_TABLE = 6;
+export const DEFAULT_SEATS_PER_TABLE = 8;
 
 /** An empty document. Also what Reset restores. */
 export function defaultDoc(): SeatingDoc {

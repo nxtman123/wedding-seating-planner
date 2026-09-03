@@ -7,6 +7,8 @@ import type { SeatingDoc } from '@/lib/types';
 
 export interface TablePanelProps {
   doc: SeatingDoc;
+  /** Guests currently ticked in the guest list, marked with a dot at their seat. */
+  selected: string[];
   /** Score of the current arrangement, or null before the first Generate. */
   score: number | null;
   /** Pairings the current arrangement failed to honor. */
@@ -18,8 +20,18 @@ export interface TablePanelProps {
   onClearPins: () => void;
 }
 
+/** A pushpin, drawn rather than an emoji so it takes the button's own color. */
+function PinIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor" aria-hidden="true">
+      <path d="M14 2v6l3 3v2h-4v7l-1 1-1-1v-7H7v-2l3-3V2h4z" />
+    </svg>
+  );
+}
+
 export default function TablePanel({
   doc,
+  selected,
   score,
   violations,
   onSeatsChange,
@@ -31,6 +43,7 @@ export default function TablePanel({
   const tables = tableCount(doc);
   const seated = doc.tables.reduce((n, t) => n + t.length, 0);
   const pinCount = Object.keys(doc.pins).length;
+  const chosen = new Set(selected);
 
   return (
     <section className="panel">
@@ -107,8 +120,16 @@ export default function TablePanel({
         <div className="tables scroller">
           {doc.tables.map((table, i) => {
             const conflicts = conflictsAtTable(doc, doc.tables, i);
+            // A table holding anyone currently ticked gets the same gentle
+            // highlight the pairing rows use.
+            const holdsPicked = table.some((id) => chosen.has(id));
             return (
-              <div key={i} className="table-card">
+              <div
+                key={i}
+                className={
+                  holdsPicked ? 'table-card row-selected' : 'table-card'
+                }
+              >
                 <div className="table-head">
                   <h3>Table {i + 1}</h3>
                   <span className="count">
@@ -121,24 +142,36 @@ export default function TablePanel({
                   <ul className="seat-list">
                     {table.map((id) => {
                       const pinned = doc.pins[id] !== undefined;
+                      const picked = chosen.has(id);
                       return (
                         <li key={id}>
+                          {/* Always present, so names stay aligned whether or
+                              not anyone at the table is ticked. */}
+                          <span
+                            className={
+                              picked ? 'seat-dot seat-dot-on' : 'seat-dot'
+                            }
+                          />
+                          <span className="seat-name">{guestName(doc, id)}</span>
                           <button
                             type="button"
                             className={
-                              pinned ? 'icon-button pin-on' : 'icon-button'
+                              pinned ? 'pin-button pin-on' : 'pin-button'
                             }
                             title={
                               pinned
                                 ? 'Unpin — let the solver move them'
                                 : `Pin to table ${i + 1}`
                             }
-                            aria-label={pinned ? 'Unpin guest' : 'Pin guest'}
+                            aria-label={
+                              pinned
+                                ? `Unpin ${guestName(doc, id)}`
+                                : `Pin ${guestName(doc, id)} to table ${i + 1}`
+                            }
                             onClick={() => onTogglePin(id)}
                           >
-                            {pinned ? '◉' : '○'}
+                            <PinIcon />
                           </button>
-                          <span>{guestName(doc, id)}</span>
                         </li>
                       );
                     })}

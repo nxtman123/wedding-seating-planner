@@ -15,6 +15,7 @@ import {
   sortedPairings,
 } from '@/lib/guests';
 import type {
+  Pairing,
   PairingDraft,
   PairingLevel,
   PairingOutcome,
@@ -85,7 +86,20 @@ export default function PairingPanel({
         ? 'Update pairing'
         : 'Add pairing';
 
-  const pairings = sortedPairings(doc);
+  /**
+   * The pairings the current pick is about. One guest picked means every pairing
+   * they are in; two or more means the pairings inside that group, which are the
+   * ones an Apply would rewrite.
+   */
+  const inFocus = (p: Pairing) =>
+    picked.length === 1
+      ? p.a === picked[0] || p.b === picked[0]
+      : chosen.has(p.a) && chosen.has(p.b);
+
+  // Floated to the top rather than filtered, so nothing goes missing.
+  const sorted = sortedPairings(doc);
+  const focused = sorted.filter(inFocus);
+  const pairings = [...focused, ...sorted.filter((p) => !inFocus(p))];
 
   return (
     <section className="panel">
@@ -189,14 +203,17 @@ export default function PairingPanel({
         </p>
       ) : (
         <ul className="list scroller">
-          {pairings.map((p) => (
+          {pairings.map((p, i) => (
             <li
               key={p.id}
-              className={
-                chosen.has(p.a) && chosen.has(p.b)
-                  ? 'pairing-row row-selected'
-                  : 'pairing-row'
-              }
+              className={[
+                'pairing-row',
+                i < focused.length ? 'row-selected' : '',
+                // Opens a gap under the floated block.
+                i === focused.length && focused.length > 0 ? 'after-focus' : '',
+              ]
+                .filter(Boolean)
+                .join(' ')}
             >
               <OutcomeDot outcome={outcomes.get(p.id)} />
               <span className="pairing-names">
