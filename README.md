@@ -17,15 +17,21 @@ line. Pasting again only adds names that aren't already there. The badge on a ro
 the pairings that guest is caught up in, so it's easy to spot who you've already placed
 and who is still floating; hover it for the split between together and apart.
 
-**Pairings** (middle panel) — say how strongly two guests belong together. Pick the
-pair either from the two dropdowns here, or by clicking the circles in the guest list:
-the first click marks guest `1`, the second marks guest `2`, and clicking a marked
-guest again releases them. Then choose a level and press **Add pairing** — the level
-sticks, so a run of pairings at the same level goes quickly.
+**Pairings** (middle panel) — say how strongly guests belong together. Pick them by
+clicking the circles in the guest list, or from the dropdown here; each pick is numbered
+in the order you made it, and clicking a picked guest again takes them back out. Then
+choose a level and press the button — the level sticks, so a run at the same level goes
+quickly.
 
-Picking two guests who are already paired, in either order, loads that pairing into the
-form and highlights its row: the level box shows what they have now, and the button reads
-**Update pairing**. A pair can only ever have one level.
+Pick **two** guests for a single pairing. Pick **three or more** and you get a clique:
+every pair within the group is set to the same level, so five friends who should all sit
+together is one selection and one click rather than ten separate pairings.
+
+Applying to a group is the last word on how its members relate — any pairing they already
+had between each other is overwritten, never duplicated, and rows about to be rewritten
+are highlighted so you can see what is changing. Pairings that reach *outside* the group
+are left alone. Picking guests who already agree on a level, in any order, loads that
+level into the form rather than the last one you used.
 
 | Level | Meaning |
 | --- | --- |

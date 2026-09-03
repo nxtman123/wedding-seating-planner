@@ -171,3 +171,55 @@ export function pairingCounts(
   }
   return counts;
 }
+
+/* -------------------------------------------------------------------------- */
+/*  Groups                                                                     */
+/* -------------------------------------------------------------------------- */
+
+/** How many unordered pairs a group of this size contains. */
+export function pairCount(size: number): number {
+  return size < 2 ? 0 : (size * (size - 1)) / 2;
+}
+
+/**
+ * Give every pair within a group the same level — a clique, in graph terms.
+ * Pairings the members already had between them are overwritten rather than
+ * duplicated, so applying to a group is the last word on how its members relate.
+ */
+export function applyGroupLevel(
+  doc: SeatingDoc,
+  ids: string[],
+  level: PairingLevel,
+): SeatingDoc {
+  const members = [...new Set(ids)];
+  let next = doc;
+  for (let i = 0; i < members.length; i++) {
+    for (let j = i + 1; j < members.length; j++) {
+      next = addPairing(next, members[i], members[j], level);
+    }
+  }
+  return next;
+}
+
+/**
+ * The level every pair in a group already shares, or null when the group is
+ * smaller than two, has a pair with no pairing, or mixes levels. Lets the form
+ * show what a group agrees on instead of whatever level was last used.
+ */
+export function commonLevel(
+  doc: SeatingDoc,
+  ids: string[],
+): PairingLevel | null {
+  const members = [...new Set(ids)];
+  if (members.length < 2) return null;
+  let shared: PairingLevel | null = null;
+  for (let i = 0; i < members.length; i++) {
+    for (let j = i + 1; j < members.length; j++) {
+      const found = findPairing(doc, members[i], members[j]);
+      if (!found) return null;
+      if (shared === null) shared = found.level;
+      else if (shared !== found.level) return null;
+    }
+  }
+  return shared;
+}

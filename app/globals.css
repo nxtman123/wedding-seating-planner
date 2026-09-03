@@ -282,17 +282,15 @@ textarea {
   border-color: #f0dbe2;
 }
 
-/* The two pairing slots. Both wear the accent — the number tells them apart. */
-.pair-slot-1,
-.pair-slot-2 {
+/* A guest picked into the group. The number is the order they were picked in. */
+.pair-slot {
   background: var(--accent);
   border-color: var(--accent);
   color: var(--accent-ink);
   font-size: 0.78rem;
   font-weight: 600;
 }
-.pair-slot-1:hover:not(:disabled),
-.pair-slot-2:hover:not(:disabled) {
+.pair-slot:hover:not(:disabled) {
   background: #9d5c6f;
   border-color: #9d5c6f;
 }
@@ -325,13 +323,69 @@ textarea {
 
 /* ---------------- pairings ---------------- */
 .add-pairing {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  flex-direction: column;
   gap: 8px;
 }
-.add-pairing select:nth-child(3),
-.add-pairing button {
-  grid-column: 1 / -1;
+.apply-row {
+  display: flex;
+  gap: 8px;
+}
+/* The level box gives up width first; the buttons keep their labels intact. */
+.apply-row select {
+  flex: 1;
+  min-width: 0;
+}
+.apply-row button {
+  flex: none;
+}
+
+/* The picked group, in the order picked. */
+.chips {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.chip {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 4px 3px 5px;
+  font-size: 0.85rem;
+  background: #fdf3f6;
+  border: 1px solid #f0dbe2;
+  border-radius: 999px;
+}
+.chip-index {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-size: 0.68rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.chip-remove {
+  padding: 0;
+  width: 17px;
+  height: 17px;
+  line-height: 1;
+  font-size: 0.8rem;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--muted);
+}
+.chip-remove:hover:not(:disabled) {
+  background: #f0dbe2;
+  color: var(--text);
 }
 
 .pairing-row {

@@ -7,13 +7,13 @@ export interface GuestPanelProps {
   doc: SeatingDoc;
   /** Guest id -> how many pairings they appear in, by direction. */
   counts: Map<string, { together: number; apart: number }>;
-  /** The two guests currently armed for a pairing; '' when the slot is empty. */
-  selected: { a: string; b: string };
+  /** The guests currently picked for a pairing or group, in the order picked. */
+  selected: string[];
   onAdd: (name: string) => void;
   onAddMany: (text: string) => void;
   onRename: (id: string, name: string) => void;
   onRemove: (id: string) => void;
-  /** Put this guest in a pairing slot, or take them out of the one they hold. */
+  /** Put this guest in the group being composed, or take them back out. */
   onTogglePair: (id: string) => void;
 }
 
@@ -101,8 +101,8 @@ export default function GuestPanel({
 
       {doc.guests.length > 1 && (
         <p className="hint">
-          Click the circles to pick two guests, then set their level in the
-          Pairings panel.
+          Click the circles to pick guests — two for a single pairing, or a
+          whole group to link them all at one level.
         </p>
       )}
 
@@ -114,8 +114,8 @@ export default function GuestPanel({
             const count = counts.get(guest.id) ?? { together: 0, apart: 0 };
             const total = count.together + count.apart;
             const pinnedTo = doc.pins[guest.id];
-            const slot =
-              guest.id === selected.a ? 1 : guest.id === selected.b ? 2 : null;
+            const picked = selected.indexOf(guest.id);
+            const slot = picked >= 0 ? picked + 1 : null;
             return (
               <li
                 key={guest.id}
@@ -144,17 +144,15 @@ export default function GuestPanel({
                 )}
                 <button
                   type="button"
-                  className={
-                    slot ? `icon-button pair-slot-${slot}` : 'icon-button'
-                  }
+                  className={slot ? 'icon-button pair-slot' : 'icon-button'}
                   title={
                     slot
-                      ? `Guest ${slot} of the pairing — click to clear`
-                      : 'Pick for a pairing'
+                      ? `Guest ${slot} of the group — click to take out`
+                      : 'Pick for a pairing or group'
                   }
                   aria-label={
                     slot
-                      ? `Clear ${guest.name} from the pairing`
+                      ? `Take ${guest.name} out of the group`
                       : `Pick ${guest.name} for a pairing`
                   }
                   aria-pressed={slot !== null}

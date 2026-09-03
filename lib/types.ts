@@ -49,12 +49,12 @@ export interface SeatingDoc {
 export type PairingOutcome = 'satisfied' | 'violated' | 'unplaced';
 
 /**
- * The pairing being composed, held outside the document because it is transient
- * UI state. `a` and `b` are `Guest.id`s, empty while that slot is unfilled —
- * they are filled either from the guest list or the pairing panel's dropdowns.
+ * The group being composed, held outside the document because it is transient
+ * UI state. Two guests make a single pairing; more make a clique, where every
+ * pair in the group gets the same level. Order is only the order they were
+ * picked in, shown as the numbers on the guest rows.
  */
-export interface PairDraft {
-  a: string;
-  b: string;
+export interface PairingDraft {
+  guests: string[];
   level: PairingLevel;
 }

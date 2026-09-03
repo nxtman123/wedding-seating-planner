@@ -7,9 +7,14 @@ import {
   levelLabel,
   levelShort,
 } from '@/lib/defaults';
-import { findPairing, guestName, sortedPairings } from '@/lib/guests';
+import {
+  findPairing,
+  guestName,
+  pairCount,
+  sortedPairings,
+} from '@/lib/guests';
 import type {
-  PairDraft,
+  PairingDraft,
   PairingLevel,
   PairingOutcome,
   SeatingDoc,
@@ -20,12 +25,15 @@ export interface PairingPanelProps {
   /** Pairing id -> how it fared in the current seating. Empty before a solve. */
   outcomes: Map<string, PairingOutcome>;
   /**
-   * The pairing being composed. Owned by the page because the guest list fills
-   * the same two slots these dropdowns do.
+   * The group being composed. Owned by the page because the guest list and the
+   * chips here pick from the same set.
    */
-  draft: PairDraft;
-  onDraftChange: (draft: PairDraft) => void;
-  onAdd: () => void;
+  draft: PairingDraft;
+  onToggleGuest: (id: string) => void;
+  onLevelChange: (level: PairingLevel) => void;
+  onClear: () => void;
+  /** Apply the level to every pair in the group. */
+  onApply: () => void;
   onSetLevel: (id: string, level: PairingLevel) => void;
   onRemove: (id: string) => void;
 }
@@ -45,15 +53,28 @@ export default function PairingPanel({
   doc,
   outcomes,
   draft,
-  onDraftChange,
-  onAdd,
+  onToggleGuest,
+  onLevelChange,
+  onClear,
+  onApply,
   onSetLevel,
   onRemove,
 }: PairingPanelProps) {
-  const { a, b, level } = draft;
-  const canAdd = a !== '' && b !== '' && a !== b;
-  /** Set when the two picked guests are already paired — this edits that one. */
-  const existing = findPairing(doc, a, b);
+  const { guests: picked, level } = draft;
+  const chosen = new Set(picked);
+  const pairs = pairCount(picked.length);
+
+  /** Only meaningful for a group of two — the one pairing this would rewrite. */
+  const existing =
+    picked.length === 2 ? findPairing(doc, picked[0], picked[1]) : null;
+
+  const applyLabel =
+    picked.length > 2
+      ? `Apply to all ${pairs} pairs`
+      : existing
+        ? 'Update pairing'
+        : 'Add pairing';
+
   const pairings = sortedPairings(doc);
 
   return (
@@ -67,49 +88,80 @@ export default function PairingPanel({
         <p className="empty">Add at least two guests to pair them up.</p>
       ) : (
         <div className="add-pairing">
+          {picked.length > 0 && (
+            <ul className="chips">
+              {picked.map((id, i) => (
+                <li key={id} className="chip">
+                  <span className="chip-index">{i + 1}</span>
+                  {guestName(doc, id)}
+                  <button
+                    type="button"
+                    className="chip-remove"
+                    title="Take out of the group"
+                    aria-label={`Take ${guestName(doc, id)} out of the group`}
+                    onClick={() => onToggleGuest(id)}
+                  >
+                    &times;
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+
           <select
-            value={a}
-            aria-label="First guest"
-            onChange={(e) => onDraftChange({ ...draft, a: e.target.value })}
+            value=""
+            aria-label="Add a guest to the group"
+            onChange={(e) => {
+              if (e.target.value) onToggleGuest(e.target.value);
+            }}
           >
-            <option value="">Guest…</option>
-            {doc.guests.map((g) => (
-              <option key={g.id} value={g.id}>
-                {g.name}
-              </option>
-            ))}
+            <option value="">
+              {picked.length === 0 ? 'Pick a guest…' : 'Add another guest…'}
+            </option>
+            {doc.guests
+              .filter((g) => !chosen.has(g.id))
+              .map((g) => (
+                <option key={g.id} value={g.id}>
+                  {g.name}
+                </option>
+              ))}
           </select>
-          <select
-            value={b}
-            aria-label="Second guest"
-            onChange={(e) => onDraftChange({ ...draft, b: e.target.value })}
-          >
-            <option value="">Guest…</option>
-            {doc.guests.map((g) => (
-              <option key={g.id} value={g.id} disabled={g.id === a}>
-                {g.name}
-              </option>
-            ))}
-          </select>
-          <select
-            value={level}
-            aria-label="Priority level"
-            onChange={(e) =>
-              onDraftChange({
-                ...draft,
-                level: Number(e.target.value) as PairingLevel,
-              })
-            }
-          >
-            {PAIRING_LEVELS.map((l) => (
-              <option key={l} value={l}>
-                {levelBadge(l)} · {levelLabel(l)}
-              </option>
-            ))}
-          </select>
-          <button type="button" onClick={onAdd} disabled={!canAdd}>
-            {existing ? 'Update pairing' : 'Add pairing'}
-          </button>
+
+          <div className="apply-row">
+            <select
+              value={level}
+              aria-label="Priority level"
+              onChange={(e) =>
+                onLevelChange(Number(e.target.value) as PairingLevel)
+              }
+            >
+              {PAIRING_LEVELS.map((l) => (
+                <option key={l} value={l}>
+                  {levelBadge(l)} · {levelLabel(l)}
+                </option>
+              ))}
+            </select>
+            <button
+              type="button"
+              className="primary"
+              onClick={onApply}
+              disabled={picked.length < 2}
+            >
+              {applyLabel}
+            </button>
+            {picked.length > 0 && (
+              <button type="button" onClick={onClear}>
+                Clear
+              </button>
+            )}
+          </div>
+
+          {picked.length > 2 && (
+            <p className="hint">
+              Every pair in this group gets {levelBadge(level)} — any pairing
+              they already have between them is overwritten.
+            </p>
+          )}
         </div>
       )}
 
@@ -123,7 +175,9 @@ export default function PairingPanel({
             <li
               key={p.id}
               className={
-                p.id === existing?.id ? 'pairing-row row-selected' : 'pairing-row'
+                chosen.has(p.a) && chosen.has(p.b)
+                  ? 'pairing-row row-selected'
+                  : 'pairing-row'
               }
             >
               <OutcomeDot outcome={outcomes.get(p.id)} />

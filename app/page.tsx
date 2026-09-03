@@ -5,10 +5,10 @@ import { defaultDoc } from '@/lib/defaults';
 import {
   addGuest,
   addGuestsFromText,
-  addPairing,
+  applyGroupLevel,
   clearAllPins,
   clearPin,
-  findPairing,
+  commonLevel,
   removeGuest,
   pairingCounts,
   removePairing,
@@ -25,15 +25,15 @@ import {
   solveSeating,
 } from '@/lib/solver';
 import { exportDoc, loadDoc, parseDocFile, saveDoc } from '@/lib/storage';
-import type { PairDraft, SeatingDoc } from '@/lib/types';
+import type { PairingDraft, PairingLevel, SeatingDoc } from '@/lib/types';
 import GuestPanel from '@/components/GuestPanel';
 import PairingPanel from '@/components/PairingPanel';
 import TablePanel from '@/components/TablePanel';
 
 export default function Page() {
   const [doc, setDoc] = useState<SeatingDoc>(defaultDoc());
-  /** The pairing being composed, shared by the guest list and the pairing panel. */
-  const [draft, setDraft] = useState<PairDraft>({ a: '', b: '', level: 1 });
+  /** The group being composed, shared by the guest list and the pairing panel. */
+  const [draft, setDraft] = useState<PairingDraft>({ guests: [], level: 1 });
   const [hydrated, setHydrated] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -70,51 +70,45 @@ export default function Page() {
   /* ----- composing a pairing ----- */
 
   /**
-   * Adopt the level of whatever pairing these two guests already have, in
-   * whichever order they were picked. Without this the form would keep showing
-   * the last level used and quietly overwrite the existing one on submit.
+   * Adopt the level a group already agrees on, so re-picking people who are
+   * already linked shows what they have rather than the last level used. A
+   * group that mixes levels, or has an unpaired pair, is left alone.
    */
-  const withExistingLevel = (next: PairDraft): PairDraft => {
-    const existing = findPairing(doc, next.a, next.b);
-    return existing ? { ...next, level: existing.level } : next;
+  const withCommonLevel = (next: PairingDraft): PairingDraft => {
+    const shared = commonLevel(doc, next.guests);
+    return shared === null ? next : { ...next, level: shared };
   };
 
-  /**
-   * Click a guest to drop them into a pairing slot: the first empty one, or the
-   * second when both are taken. Clicking a guest who already holds a slot takes
-   * them back out.
-   */
-  const togglePairSelection = (id: string) =>
-    setDraft((d) => {
-      if (d.a === id) return withExistingLevel({ ...d, a: '' });
-      if (d.b === id) return withExistingLevel({ ...d, b: '' });
-      if (!d.a) return withExistingLevel({ ...d, a: id });
-      return withExistingLevel({ ...d, b: id });
-    });
-
-  /**
-   * Changing who is paired re-reads the existing level; changing the level
-   * itself must stick, so that case is passed through untouched.
-   */
-  const changeDraft = (next: PairDraft) =>
-    setDraft((prev) =>
-      next.a === prev.a && next.b === prev.b ? next : withExistingLevel(next),
+  /** Put a guest in the group, or take them back out. */
+  const toggleGuestSelection = (id: string) =>
+    setDraft((d) =>
+      withCommonLevel({
+        ...d,
+        guests: d.guests.includes(id)
+          ? d.guests.filter((g) => g !== id)
+          : [...d.guests, id],
+      }),
     );
 
-  /** Commit the draft, keeping the level so a run of pairings adds quickly. */
-  const submitPairing = () => {
-    setDoc((d) => addPairing(d, draft.a, draft.b, draft.level));
-    setDraft((d) => ({ ...d, a: '', b: '' }));
+  const setDraftLevel = (level: PairingLevel) =>
+    setDraft((d) => ({ ...d, level }));
+
+  const clearSelection = () => setDraft((d) => ({ ...d, guests: [] }));
+
+  /**
+   * Give every pair in the group the level shown. Two guests is the ordinary
+   * one-pairing case; more is a clique. The level is kept afterwards so a run
+   * of groups at the same level goes quickly.
+   */
+  const applyToGroup = () => {
+    setDoc((d) => applyGroupLevel(d, draft.guests, draft.level));
+    setDraft((d) => ({ ...d, guests: [] }));
   };
 
-  /** Removing a guest also takes them out of any slot they were holding. */
+  /** Removing a guest also takes them out of the group being composed. */
   const dropGuest = (id: string) => {
     setDoc((d) => removeGuest(d, id));
-    setDraft((d) => ({
-      ...d,
-      a: d.a === id ? '' : d.a,
-      b: d.b === id ? '' : d.b,
-    }));
+    setDraft((d) => ({ ...d, guests: d.guests.filter((g) => g !== id) }));
   };
 
   /* ----- pinning ----- */
@@ -136,7 +130,7 @@ export default function Page() {
     try {
       const text = await file.text();
       setDoc(parseDocFile(text));
-      setDraft({ a: '', b: '', level: 1 });
+      setDraft({ guests: [], level: 1 });
     } catch (e) {
       window.alert('Could not import file: ' + (e as Error).message);
     }
@@ -145,7 +139,7 @@ export default function Page() {
   const reset = () => {
     if (window.confirm('Clear the guest list, pairings and seating?')) {
       setDoc(defaultDoc());
-      setDraft({ a: '', b: '', level: 1 });
+      setDraft({ guests: [], level: 1 });
     }
   };
 
@@ -194,15 +188,17 @@ export default function Page() {
             onAddMany={(text) => setDoc((d) => addGuestsFromText(d, text))}
             onRename={(id, name) => setDoc((d) => renameGuest(d, id, name))}
             onRemove={dropGuest}
-            selected={draft}
-            onTogglePair={togglePairSelection}
+            selected={draft.guests}
+            onTogglePair={toggleGuestSelection}
           />
           <PairingPanel
             doc={doc}
             outcomes={outcomes}
             draft={draft}
-            onDraftChange={changeDraft}
-            onAdd={submitPairing}
+            onToggleGuest={toggleGuestSelection}
+            onLevelChange={setDraftLevel}
+            onClear={clearSelection}
+            onApply={applyToGroup}
             onSetLevel={(id, level) =>
               setDoc((d) => setPairingLevel(d, id, level))
             }
