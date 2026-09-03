@@ -370,9 +370,11 @@ textarea {
   border-color: #f0dbe2;
 }
 
-/* The band of pairings reaching out of the pick: same treatment, stepped back,
-   so the two bands read as related without competing. */
-.pairing-row.row-adjacent {
+/* Reaching out of the pick rather than inside it: same treatment, stepped back,
+   so the two read as related without competing. Used for the pairings the pick
+   touches and, in the guest list, for the guests on the far end of them. */
+.pairing-row.row-adjacent,
+.guest-row.row-adjacent {
   background: #fdf9fb;
   border-color: #f7ecf0;
   box-shadow: inset 0 0 0 1px #f7ecf0;
@@ -406,30 +408,20 @@ textarea {
   outline: none;
   box-shadow: inset 0 -1px 0 0 var(--accent);
 }
-/* How many pairings a guest is caught up in. Hidden at zero, so the column
-   stays quiet and only the well-connected guests draw the eye. */
-.pair-badge {
+/* A guest's pairings at one level. Wearing the level's own colour turns the row
+   into a small profile — who is heavily committed, and at what strength — which
+   a single total could not show. Absent levels draw nothing. */
+.count-chip {
   flex: none;
-  min-width: 20px;
+  min-width: 17px;
   text-align: center;
-  font-size: 0.78rem;
-  font-variant-numeric: tabular-nums;
-  color: var(--muted);
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: 5px;
-  padding: 0 4px;
-}
-
-/* Marks a guest named by one of the floated pairings — the picked guests, and
-   whoever their pairings reach out to. Filled rather than tinted so it separates
-   from the quiet badges around it; the deeper accent clears 4.5:1 against white,
-   which the lighter one does not. */
-.pair-badge.badge-linked {
-  color: var(--accent-ink);
-  background: #9d5c6f;
-  border-color: #9d5c6f;
+  font-size: 0.72rem;
   font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.5;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  padding: 0 3px;
 }
 
 /* Pinning is set in the tables panel; this only reports it back here, and only

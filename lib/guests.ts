@@ -1,4 +1,4 @@
-import { uid } from './defaults';
+import { PAIRING_LEVELS, uid } from './defaults';
 import type { Group, Guest, Pairing, PairingLevel, SeatingDoc } from './types';
 
 /* -------------------------------------------------------------------------- */
@@ -398,23 +398,32 @@ export function linkedGuests(
 }
 
 /**
- * Guest id -> how many pairings they appear in, split by direction. Guests with
- * no pairings are present with zeroes, so callers can look up any guest.
+ * Guest id -> their pairings tallied by level, strongest first, with levels they
+ * have none of left out. Every guest is present, so callers can look any up.
  */
 export function pairingCounts(
   doc: SeatingDoc,
-): Map<string, { together: number; apart: number }> {
-  const counts = new Map<string, { together: number; apart: number }>();
-  for (const g of doc.guests) counts.set(g.id, { together: 0, apart: 0 });
+): Map<string, { level: PairingLevel; count: number }[]> {
+  const byGuest = new Map<string, Map<PairingLevel, number>>();
+  for (const g of doc.guests) byGuest.set(g.id, new Map());
   for (const p of doc.pairings) {
     for (const id of [p.a, p.b]) {
-      const c = counts.get(id);
-      if (!c) continue;
-      if (p.level > 0) c.together++;
-      else c.apart++;
+      const tally = byGuest.get(id);
+      if (!tally) continue;
+      tally.set(p.level, (tally.get(p.level) ?? 0) + 1);
     }
   }
-  return counts;
+  const out = new Map<string, { level: PairingLevel; count: number }[]>();
+  for (const [id, tally] of byGuest) {
+    out.set(
+      id,
+      PAIRING_LEVELS.filter((l) => tally.has(l)).map((level) => ({
+        level,
+        count: tally.get(level)!,
+      })),
+    );
+  }
+  return out;
 }
 
 /* -------------------------------------------------------------------------- */

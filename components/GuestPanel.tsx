@@ -2,14 +2,15 @@
 
 import { useState } from 'react';
 import type { DragEvent } from 'react';
+import { levelClass, levelPhrase } from '@/lib/defaults';
 import { groupMembers } from '@/lib/guests';
-import type { Group, Guest, SeatingDoc } from '@/lib/types';
+import type { Group, Guest, PairingLevel, SeatingDoc } from '@/lib/types';
 
 export interface GuestPanelProps {
   doc: SeatingDoc;
-  /** Guest id -> how many pairings they appear in, by direction. */
-  counts: Map<string, { together: number; apart: number }>;
-  /** Guests named by a floated pairing — their count badge is marked. */
+  /** Guest id -> their pairings tallied by level, strongest first. */
+  counts: Map<string, { level: PairingLevel; count: number }[]>;
+  /** Guests named by a floated pairing — their row is marked. */
   linked: Set<string>;
   /** The guests currently picked for a pairing or group, in the order picked. */
   selected: string[];
@@ -33,15 +34,6 @@ export interface GuestPanelProps {
   onReorderGroup: (id: string, index: number) => void;
   /** Drop every ticked guest into this group. */
   onAddPickedToGroup: (groupId: string) => void;
-}
-
-/** "3 pairings — 2 together, 1 apart", for the badge's tooltip. */
-function countTitle(count: { together: number; apart: number }): string {
-  const total = count.together + count.apart;
-  const parts: string[] = [];
-  if (count.together) parts.push(`${count.together} together`);
-  if (count.apart) parts.push(`${count.apart} apart`);
-  return `${total} pairing${total === 1 ? '' : 's'} — ${parts.join(', ')}`;
 }
 
 /**
@@ -215,14 +207,16 @@ export default function GuestPanel({
    * drop would land there.
    */
   const guestRow = (guest: Guest, mark: boolean) => {
-    const count = counts.get(guest.id) ?? { together: 0, apart: 0 };
-    const total = count.together + count.apart;
+    const tally = counts.get(guest.id) ?? [];
     const pinnedTo = doc.pins[guest.id];
     const picked = chosen.has(guest.id);
     const moving = cargo?.kind === 'guests' && cargo.ids.includes(guest.id);
     const className = [
       'guest-row',
       picked ? 'row-selected' : '',
+      // Not picked, but named by one of the pairings floated to the top —
+      // the same pale band the pairing list gives those.
+      !picked && linked.has(guest.id) ? 'row-adjacent' : '',
       moving ? 'row-dragging' : '',
       mark ? 'drop-before' : '',
     ]
@@ -287,16 +281,15 @@ export default function GuestPanel({
             ◉
           </span>
         )}
-        {total > 0 && (
+        {tally.map(({ level, count }) => (
           <span
-            className={
-              linked.has(guest.id) ? 'pair-badge badge-linked' : 'pair-badge'
-            }
-            title={countTitle(count)}
+            key={level}
+            className={`count-chip ${levelClass(level)}`}
+            title={`${count} ${levelPhrase(level)}`}
           >
-            {total}
+            {count}
           </span>
-        )}
+        ))}
       </li>
     );
   };

@@ -32,9 +32,9 @@ guest's pairings, pin and seat go with them.
 
 Dragging a ticked row carries the whole ticked selection
 with it: they lift out of wherever they are, gaps and all, and land together at the line
-in the order they had. Dragging an unticked row moves just that row. The badge on a row counts
-the pairings that guest is caught up in, so it's easy to spot who you've already placed
-and who is still floating; hover it for the split between together and apart.
+in the order they had. Dragging an unticked row moves just that row. The chips on a row count that guest's
+pairings by level, each in its level's colour — so a row shows at a glance not just how
+committed someone is but how strongly, and who is still floating with no chips at all.
 
 **Pairings** (middle panel) — say how strongly guests belong together. Pick them by
 ticking them in the guest list, or from the dropdown here; unticking takes a guest back
@@ -62,9 +62,9 @@ Whatever you tick is followed through the other two panels. The pairing list flo
 the pick concerns to the top in two bands, each above a gap: first the pairings *inside*
 the group — the ones an Apply would rewrite — then the ones *reaching out* of it, tying
 those guests to everyone else. Ticking a single guest just empties the first band, since
-nothing can be inside a group of one. Back in the guest list, the count badge lights up
-for everyone those floated pairings name — including guests you did not tick, who are
-there because someone you did tick is paired with them. Meanwhile the tables holding the
+nothing can be inside a group of one. Back in the guest list, the same pale band marks
+everyone those floated pairings reach — guests you did not tick, who are there because
+someone you did tick is paired with them. Meanwhile the tables holding the
 picked guests are highlighted, with a dot at each picked seat.
 
 Neither apply touches pairings that reach *outside* the group, and neither ever duplicates
