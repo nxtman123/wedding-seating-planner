@@ -45,8 +45,10 @@ Whatever you tick is followed through the other two panels. The pairing list flo
 the pick concerns to the top in two bands, each above a gap: first the pairings *inside*
 the group — the ones an Apply would rewrite — then the ones *reaching out* of it, tying
 those guests to everyone else. Ticking a single guest just empties the first band, since
-nothing can be inside a group of one. Meanwhile the tables holding those guests are
-highlighted, with a dot at each picked seat.
+nothing can be inside a group of one. Back in the guest list, the count badge lights up
+for everyone those floated pairings name — including guests you did not tick, who are
+there because someone you did tick is paired with them. Meanwhile the tables holding the
+picked guests are highlighted, with a dot at each picked seat.
 
 Neither apply touches pairings that reach *outside* the group, and neither ever duplicates
 a pair. Picking guests who already agree on a level, in any order, loads that level into the

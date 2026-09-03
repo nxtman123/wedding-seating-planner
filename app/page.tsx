@@ -11,6 +11,7 @@ import {
   commonLevel,
   fillGroupLevel,
   guestName,
+  linkedGuests,
   moveGuests,
   removeGuests,
   pairingCounts,
@@ -52,6 +53,11 @@ export default function Page() {
   /* ----- derived views of the current seating ----- */
 
   const counts = useMemo(() => pairingCounts(doc), [doc]);
+  /** Guests the floated pairings name, so the guest list can mark the same set. */
+  const linked = useMemo(
+    () => linkedGuests(doc, draft.guests),
+    [doc, draft.guests],
+  );
   const outcomes = useMemo(
     () => (doc.tables.length ? pairingOutcomes(doc, doc.tables) : new Map()),
     [doc],
@@ -202,6 +208,7 @@ export default function Page() {
           <GuestPanel
             doc={doc}
             counts={counts}
+            linked={linked}
             onAdd={(name) => setDoc((d) => addGuest(d, name))}
             onAddMany={(text) => setDoc((d) => addGuestsFromText(d, text))}
             onRename={(id, name) => setDoc((d) => renameGuest(d, id, name))}

@@ -8,6 +8,8 @@ export interface GuestPanelProps {
   doc: SeatingDoc;
   /** Guest id -> how many pairings they appear in, by direction. */
   counts: Map<string, { together: number; apart: number }>;
+  /** Guests named by a floated pairing — their count badge is marked. */
+  linked: Set<string>;
   /** The guests currently picked for a pairing or group, in the order picked. */
   selected: string[];
   onAdd: (name: string) => void;
@@ -33,6 +35,7 @@ function countTitle(count: { together: number; apart: number }): string {
 export default function GuestPanel({
   doc,
   counts,
+  linked,
   selected,
   onAdd,
   onAddMany,
@@ -242,7 +245,14 @@ export default function GuestPanel({
                   </span>
                 )}
                 {total > 0 && (
-                  <span className="pair-badge" title={countTitle(count)}>
+                  <span
+                    className={
+                      linked.has(guest.id)
+                        ? 'pair-badge badge-linked'
+                        : 'pair-badge'
+                    }
+                    title={countTitle(count)}
+                  >
                     {total}
                   </span>
                 )}

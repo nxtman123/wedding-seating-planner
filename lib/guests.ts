@@ -181,6 +181,27 @@ export function clearAllPins(doc: SeatingDoc): SeatingDoc {
 }
 
 /**
+ * Everyone named in a pairing that touches the picked group: the picked guests
+ * themselves, plus whoever those pairings reach out to. Exactly the guests
+ * appearing in the two bands the pairing list floats to the top, so the guest
+ * list can mark the same set.
+ */
+export function linkedGuests(
+  doc: SeatingDoc,
+  picked: string[],
+): Set<string> {
+  const chosen = new Set(picked);
+  const linked = new Set<string>();
+  if (chosen.size === 0) return linked;
+  for (const p of doc.pairings) {
+    if (!chosen.has(p.a) && !chosen.has(p.b)) continue;
+    linked.add(p.a);
+    linked.add(p.b);
+  }
+  return linked;
+}
+
+/**
  * Guest id -> how many pairings they appear in, split by direction. Guests with
  * no pairings are present with zeroes, so callers can look up any guest.
  */

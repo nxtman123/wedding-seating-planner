@@ -349,6 +349,15 @@ textarea {
   padding: 2px 6px;
 }
 
+/* Marks a guest named by one of the floated pairings — the picked guests, and
+   whoever their pairings reach out to. */
+.pair-badge.badge-linked {
+  color: var(--accent);
+  background: #fdf3f6;
+  border-color: #f0dbe2;
+  font-weight: 600;
+}
+
 /* Pinning is set in the tables panel; this only reports it back here, and only
    for the few guests who have a pin. */
 .pin-mark {
