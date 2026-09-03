@@ -74,10 +74,20 @@ export default function GuestPanel({
     setDropAt(null);
   };
 
-  /** Above a row's midpoint drops before it, below drops after. */
-  const insertionFor = (e: DragEvent<HTMLElement>, index: number) => {
-    const box = e.currentTarget.getBoundingClientRect();
-    return e.clientY < box.top + box.height / 2 ? index : index + 1;
+  /**
+   * Which insertion point the pointer is nearest, measured against the rows of
+   * the whole list rather than the row under the cursor. Rows are separated by a
+   * gap, and a gap belongs to no row — resolving the position from coordinates
+   * instead means every pixel of the list is a valid drop target, gaps and the
+   * strip below the last row included.
+   */
+  const insertionFor = (e: DragEvent<HTMLElement>) => {
+    const rows = [...e.currentTarget.children] as HTMLElement[];
+    for (let i = 0; i < rows.length; i++) {
+      const box = rows[i].getBoundingClientRect();
+      if (e.clientY < box.top + box.height / 2) return i;
+    }
+    return rows.length;
   };
 
   /**
@@ -85,9 +95,9 @@ export default function GuestPanel({
    * which only drives the indicator. Reading state here would go stale if a drop
    * landed in the same frame as the dragover that preceded it.
    */
-  const drop = (e: DragEvent<HTMLElement>, index: number) => {
+  const drop = (e: DragEvent<HTMLElement>) => {
     e.preventDefault();
-    if (moving !== null) onReorder(moving, index);
+    if (moving !== null) onReorder(moving, insertionFor(e));
     endDrag();
   };
 
@@ -158,16 +168,12 @@ export default function GuestPanel({
         <ul
           className="list scroller"
           onDragOver={(e) => {
-            // Only fires for the strip below the last row; rows handle their own.
-            if (e.target === e.currentTarget) {
-              e.preventDefault();
-              setDropAt(doc.guests.length);
-            }
+            if (!moving) return;
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            setDropAt(insertionFor(e));
           }}
-          onDrop={(e) => {
-            // Row drops bubble up here; only handle the strip below the list.
-            if (e.target === e.currentTarget) drop(e, doc.guests.length);
-          }}
+          onDrop={drop}
         >
           {doc.guests.map((guest, index) => {
             const count = counts.get(guest.id) ?? { together: 0, apart: 0 };
@@ -195,13 +201,6 @@ export default function GuestPanel({
                   e.dataTransfer.setData('text/plain', guest.id);
                 }}
                 onDragEnd={endDrag}
-                onDragOver={(e) => {
-                  if (!moving) return;
-                  e.preventDefault();
-                  e.dataTransfer.dropEffect = 'move';
-                  setDropAt(insertionFor(e, index));
-                }}
-                onDrop={(e) => drop(e, insertionFor(e, index))}
               >
                 <span
                   className="drag-handle"
