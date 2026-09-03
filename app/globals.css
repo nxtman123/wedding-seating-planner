@@ -107,21 +107,6 @@ button.primary:hover:not(:disabled) {
   border-color: #9d5c6f;
 }
 
-/* A button that reads as a link — used for the "Paste a list" disclosure. */
-.link-button {
-  align-self: flex-start;
-  padding: 2px 0;
-  border: 0;
-  background: none;
-  color: var(--accent);
-  font-size: 0.9rem;
-  text-decoration: underline;
-}
-.link-button:hover:not(:disabled) {
-  background: none;
-  color: #9d5c6f;
-}
-
 /* Square affordance for pin / remove, sized to sit inline with a text row. */
 .icon-button {
   flex: none;
@@ -253,18 +238,13 @@ textarea {
 .add-row input {
   flex: 1;
 }
-/* One row for the paste toggle and the delete, so the delete appearing when
-   guests are ticked does not push the list down. */
+/* One row for the paste toggle and the delete. The paste button is always there,
+   so the delete appearing when guests are ticked does not change the height. */
 .guest-actions {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  min-height: 26px;
-}
-button.small {
-  padding: 3px 9px;
-  font-size: 0.82rem;
 }
 
 .bulk {

@@ -128,13 +128,12 @@ export default function GuestPanel({
       <div className="guest-actions">
         <button
           type="button"
-          className="link-button"
           onClick={() => setBulkOpen((open) => !open)}
         >
           {bulkOpen ? 'Hide paste box' : 'Paste a list…'}
         </button>
         {selected.length > 0 && (
-          <button type="button" className="danger small" onClick={onDeletePicked}>
+          <button type="button" className="danger" onClick={onDeletePicked}>
             {selected.length === 1
               ? 'Delete guest'
               : `Delete ${selected.length} guests`}
