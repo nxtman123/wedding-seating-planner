@@ -82,7 +82,7 @@ be set at one level without resetting it each time.
 | | Weight | Setting a group | A single pairing reads |
 | --- | --- | --- | --- |
 | ❤️ | 400 | Must sit together | A **must sit with** B |
-| 😁 | 20 | Should sit together | A **should sit with** B |
+| 😃 | 20 | Should sit together | A **should sit with** B |
 | 👋 | 0 | Could sit together | A **could sit with** B |
 | | −5 | *nothing said at all* | |
 | 🚫 | −800 | Must not sit together | A **must avoid** B |
