@@ -62,7 +62,12 @@ body {
   flex: none;
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
+  /* Bottoms, not baselines. The buttons are a few pixels taller than the title's
+     line box, so sharing a baseline left the title floating above the row's
+     floor and further from its own subtitle than the toolbar was. Aligned to
+     the bottom, the title sits the row gap above the sentence that belongs to
+     it. */
+  align-items: flex-end;
   gap: 4px 16px;
   margin-bottom: 24px;
 }
