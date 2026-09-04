@@ -9,7 +9,7 @@ export function uid(): string {
 }
 
 /** Bumped when stored documents need bringing forward; see lib/storage.ts. */
-export const DOC_VERSION = 2;
+export const DOC_VERSION = 3;
 
 export const DEFAULT_SEATS_PER_TABLE = 8;
 
@@ -43,45 +43,45 @@ export function defaultDoc(): SeatingDoc {
 /*  Pairing levels                                                             */
 /* -------------------------------------------------------------------------- */
 
-/** How many rungs each ladder has, which sets both the badges and the weights. */
-export const LEVEL_COUNT = 4;
-
 /** Every level, strongest pull first, strongest push last. */
-export const PAIRING_LEVELS: PairingLevel[] = [1, 2, 3, 4, -4, -3, -2, -1];
+export const PAIRING_LEVELS: PairingLevel[] = [1, 2, 3, -1];
 
 export function isPairingLevel(value: unknown): value is PairingLevel {
-  return (
-    typeof value === 'number' &&
-    Number.isInteger(value) &&
-    value !== 0 &&
-    Math.abs(value) <= LEVEL_COUNT
-  );
+  return value === 1 || value === 2 || value === 3 || value === -1;
 }
 
 /**
  * Score contributed when a pair shares a table.
  *
- * The ratio between levels is 20, which is the largest table this app allows
+ * The ratio between rungs is 20, which is the largest table this app allows
  * (see `MAX_SEATS_PER_TABLE`). That is the number that matters, because a group
  * applied to N guests creates N-choose-2 pairings and each guest at a full table
- * of S seats holds S-1 of them: with a ratio of 20, one pairing still outweighs
- * a whole table's worth of the level below it even at the maximum table size.
- * At the default eight seats it is not close, which is the point — a clique of
- * the weakest level should never crowd out a stronger pairing on sheer volume.
+ * of S seats holds S-1 of them: at 20 to 1, one pairing still outweighs a whole
+ * table's worth of the rung below it even at the maximum table size.
  *
- * The weakest rung is 1, so the ladder reads 1, 20, 400, 8000 upwards.
+ * "Could sit together" is worth nothing on purpose. It does not pull anyone
+ * anywhere; it only cancels the penalty below, which is the whole of its job.
  */
-const LEVEL_WEIGHTS: Record<1 | 2 | 3 | 4, number> = {
-  1: 8000,
-  2: 400,
-  3: 20,
-  4: 1,
+const LEVEL_WEIGHTS: Record<PairingLevel, number> = {
+  1: 400,
+  2: 20,
+  3: 0,
+  [-1]: -8000,
 };
+
+/**
+ * What a pair with no pairing at all costs when seated together.
+ *
+ * Small, but it applies to every such pair, so a table of eight strangers starts
+ * 28 of these in the hole and the solver has a reason to keep groups apart
+ * without anyone saying so. It is also what makes "could sit together" mean
+ * something: setting it lifts this, which is why that rung can be worth zero.
+ */
+export const IMPLICIT_WEIGHT = -1;
 
 /** Signed score for seating this pair together. Negative levels return < 0. */
 export function levelWeight(level: PairingLevel): number {
-  const magnitude = LEVEL_WEIGHTS[Math.abs(level) as 1 | 2 | 3 | 4];
-  return level > 0 ? magnitude : -magnitude;
+  return LEVEL_WEIGHTS[level];
 }
 
 /**
@@ -96,28 +96,28 @@ export function levelLabel(level: PairingLevel): string {
     case 2:
       return 'Should sit together';
     case 3:
-      return 'Prefers to sit together';
-    case 4:
       return 'Could sit together';
-    case -4:
-      return 'Could avoid each other';
-    case -3:
-      return 'Prefers to avoid each other';
-    case -2:
-      return 'Should avoid each other';
     case -1:
-      return 'Must avoid each other';
+      return 'Must not sit together';
   }
 }
 
 /**
- * The level as a run of signs, strongest first: `+++` down to `+`, and `−` down
- * to `−−−`. Reads the right way round, unlike the levels themselves, where 1 is
- * the strongest and 3 the weakest.
+ * A face for each rung. The dropdowns are native, so their open list gets none
+ * of the chip colours — an emoji is the one mark that survives into it, and it
+ * carries the ladder better than a run of signs did.
  */
 export function levelBadge(level: PairingLevel): string {
-  const strength = LEVEL_COUNT + 1 - Math.abs(level);
-  return (level > 0 ? '+' : '−').repeat(strength);
+  switch (level) {
+    case 1:
+      return '❤️';
+    case 2:
+      return '👍';
+    case 3:
+      return '🙂';
+    case -1:
+      return '🚫';
+  }
 }
 
 /**
@@ -133,21 +133,13 @@ export function levelPhrase(level: PairingLevel): string {
     case 2:
       return 'should sit with';
     case 3:
-      return 'prefers to sit with';
-    case 4:
       return 'could sit with';
-    case -4:
-      return 'could avoid';
-    case -3:
-      return 'prefers to avoid';
-    case -2:
-      return 'should avoid';
     case -1:
       return 'must avoid';
   }
 }
 
-/** CSS modifier class for a level chip — `.level-pos-1` … `.level-neg-3`. */
+/** CSS modifier class for a level chip — `.level-pos-1` … `.level-neg-1`. */
 export function levelClass(level: PairingLevel): string {
   return level > 0 ? `level-pos-${level}` : `level-neg-${Math.abs(level)}`;
 }

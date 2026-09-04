@@ -1,12 +1,24 @@
 /**
  * How strongly two guests should, or should not, share a table.
  *
- * Positive levels pull a pair together, negative levels push them apart, and
- * `1` / `-1` are the strongest in each direction. Tables are circular and every
- * seat at one is equivalent, so a table is really just a set of guests — there
- * is no "next to" finer than "same table".
+ * Four rungs, of which only the ends really pull:
+ *
+ *   1  must sit together      strongest pull
+ *   2  should sit together    a real preference
+ *   3  could sit together     neutral, worth nothing either way
+ *  -1  must not sit together  strongest push
+ *
+ * The rung below "could" is not on this list, because it is what a pair has when
+ * nothing has been said about them: two guests with no pairing carry a small
+ * penalty for sharing a table, so strangers drift apart on their own and the
+ * work is in saying who belongs together. "Could sit together" is then exactly
+ * the act of lifting that penalty — a group that may share a table without
+ * anyone being pulled towards it.
+ *
+ * Tables are circular and every seat at one is equivalent, so a table is really
+ * just a set of guests — there is no "next to" finer than "same table".
  */
-export type PairingLevel = -4 | -3 | -2 | -1 | 1 | 2 | 3 | 4;
+export type PairingLevel = -1 | 1 | 2 | 3;
 
 /** A named section of the guest list — a family, a table's worth of friends. */
 export interface Group {

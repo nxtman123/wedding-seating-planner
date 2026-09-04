@@ -621,9 +621,10 @@ textarea {
    a short label, so the row needs no separate badge beside the names. */
 .level-select {
   flex: none;
-  /* Sized for the longest phrase it shows, "prefers to sit with" at 110px, with
-     a few pixels spare so a different font rendering cannot clip it. The open
-     list is wider — the browser sizes the popup to its own contents. */
+  /* Sized for the widest option, "👍 should sit with", which Chrome wants 139px
+     for once its own dropdown arrow is counted; the few spare pixels keep a
+     different font rendering from clipping it. A select is as wide as its widest
+     option whatever is selected, so this never shifts between rows. */
   width: 144px;
   padding: 3px 2px 3px 7px;
   font-size: 0.8rem;
@@ -631,12 +632,12 @@ textarea {
   border-color: transparent;
 }
 
-/* Runs of signs rather than numbers, so they need a floor to stay square-ish:
-   a lone "+" is a third the width of "+++". */
+/* An emoji rather than a number, so the chip needs a floor to stay square-ish
+   against the padding around it. */
 .level-chip {
   flex: none;
-  /* The width of "++++", so a stack of chips aligns whatever their strength. */
-  min-width: 50px;
+  /* One emoji wide, with room to breathe, so a stack of chips lines up. */
+  min-width: 30px;
   text-align: center;
   font-size: 0.78rem;
   font-weight: 600;
@@ -656,37 +657,22 @@ textarea {
   color: #275a3d;
   border-color: #a6cfb4;
 }
-/* Between "should" and "could", set midway between them in lightness. */
+/* "Could sit together" steps out of the green, because it is not a pull at all —
+   it only lifts the penalty two unmentioned guests carry. Blue at the lightness
+   the green ranks below it had, so it reads as its own thing without shouting:
+   same L* on all three, hue turned to 260. */
 .level-pos-3 {
-  background: #d8ecdf;
-  color: #356647;
-  border-color: #c3ddcd;
+  background: #dae9f9;
+  color: #2a6188;
+  border-color: #c6d9ee;
 }
-/* The weakest level, so the faintest wash — the border is what keeps it a chip
-   at all, and the ink darkens to make up for the ground. */
-.level-pos-4 {
-  background: #f2f8f4;
-  color: #487257;
-  border-color: #dbe8e0;
-}
-.level-neg-4 {
-  background: #f9f3f2;
-  color: #8f6058;
-  border-color: #ecdedc;
-}
-.level-neg-3 {
-  background: #f4dcda;
-  color: #8c4a42;
-  border-color: #e8cac7;
-}
-.level-neg-2 {
+/* The one avoid left. It used to be solid red on white, which was more alarm
+   than a wedding seating chart needs when it is doing exactly what you asked, so
+   it takes the wash the rung above it wore back when there were four of them. */
+.level-neg-1 {
   background: #eec6c2;
   color: #8f3f38;
   border-color: #e3aca6;
-}
-.level-neg-1 {
-  background: #a3453d;
-  color: #fff;
 }
 
 .dot {

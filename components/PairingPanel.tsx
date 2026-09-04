@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import {
   PAIRING_LEVELS,
   levelBadge,
@@ -120,38 +119,6 @@ export default function PairingPanel({
     bandBreaks.add(bandInside.length + bandOut.length);
   }
 
-  /**
-   * Which row's level dropdown is about to open, if any.
-   *
-   * A native select paints its collapsed state from the selected option's own
-   * text, so the strength signs cannot just live in the options — they would
-   * show on the row too, where the phrase alone reads better. Instead the labels
-   * gain their signs on the way into the open list and lose them again on the
-   * way out: React flushes this discrete event before the browser runs the
-   * default action, so the popup is built from the labels with signs.
-   */
-  const [opening, setOpening] = useState<string | null>(null);
-
-  /*
-   * Blur alone is not enough to put the labels back. If the list re-sorts while
-   * a dropdown is armed — clearing the pick does exactly that — the element goes
-   * out from under the focus without React seeing a blur, and the row is left
-   * showing signs it should not. So the next thing the user does anywhere puts
-   * them back; a dropdown being opened again re-arms after this has run, since
-   * this listens on the way down and React's own handler on the way up.
-   */
-  useEffect(() => {
-    if (opening === null) return;
-    const clear = () => setOpening(null);
-    window.addEventListener('pointerdown', clear, true);
-    window.addEventListener('keydown', clear, true);
-    return () => {
-      window.removeEventListener('pointerdown', clear, true);
-      window.removeEventListener('keydown', clear, true);
-    };
-  }, [opening]);
-
-
   return (
     <section className="panel">
       <div className="panel-header">
@@ -245,19 +212,13 @@ export default function PairingPanel({
                 value={p.level}
                 aria-label={`${guestName(doc, p.a)} and ${guestName(doc, p.b)}`}
                 title={levelLabel(p.level)}
-                onMouseDown={() => setOpening(p.id)}
-                onKeyDown={() => setOpening(p.id)}
-                onBlur={() => setOpening(null)}
-                onChange={(e) => {
-                  setOpening(null);
-                  onSetLevel(p.id, Number(e.target.value) as PairingLevel);
-                }}
+                onChange={(e) =>
+                  onSetLevel(p.id, Number(e.target.value) as PairingLevel)
+                }
               >
                 {PAIRING_LEVELS.map((l) => (
                   <option key={l} value={l}>
-                    {opening === p.id
-                      ? `${levelBadge(l)} ${levelPhrase(l)}`
-                      : levelPhrase(l)}
+                    {levelBadge(l)} {levelPhrase(l)}
                   </option>
                 ))}
               </select>

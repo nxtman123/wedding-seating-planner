@@ -1,4 +1,4 @@
-import { levelWeight } from './defaults';
+import { IMPLICIT_WEIGHT, levelWeight } from './defaults';
 import type { PairingLevel, PairingOutcome, SeatingDoc } from './types';
 
 /* -------------------------------------------------------------------------- */
@@ -31,8 +31,29 @@ export function seatCount(doc: SeatingDoc): number {
 /*  Scoring                                                                    */
 /* -------------------------------------------------------------------------- */
 
-/** Guest id -> the weighted pairings that guest appears in. */
+/**
+ * Guest id -> the pairings that guest appears in, weighted against the penalty
+ * every unpaired pair already carries.
+ *
+ * Every co-seated pair is worth IMPLICIT_WEIGHT to begin with, so a pairing is
+ * only worth the difference. That leaves the whole implicit part a function of
+ * how many people sit at each table and nothing else, which `implicitScore`
+ * handles in one place — and it keeps the per-move deltas as cheap as they were
+ * when there was no penalty at all.
+ */
 type Affinities = Map<string, { other: string; weight: number }[]>;
+
+/** Pairs at a table, which is what the implicit penalty is charged per. */
+function pairsAt(n: number): number {
+  return (n * (n - 1)) / 2;
+}
+
+/** What an arrangement costs before a single pairing is taken into account. */
+function implicitScore(tables: string[][]): number {
+  let total = 0;
+  for (const table of tables) total += pairsAt(table.length);
+  return total * IMPLICIT_WEIGHT;
+}
 
 function buildAffinities(doc: SeatingDoc): Affinities {
   const known = new Set(doc.guests.map((g) => g.id));
@@ -40,7 +61,7 @@ function buildAffinities(doc: SeatingDoc): Affinities {
   for (const g of doc.guests) map.set(g.id, []);
   for (const p of doc.pairings) {
     if (p.a === p.b || !known.has(p.a) || !known.has(p.b)) continue;
-    const weight = levelWeight(p.level);
+    const weight = levelWeight(p.level) - IMPLICIT_WEIGHT;
     map.get(p.a)!.push({ other: p.b, weight });
     map.get(p.b)!.push({ other: p.a, weight });
   }
@@ -54,14 +75,16 @@ function buildAffinities(doc: SeatingDoc): Affinities {
  */
 export function scoreAssignment(doc: SeatingDoc, tables: string[][]): number {
   const seat = seatIndex(tables);
-  let total = 0;
+  // Every co-seated pair starts in the hole, so a pairing only has to account
+  // for the difference it makes to that.
+  let total = implicitScore(tables);
   const known = new Set(doc.guests.map((g) => g.id));
   for (const p of doc.pairings) {
     if (p.a === p.b || !known.has(p.a) || !known.has(p.b)) continue;
     const ta = seat.get(p.a);
     const tb = seat.get(p.b);
     if (ta === undefined || tb === undefined || ta !== tb) continue;
-    total += levelWeight(p.level);
+    total += levelWeight(p.level) - IMPLICIT_WEIGHT;
   }
   return total;
 }
@@ -307,9 +330,22 @@ function boundClusters(
 function deltaForMoves(
   affinities: Affinities,
   seat: Map<string, number>,
+  seating: string[][],
   moves: Map<string, number>,
 ): number {
+  // How each table's occupancy changes, and what that does to the penalty.
+  const change = new Map<number, number>();
+  for (const [guest, to] of moves) {
+    const from = seat.get(guest)!;
+    if (from === to) continue;
+    change.set(from, (change.get(from) ?? 0) - 1);
+    change.set(to, (change.get(to) ?? 0) + 1);
+  }
   let delta = 0;
+  for (const [table, by] of change) {
+    const n = seating[table].length;
+    delta += (pairsAt(n + by) - pairsAt(n)) * IMPLICIT_WEIGHT;
+  }
   for (const [guest, to] of moves) {
     const from = seat.get(guest)!;
     for (const link of affinities.get(guest) ?? []) {
@@ -331,15 +367,23 @@ function deltaForMoves(
   return delta;
 }
 
-/** Change in score from moving `guest` out of `from` and into `to`. */
+/**
+ * Change in score from moving `guest` out of `from` and into `to`.
+ *
+ * The pairing terms come off the affinity map, which is already net of the
+ * penalty. What is left is the penalty on the pairs made and broken by the move
+ * itself: leaving a table of n breaks n-1 of them, joining a table of m makes m.
+ */
 function moveDelta(
   affinities: Affinities,
   seat: Map<string, number>,
+  seating: string[][],
   guest: string,
   from: number,
   to: number,
 ): number {
-  let delta = 0;
+  let delta =
+    IMPLICIT_WEIGHT * (seating[to].length - (seating[from].length - 1));
   for (const link of affinities.get(guest) ?? []) {
     const where = seat.get(link.other);
     if (where === from) delta -= link.weight;
@@ -348,7 +392,10 @@ function moveDelta(
   return delta;
 }
 
-/** Change in score from swapping two guests between their tables. */
+/**
+ * Change in score from swapping two guests between their tables. No penalty term
+ * here: a swap leaves both tables exactly as full as they were.
+ */
 function swapDelta(
   affinities: Affinities,
   seat: Map<string, number>,
@@ -428,7 +475,7 @@ function improve(
     if (to === seat.get(body.members[0])) return;
     if (seating[to].length + body.members.length > sizes[to]) return;
     const moves = new Map(body.members.map((id) => [id, to] as const));
-    const delta = deltaForMoves(affinities, seat, moves);
+    const delta = deltaForMoves(affinities, seat, seating, moves);
     if (delta >= 0 || rng() < Math.exp(delta / temp)) {
       applyMoves(moves);
       score += delta;
@@ -456,7 +503,7 @@ function improve(
     const moves = new Map<string, number>();
     for (const id of a.members) moves.set(id, tb);
     for (const id of b.members) moves.set(id, ta);
-    const delta = deltaForMoves(affinities, seat, moves);
+    const delta = deltaForMoves(affinities, seat, seating, moves);
     if (delta >= 0 || rng() < Math.exp(delta / temp)) {
       applyMoves(moves);
       score += delta;
@@ -490,7 +537,7 @@ function improve(
       // Move into a table with a spare seat.
       const to = (rng() * seating.length) | 0;
       if (to === from || seating[to].length >= sizes[to]) continue;
-      const delta = moveDelta(affinities, seat, guest, from, to);
+      const delta = moveDelta(affinities, seat, seating, guest, from, to);
       if (delta >= 0 || rng() < Math.exp(delta / temp)) {
         remove(from, guest);
         seating[to].push(guest);
@@ -524,7 +571,7 @@ function improve(
       const from = seat.get(guest)!;
       for (let to = 0; to < seating.length; to++) {
         if (to === from || seating[to].length >= sizes[to]) continue;
-        const delta = moveDelta(affinities, seat, guest, from, to);
+        const delta = moveDelta(affinities, seat, seating, guest, from, to);
         if (delta > 0) {
           remove(from, guest);
           seating[to].push(guest);

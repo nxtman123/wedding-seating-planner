@@ -23,6 +23,23 @@ const KEY = 'wedding-seating/v1';
 /*  Validation                                                                 */
 /* -------------------------------------------------------------------------- */
 
+/**
+ * Levels this reader will take in, as opposed to the ones it writes out.
+ *
+ * The guard runs before the migration, so it has to accept every rung any past
+ * version ever wrote — checking against today's ladder would throw out the very
+ * documents the migration exists to rescue. Narrowing to the current set is
+ * `sanitize`'s job, after `migrate` has had its turn.
+ */
+function isReadableLevel(value: unknown): value is number {
+  return (
+    typeof value === 'number' &&
+    Number.isInteger(value) &&
+    value !== 0 &&
+    Math.abs(value) <= 4
+  );
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
@@ -78,7 +95,7 @@ export function isDoc(value: unknown): value is SeatingDoc {
     if (!isRecord(p)) return false;
     if (typeof p.id !== 'string') return false;
     if (typeof p.a !== 'string' || typeof p.b !== 'string') return false;
-    if (!isPairingLevel(p.level)) return false;
+    if (!isReadableLevel(p.level)) return false;
   }
 
   const names = (value as { tableNames?: unknown }).tableNames;
@@ -168,18 +185,53 @@ function roomOf(
  * between "should" and "could". The old weakest level was called "could", so it
  * keeps that meaning and moves to the new weakest rung rather than being
  * silently promoted into the new one.
+ *
+ * Version 3 cut the ladder back to four rungs and made having no pairing mean
+ * something. Going down the old scale:
+ *
+ *   must (1) and should (2) are unchanged;
+ *   "would like" (3) was a real preference, so it becomes should;
+ *   "could" (4) becomes could, which is now worth nothing either way;
+ *   "must avoid" (-1) and "should avoid" (-2) become must-not, the only push
+ *     left that needs saying;
+ *   the two faint avoids (-3, -4) are dropped altogether — a pair with no
+ *     pairing now carries a small penalty of its own, which is what those two
+ *     were for.
  */
 function migrate(doc: SeatingDoc): SeatingDoc {
-  if ((doc.version ?? 1) >= 2) return doc;
-  return {
-    ...doc,
-    version: 2,
-    pairings: doc.pairings.map((p) =>
-      Math.abs(p.level) === 3
-        ? { ...p, level: (p.level > 0 ? 4 : -4) as PairingLevel }
-        : p,
-    ),
-  };
+  let next = doc;
+  if ((next.version ?? 1) < 2) {
+    next = {
+      ...next,
+      version: 2,
+      pairings: next.pairings.map((p) =>
+        Math.abs(p.level) === 3
+          ? { ...p, level: (p.level > 0 ? 4 : -4) as PairingLevel }
+          : p,
+      ),
+    };
+  }
+  if ((next.version ?? 1) < 3) {
+    const remap: Record<number, PairingLevel | null> = {
+      1: 1,
+      2: 2,
+      3: 2,
+      4: 3,
+      [-1]: -1,
+      [-2]: -1,
+      [-3]: null,
+      [-4]: null,
+    };
+    next = {
+      ...next,
+      version: 3,
+      pairings: next.pairings.flatMap((p) => {
+        const level = remap[p.level as number];
+        return level === null || level === undefined ? [] : [{ ...p, level }];
+      }),
+    };
+  }
+  return next;
 }
 
 function sanitize(doc: SeatingDoc): SeatingDoc {
@@ -204,7 +256,13 @@ function sanitize(doc: SeatingDoc): SeatingDoc {
     groups,
     order,
     pairings: doc.pairings.filter(
-      (p) => p.a !== p.b && ids.has(p.a) && ids.has(p.b),
+      // isPairingLevel is the current ladder; anything the migration could not
+      // place is dropped rather than carried forward as a number nothing reads.
+      (p) =>
+        p.a !== p.b &&
+        ids.has(p.a) &&
+        ids.has(p.b) &&
+        isPairingLevel(p.level),
     ),
     tableSpecs: roomOf(doc, guests.length),
     tableNames: Array.isArray(doc.tableNames)

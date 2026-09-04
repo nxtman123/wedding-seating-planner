@@ -57,9 +57,9 @@ leaves the existing ones exactly as they are — useful for widening a group wit
 flattening the levels you already tuned inside it. **Strengthen N pairs** is between the
 two: it raises the pairs that are weaker than the level chosen and leaves anything already
 stronger alone, so a group of *could sit with*s can be lifted to *should* without
-flattening the one *must* among them. It works the same among avoids, where stronger means
-more emphatic, and it never reverses a pair pointing the other way — only **Apply to all**
-does that. Each narrower button appears only where it would do something the wider one
+flattening the one *must* among them. It never reverses a pair pointing the other way —
+only **Apply to all** does that, and it is the only one that can turn a *must not* into a
+*must*. Each narrower button appears only where it would do something the wider one
 would not; rows about to be rewritten are highlighted whichever you use. At the end of the
 row, **Remove N pairings** deletes the pairings *between* the picked guests, leaving the
 ones that reach out of the group alone. The group stays
@@ -79,30 +79,38 @@ a pair. The level box stays where you put it as you tick and untick — it is th
 are about to apply, not a readout of what the pick already has, so a run of groups can all
 be set at one level without resetting it each time.
 
-| Strength | Weight | Setting a group | A single pairing reads |
+| | Weight | Setting a group | A single pairing reads |
 | --- | --- | --- | --- |
-| `++++` | 8000 | Must sit together | A **must sit with** B |
-| `+++` | 400 | Should sit together | A **should sit with** B |
-| `++` | 20 | Prefers to sit together | A **prefers to sit with** B |
-| `+` | 1 | Could sit together | A **could sit with** B |
-| `−` | −1 | Could avoid each other | A **could avoid** B |
-| `−−` | −20 | Prefers to avoid each other | A **prefers to avoid** B |
-| `−−−` | −400 | Should avoid each other | A **should avoid** B |
-| `−−−−` | −8000 | Must avoid each other | A **must avoid** B |
+| ❤️ | 400 | Must sit together | A **must sit with** B |
+| 👍 | 20 | Should sit together | A **should sit with** B |
+| 🙂 | 0 | Could sit together | A **could sit with** B |
+| | −1 | *nothing said at all* | |
+| 🚫 | −8000 | Must not sit together | A **must avoid** B |
 
-The same must / should / could ladder either way — the form speaks about the group you
-have picked, the row about the one pair it names.
+The rung with no name is the one that does the most work. Two guests you have never
+mentioned to each other carry a small penalty for sharing a table, so strangers drift
+apart on their own and every table the solver builds has a reason to be the shape it is.
+That inverts the job: instead of listing everyone who should be kept apart, you say who
+belongs together, and the room sorts itself.
+
+**Could sit together** is then exactly the act of lifting that penalty. It is worth zero —
+it pulls nobody towards anybody — but it says these people *may* share a table without
+being pushed apart. Draw a wide circle with it (a whole side of the family, all the
+university friends) and you have described a pool the solver may fill tables from; build
+the couples and the households on top of that with **should** and **must**.
 
 In the pairing list the level sits between the two names, so each row reads as a sentence
 and doubles as the control that changes it.
 
 The levels are weights, not rules — the solver maximizes the total, so it will always
-produce a seating even when the pairings contradict each other. Each level is worth 20× the one below
-it — 1, 20, 400, 8000 — which matters more than it looks: a group applied to N guests creates
-N-choose-2 pairings, and every guest at a table of S seats holds S-1 of them, so a large
-low-level group could otherwise outvote a high-level pairing on sheer volume. At 20× no
-level can be outvoted by a whole table's worth of the level beneath it, even at the
-largest table size the app allows. At the default eight seats it is not close.
+produce a seating even when the pairings contradict each other. Each step up is worth at
+least 20× the step below it, which matters more than it looks: a group applied to N guests
+creates N-choose-2 pairings, and every guest at a table of S seats holds S−1 of them, so a
+large weak group could otherwise outvote a strong pairing on sheer volume. Each of the
+three gaps — the 1 between saying nothing and *could*, the 20 up to *should*, the 380 up to
+*must*, and the 7,600 down to *must not* — clears a whole table's worth of the gap beneath
+it, even at the largest table size the app allows. At the default eight seats it is not
+close.
 
 **Tables** (right panel) — describe the room a row at a time: *10 tables of 8 seats*, then
 *2 tables of 16*, then *1 table of 2* if there is an odd corner to fill. Add and remove
@@ -111,8 +119,8 @@ in place — click one to call it *Head Table* or *Kids* instead of a number. Th
 places against the guest list and says so plainly when the room is short; anyone who could
 not be given a seat is listed rather than squeezed in. The score comes with a line per level in
 use — "all must sit with pairings honored", "6 should sit with pairings not honored" —
-because one broken `+++` matters more than a hundred missed `+`s, and a single total hides
-which it was. Per-table warnings and the dots in the pairings panel show the detail.
+because one broken **must** matters more than a hundred unseated **could**s, and a single
+total hides which it was. Per-table warnings and the dots in the pairings panel show the detail.
 
 Ticking guests puts an **Add to table** button on every table heading: it seats them there
 and pins them, taking them off whatever table they were at. If the table cannot hold them
