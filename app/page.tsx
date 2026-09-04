@@ -269,25 +269,32 @@ export default function Page() {
    * every keystroke typed into a guest's name.
    */
   const generateRef = useRef(generate);
+  const applyRef = useRef(applyToGroup);
+  const draftRef = useRef(draft);
   useEffect(() => {
     generateRef.current = generate;
+    applyRef.current = applyToGroup;
+    draftRef.current = draft;
   });
 
   /**
-   * C clears the pick and G generates, wherever you are — except where the
-   * letter is being typed, and with a modifier held, where it belongs to the
-   * browser.
+   * A applies the level to the pick, C clears it and G generates, wherever you
+   * are — except where the letter is being typed, and with a modifier held,
+   * where it belongs to the browser.
    */
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.metaKey || e.ctrlKey || e.altKey) return;
       const key = e.key.toLowerCase();
-      if (key !== 'c' && key !== 'g') return;
+      if (key !== 'a' && key !== 'c' && key !== 'g') return;
       if (takesTyping(e.target as HTMLElement | null)) return;
       // A select would otherwise jump to the option starting with the letter,
       // which in a pairing row would quietly rewrite that pairing's level.
       e.preventDefault();
-      if (key === 'c') {
+      if (key === 'a') {
+        // Same condition as the button: a pairing needs two ends.
+        if (draftRef.current.guests.length >= 2) applyRef.current();
+      } else if (key === 'c') {
         setDraft((d) => (d.guests.length ? { ...d, guests: [] } : d));
       } else {
         generateRef.current();

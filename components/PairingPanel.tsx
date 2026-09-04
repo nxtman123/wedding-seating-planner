@@ -8,7 +8,6 @@ import {
   levelPhrase,
 } from '@/lib/defaults';
 import {
-  findPairing,
   guestName,
   missingPairs,
   pairCount,
@@ -84,16 +83,13 @@ export default function PairingPanel({
   /** How many pairings sit inside the group — what there is to take away. */
   const insideCount = pairs - missing;
 
-  /** Only meaningful for a group of two — the one pairing this would rewrite. */
-  const existing =
-    picked.length === 2 ? findPairing(doc, picked[0], picked[1]) : null;
-
+  /*
+   * One pair or many, the button does the same thing — set every pair in the
+   * pick to the level shown — so it says so, rather than splitting into add and
+   * update over a distinction the user did not make and cannot see coming.
+   */
   const applyLabel =
-    picked.length > 2
-      ? `Apply to all ${pairs} pairs`
-      : existing
-        ? 'Update pairing'
-        : 'Add pairing';
+    picked.length > 2 ? `Apply to all ${pairs} pairs` : 'Apply pairing';
 
   /** Both ends picked — the pairings an Apply would rewrite. */
   const inside = (p: Pairing) => chosen.has(p.a) && chosen.has(p.b);
@@ -151,7 +147,7 @@ export default function PairingPanel({
               onClick={onApply}
               disabled={picked.length < 2}
             >
-              {applyLabel}
+              {applyLabel} <kbd>A</kbd>
             </button>
             {showStrengthen && (
               <button

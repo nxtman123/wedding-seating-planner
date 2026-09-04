@@ -43,8 +43,9 @@ between them, across group boundaries and all — it only ever adds, so a select
 built out of several runs. Order of picking carries no meaning. Then choose a level and press the button — the level sticks, so a run at the same level goes
 quickly.
 
-Two keys work anywhere outside a text field: <kbd>C</kbd> clears the pick, the same as
-**Clear selection** in the top bar, and <kbd>G</kbd> generates a seating.
+Three keys work anywhere outside a text field: <kbd>A</kbd> applies the level to the pick,
+<kbd>C</kbd> clears it, the same as **Clear selection** in the top bar, and <kbd>G</kbd>
+generates a seating.
 
 Pick **two** guests for a single pairing. Pick **three or more** and you get a clique:
 every pair within the group is set to the same level, so five friends who should all sit
