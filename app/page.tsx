@@ -25,6 +25,7 @@ import {
   renameGroup,
   renameGuest,
   removeGroupPairings,
+  removeOutwardPairings,
   removeTableSpec,
   seatGuestsAt,
   setPairingLevel,
@@ -185,6 +186,10 @@ export default function Page() {
   /** Drop the pairings inside the group, keeping the ones reaching outside it. */
   const removeInside = () =>
     setDoc((d) => removeGroupPairings(d, draft.guests));
+
+  /** The mirror: drop what ties the group to everyone else, keeping its inside. */
+  const removeOutward = () =>
+    setDoc((d) => removeOutwardPairings(d, draft.guests));
 
   /**
    * Delete whoever is ticked. Guests can only be removed this way now, so the
@@ -439,6 +444,7 @@ export default function Page() {
             onApplyMissing={applyToMissing}
             onApplyStrengthen={applyToWeaker}
             onRemoveInside={removeInside}
+            onRemoveOutward={removeOutward}
             onSetLevel={(id, level) =>
               setDoc((d) => setPairingLevel(d, id, level))
             }

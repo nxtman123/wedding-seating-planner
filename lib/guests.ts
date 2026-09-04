@@ -649,6 +649,30 @@ export function removeGroupPairings(
 }
 
 /**
+ * Drop every pairing that ties a member of the group to somebody outside it,
+ * leaving the ones between members untouched. The mirror of
+ * `removeGroupPairings`: that one cuts the group's inside, this one cuts it
+ * loose from everyone else.
+ *
+ * A group of one is allowed here, unlike the inside cut, where it would have
+ * nothing to work on: everything a lone guest is in reaches out of them, so
+ * this is also how you unpick a single guest entirely.
+ */
+export function removeOutwardPairings(
+  doc: SeatingDoc,
+  ids: string[],
+): SeatingDoc {
+  const members = new Set(ids);
+  if (members.size === 0) return doc;
+  return {
+    ...doc,
+    // Keep a pairing when both ends are in the group or both are out of it;
+    // drop it when exactly one end is.
+    pairings: doc.pairings.filter((p) => members.has(p.a) === members.has(p.b)),
+  };
+}
+
+/**
  * Whether offering "Strengthen" would do anything the wider buttons do not.
  *
  * It is worth showing when some pairs are weaker than the level but not all of

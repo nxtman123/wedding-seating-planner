@@ -41,6 +41,8 @@ export interface PairingPanelProps {
   onApplyStrengthen: () => void;
   /** Drop every pairing between members of the group. */
   onRemoveInside: () => void;
+  /** Drop every pairing tying a member of the group to somebody outside it. */
+  onRemoveOutward: () => void;
   onSetLevel: (id: string, level: PairingLevel) => void;
   onRemove: (id: string) => void;
 }
@@ -65,6 +67,7 @@ export default function PairingPanel({
   onApplyMissing,
   onApplyStrengthen,
   onRemoveInside,
+  onRemoveOutward,
   onSetLevel,
   onRemove,
 }: PairingPanelProps) {
@@ -164,6 +167,9 @@ export default function PairingPanel({
                 Apply to {missing} missing
               </button>
             )}
+            {/* The two cuts, named after the bands they empty: the pairings
+                inside the pick, and the ones tying it to everyone else. Each
+                appears only when it has something to take. */}
             {insideCount > 0 && (
               <button
                 type="button"
@@ -171,7 +177,17 @@ export default function PairingPanel({
                 onClick={onRemoveInside}
                 title="Delete the pairings between these guests, leaving the ones that reach outside"
               >
-                Remove {insideCount} pairing{insideCount === 1 ? '' : 's'}
+                Remove {insideCount} inside
+              </button>
+            )}
+            {bandOut.length > 0 && (
+              <button
+                type="button"
+                className="danger"
+                onClick={onRemoveOutward}
+                title="Delete the pairings tying these guests to everyone else, leaving the ones between them"
+              >
+                Remove {bandOut.length} reaching out
               </button>
             )}
           </div>
