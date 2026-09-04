@@ -265,6 +265,29 @@ export default function Page() {
   };
 
   /**
+   * The height of the header, published to CSS as `--header-h`.
+   *
+   * The first row of panels is sized to end just short of the fold, which means
+   * knowing how much of the window the header has taken. It is not a constant:
+   * the title and the toolbar sit on one line at a desktop width and wrap onto
+   * two when the window narrows, so this is measured rather than guessed.
+   */
+  const headerRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const el = headerRef.current;
+    if (!el) return;
+    const publish = () =>
+      document.documentElement.style.setProperty(
+        '--header-h',
+        `${el.offsetHeight}px`,
+      );
+    publish();
+    const ro = new ResizeObserver(publish);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  /**
    * The shortcuts read the latest handler through a ref rather than closing over
    * it, so the listener is bound once instead of being torn down and rebuilt on
    * every keystroke typed into a guest's name.
@@ -336,7 +359,7 @@ export default function Page() {
 
   return (
     <main className="app">
-      <header className="app-header">
+      <header className="app-header" ref={headerRef}>
         <div>
           <h1>Wedding Seating Planner</h1>
           <p className="subtitle">

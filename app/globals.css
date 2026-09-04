@@ -41,7 +41,7 @@ body {
  * with the window so it stays generous on a laptop without eating a phone. */
 .app {
   height: 100dvh;
-  padding: 24px clamp(16px, 4vw, 44px) 20px;
+  padding: 24px clamp(20px, 5.5vw, 64px) 20px;
   display: flex;
   flex-direction: column;
   gap: 0;
@@ -183,9 +183,30 @@ textarea {
 .panels {
   flex: 1;
   min-height: 0;
+  /*
+   * How much of the card below is left showing above the fold.
+   *
+   * There is a window rather than a target: the title row ends 42px down (a
+   * border, the padding and the heading itself) and the row of controls under
+   * it begins at 54px, with the panel's own 12px gap between them. Cut inside
+   * that gap and the fold lands on nothing — the heading is whole and the next
+   * thing has not started, so there is no sliver of a half-shown control to
+   * catch the eye. 48px leaves six pixels either side.
+   */
+  --peek: 48px;
+  --gap: 16px;
+  /* What the page spends above the panels and below them, so a row can work out
+     how much of the window is left for it: the top padding, the header and the
+     gap under it; and the bottom padding. */
+  --chrome: calc(24px + var(--header-h, 130px) + 24px);
+  --foot: 20px;
   display: grid;
-  grid-template-columns: 1fr 1.25fr 1.4fr;
-  gap: 16px;
+  /* The pairings column carries two names either side of the level box, so it
+     is the one that runs out of room first — at the narrow end of this layout
+     it needs 496px or the names start wrapping. Matching it to the tables gets
+     it there while leaving the guest list clear of its own floor. */
+  grid-template-columns: 1fr 1.4fr 1.4fr;
+  gap: var(--gap);
   align-items: stretch;
 }
 
@@ -194,12 +215,16 @@ textarea {
  * guests and the pairings — the pair worth keeping side by side, since picking
  * guests is what drives the pairing list.
  *
+ * Three columns need 1506px before the pairings column falls under the 496px a
+ * row of two names wants, so this breaks just above that. 1500 misses it by two
+ * pixels and wraps.
+ *
  * Rows become a fixed share of the viewport rather than growing with content:
  * each panel still scrolls its own list, and the page scrolls between the rows,
  * so getting from the guests to the tables is one flick rather than a trip past
  * three hundred pairings.
  */
-@media (max-width: 1540px) {
+@media (max-width: 1550px) {
   html,
   body {
     height: auto;
@@ -209,18 +234,92 @@ textarea {
   }
   .panels {
     flex: none;
-    grid-template-columns: 1fr 1.25fr;
-    grid-auto-rows: 85dvh;
+    /* The guests give up some width to the pairings here. A guest row holds one
+       name; a pairing row holds two, with the level between them, so it is the
+       one that runs out of room first. */
+    grid-template-columns: 1fr 1.45fr;
+    /*
+     * Every row is a screen, and each is cut to what that screen has to show
+     * rather than to a flat share of the window.
+     *
+     * The first gives up the header above it and a strip of the card below, so
+     * landing at the top shows the whole first row and says there is more. The
+     * last gives up a strip of the card above it and the page's bottom padding,
+     * so landing at the bottom is the mirror of that. Between them sits a grid
+     * gap each way, which belongs to the run between cards rather than to
+     * either card — leave it out and the strip on screen comes up short of what
+     * `--peek` asks for.
+     *
+     * `--header-h` comes from a ResizeObserver in app/page.tsx, because the
+     * header is one line wide and two lines narrow. The fallback covers the
+     * first paint, before the observer has run.
+     */
+    grid-template-rows:
+      calc(100dvh - var(--chrome) - var(--gap) - var(--peek))
+      calc(100dvh - var(--peek) - var(--gap) - var(--foot));
   }
   .panel-tables {
     grid-column: 1 / -1;
   }
+
+  /*
+   * The page has nothing worth showing between the rows, so it does not stop
+   * there: a flick settles on a row rather than leaving one half off screen.
+   *
+   * Only the two ends are named here, which at this width is the whole story —
+   * the guests and pairings share the first row, so top and bottom are the only
+   * two places to be. The narrow layout below adds the one row this misses.
+   */
+  html {
+    scroll-snap-type: y mandatory;
+  }
+  /* The top of the page, reaching back over its own top padding so it lands at
+     zero exactly rather than at the header's edge. The first row of panels is
+     deliberately not a snap point: it would sit a handful of pixels below this
+     one, close enough to be the same place and far enough to shear the title
+     off the top of the window. */
+  .app-header {
+    scroll-snap-align: start;
+    scroll-margin-top: 24px;
+  }
+  /* The foot of the page. Reaching one padding past the panel's own edge is
+     what makes it come to rest against the bottom of the window instead of
+     flush against the tables, which would look cropped. */
+  .panel-tables {
+    scroll-snap-align: end;
+    scroll-margin-bottom: 20px;
+  }
 }
 
-/* One at a time, still a viewport tall each. */
-@media (max-width: 912px) {
+/*
+ * One at a time, still a viewport tall each.
+ *
+ * The break is where two columns stop fitting rather than where they stop
+ * looking roomy. A pairing row needs 496px — two names at their longest, the
+ * level between them, and the panel's padding — and the guest list will not go
+ * under 347px without its rows overflowing sideways. With the gap that is 859px
+ * of panels, which a window narrower than about 970px cannot give once its
+ * gutters are taken. 1000px is the round number above that. Rather than squeeze
+ * it, the pairings take a row of their own, where there is width to spare.
+ */
+@media (max-width: 1000px) {
+  /*
+   * The middle row is the one with no edge of the window to sit against. It
+   * gives up a strip and a gap on both sides instead, so what is left of it is
+   * exactly what fits between them, and it snaps to the centre rather than to
+   * an end. Resting there you get the pairings whole, the guests showing above
+   * by the same sliver the tables show below, and the feeling of being in the
+   * middle of the page rather than merely somewhere in it.
+   */
   .panels {
     grid-template-columns: 1fr;
+    grid-template-rows:
+      calc(100dvh - var(--chrome) - var(--gap) - var(--peek))
+      calc(100dvh - 2 * var(--gap) - 2 * var(--peek))
+      calc(100dvh - var(--peek) - var(--gap) - var(--foot));
+  }
+  .panels > .panel:nth-child(2) {
+    scroll-snap-align: center;
   }
 }
 
