@@ -63,10 +63,10 @@ flattening the one *must* among them. It never reverses a pair pointing the othe
 only **Apply to all** does that, and it is the only one that can turn a *must not* into a
 *must*. Each narrower button appears only where it would do something the wider one
 would not; rows about to be rewritten are highlighted whichever you use. At the end of the
-row are the two cuts, named after the bands they empty. **Remove N inside** deletes the
-pairings *between* the picked guests and leaves the ones reaching out of the group alone;
-**Remove N reaching out** does the opposite, cutting the group loose from everyone else
-while leaving its own pairings intact. Each appears only when it has something to take, so
+row are the two cuts, named after the bands they empty. **Remove N inside pairs** deletes
+the pairings *between* the picked guests and leaves the ones reaching out of the group
+alone; **Remove N outside pairs** does the opposite, cutting the group loose from everyone
+else while leaving its own pairings intact. Each appears only when it has something to take, so
 ticking a single guest offers only the second — everything they are in reaches out of a
 group of one, which makes it the way to unpick one person entirely. The group stays
 picked after you apply, so a level can be tried and changed without re-ticking everyone.

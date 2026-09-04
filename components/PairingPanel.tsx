@@ -112,6 +112,9 @@ export default function PairingPanel({
   const bandRest = sorted.filter((p) => !inside(p) && !reachingOut(p));
   const pairings = [...bandInside, ...bandOut, ...bandRest];
 
+  /** What each cut would take: the band inside the pick, and the band reaching out. */
+  const outsideCount = bandOut.length;
+
   /** Row indexes that open a gap, i.e. that start a band after a non-empty one. */
   const bandBreaks = new Set<number>();
   if (bandInside.length && bandOut.length) bandBreaks.add(bandInside.length);
@@ -167,7 +170,7 @@ export default function PairingPanel({
                 Apply to {missing} missing
               </button>
             )}
-            {/* The two cuts, named after the bands they empty: the pairings
+            {/* The two cuts, named after the bands they empty: the pairs
                 inside the pick, and the ones tying it to everyone else. Each
                 appears only when it has something to take. */}
             {insideCount > 0 && (
@@ -177,17 +180,18 @@ export default function PairingPanel({
                 onClick={onRemoveInside}
                 title="Delete the pairings between these guests, leaving the ones that reach outside"
               >
-                Remove {insideCount} inside
+                Remove {insideCount} inside pair{insideCount === 1 ? '' : 's'}
               </button>
             )}
-            {bandOut.length > 0 && (
+            {outsideCount > 0 && (
               <button
                 type="button"
                 className="danger"
                 onClick={onRemoveOutward}
                 title="Delete the pairings tying these guests to everyone else, leaving the ones between them"
               >
-                Remove {bandOut.length} reaching out
+                Remove {outsideCount} outside pair
+                {outsideCount === 1 ? '' : 's'}
               </button>
             )}
           </div>
