@@ -364,14 +364,15 @@ export default function Page() {
 
   return (
     <main className="app">
+      {/* Title and toolbar share the first line; the subtitle takes the second
+          on its own. Written in reading order and reordered in CSS, so the
+          sentence under the title still follows it for a screen reader. */}
       <header className="app-header" ref={headerRef}>
-        <div>
-          <h1>Wedding Seating Planner</h1>
-          <p className="subtitle">
-            List the guests, say who should sit together, and let the tables
-            sort themselves out.
-          </p>
-        </div>
+        <h1>Wedding Seating Planner</h1>
+        <p className="subtitle">
+          List the guests, say who should sit together, and let the tables sort
+          themselves out.
+        </p>
         <div className="toolbar">
           <button
             type="button"

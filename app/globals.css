@@ -48,13 +48,22 @@ body {
 }
 
 /* ---------------- header / toolbar ---------------- */
+/*
+ * The title and the toolbar share the first line, and the subtitle drops to a
+ * second on its own — which is a line cheaper than giving the toolbar a row,
+ * and the panels below get the difference.
+ *
+ * The subtitle is written between them in the markup, where it belongs when
+ * read aloud, and reordered here. Its 100% basis is what puts it on its own
+ * line; the toolbar's auto margin holds it to the right until the window is too
+ * narrow for both, at which point the wrap takes over on its own.
+ */
 .app-header {
   flex: none;
   display: flex;
   flex-wrap: wrap;
-  gap: 16px;
-  align-items: flex-end;
-  justify-content: space-between;
+  align-items: baseline;
+  gap: 4px 16px;
   margin-bottom: 24px;
 }
 .app-header h1 {
@@ -62,8 +71,14 @@ body {
   font-size: 1.6rem;
   letter-spacing: -0.01em;
 }
+.app-header .toolbar {
+  order: 1;
+  margin-left: auto;
+}
 .subtitle {
-  margin: 4px 0 0;
+  order: 2;
+  flex: 0 0 100%;
+  margin: 0;
   color: var(--muted);
   font-size: 0.95rem;
 }
