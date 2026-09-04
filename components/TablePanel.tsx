@@ -1,6 +1,11 @@
 'use client';
 
-import { levelBadge, levelClass, levelPhrase } from '@/lib/defaults';
+import {
+  levelBadge,
+  levelClass,
+  levelPhrase,
+  levelWeight,
+} from '@/lib/defaults';
 import { guestName, tableName } from '@/lib/guests';
 import {
   conflictsAtTable,
@@ -151,20 +156,30 @@ export default function TablePanel({
             Score <strong>{score.toLocaleString()}</strong>
           </p>
           {/* Per level, because one broken "must sit with" matters more than a
-              dozen missed "could"s, and a bare total hides which it was. */}
+              dozen unseated "could"s, and a bare total hides which it was.
+              "Could" is the exception: it is worth nothing either way, so
+              leaving one unseated costs the score nothing and is reported as a
+              plain count rather than as something gone wrong. */}
           <ul className="score-lines">
-            {breakdown.map(({ level, violated }) => (
-              <li
-                key={level}
-                className={violated === 0 ? 'score-ok' : 'score-bad'}
-              >
-                {violated === 0
-                  ? `✓ all ${levelPhrase(level)} pairings honored`
-                  : `${violated} ${levelPhrase(level)} pairing${
-                      violated === 1 ? '' : 's'
-                    } not honored`}
-              </li>
-            ))}
+            {breakdown.map(({ level, total, violated }) =>
+              levelWeight(level) === 0 ? (
+                <li key={level} className="score-note">
+                  {total - violated} / {total} {levelPhrase(level)} pairings
+                  honored
+                </li>
+              ) : (
+                <li
+                  key={level}
+                  className={violated === 0 ? 'score-ok' : 'score-bad'}
+                >
+                  {violated === 0
+                    ? `✓ all ${levelPhrase(level)} pairings honored`
+                    : `${violated} ${levelPhrase(level)} pairing${
+                        violated === 1 ? '' : 's'
+                      } not honored`}
+                </li>
+              ),
+            )}
               </ul>
             </>
           )}

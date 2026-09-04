@@ -829,6 +829,11 @@ textarea {
 .score-bad {
   color: var(--danger);
 }
+/* "Could sit together" is worth nothing either way, so its line is a count
+   rather than a verdict — grey, so it does not read as a pass or a failure. */
+.score-note {
+  color: var(--muted);
+}
 
 .tables {
   display: grid;

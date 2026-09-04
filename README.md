@@ -82,10 +82,10 @@ be set at one level without resetting it each time.
 | | Weight | Setting a group | A single pairing reads |
 | --- | --- | --- | --- |
 | ❤️ | 400 | Must sit together | A **must sit with** B |
-| 👍 | 20 | Should sit together | A **should sit with** B |
-| 🙂 | 0 | Could sit together | A **could sit with** B |
-| | −1 | *nothing said at all* | |
-| 🚫 | −8000 | Must not sit together | A **must avoid** B |
+| 😁 | 20 | Should sit together | A **should sit with** B |
+| 🤝 | 0 | Could sit together | A **could sit with** B |
+| | −5 | *nothing said at all* | |
+| 🚫 | −800 | Must not sit together | A **must avoid** B |
 
 The rung with no name is the one that does the most work. Two guests you have never
 mentioned to each other carry a small penalty for sharing a table, so strangers drift
@@ -103,14 +103,18 @@ In the pairing list the level sits between the two names, so each row reads as a
 and doubles as the control that changes it.
 
 The levels are weights, not rules — the solver maximizes the total, so it will always
-produce a seating even when the pairings contradict each other. Each step up is worth at
-least 20× the step below it, which matters more than it looks: a group applied to N guests
-creates N-choose-2 pairings, and every guest at a table of S seats holds S−1 of them, so a
-large weak group could otherwise outvote a strong pairing on sheer volume. Each of the
-three gaps — the 1 between saying nothing and *could*, the 20 up to *should*, the 380 up to
-*must*, and the 7,600 down to *must not* — clears a whole table's worth of the gap beneath
-it, even at the largest table size the app allows. At the default eight seats it is not
-close.
+produce a seating even when the pairings contradict each other. What matters is not the
+numbers themselves but the gaps between them, because a guest at a table of S seats holds
+S−1 pairs at once and every one of them counts.
+
+A **must** clears a whole table of anything under it — 400 against nineteen *should*s even
+at the largest table the app allows — so it is as close to a rule as a weight gets. Below
+that the ladder is deliberately softer. A **should** is worth four unmentioned guests, so
+at a full table of eight the company a guest keeps can outweigh a single preference, which
+is the point: a table wants to be a group, not a chain of pairs. And a **must not** is
+worth two *must*s, so it bends rather than breaks — hem someone in with enough musts and it
+will give, and the report will tell you it did rather than the solver quietly wrecking
+something else to avoid it.
 
 **Tables** (right panel) — describe the room a row at a time: *10 tables of 8 seats*, then
 *2 tables of 16*, then *1 table of 2* if there is an odd corner to fill. Add and remove
@@ -120,7 +124,8 @@ places against the guest list and says so plainly when the room is short; anyone
 not be given a seat is listed rather than squeezed in. The score comes with a line per level in
 use — "all must sit with pairings honored", "6 should sit with pairings not honored" —
 because one broken **must** matters more than a hundred unseated **could**s, and a single
-total hides which it was. Per-table warnings and the dots in the pairings panel show the detail.
+total hides which it was. *Could* gets a plain grey count instead of a verdict, since
+leaving one of those unseated costs the score nothing and is not a failure. Per-table warnings and the dots in the pairings panel show the detail.
 
 Ticking guests puts an **Add to table** button on every table heading: it seats them there
 and pins them, taking them off whatever table they were at. If the table cannot hold them
