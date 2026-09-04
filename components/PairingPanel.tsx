@@ -8,6 +8,7 @@ import {
   levelPhrase,
 } from '@/lib/defaults';
 import {
+  canStrengthen,
   guestName,
   missingPairs,
   pairCount,
@@ -75,11 +76,11 @@ export default function PairingPanel({
   /*
    * Each narrower button is worth offering only where it would do something the
    * wider one does not: with nothing yet paired, all three do the same thing.
-   * Strengthen also hides when it matches missing, which is the case when no
-   * existing pair is weaker than the level chosen.
+   * Strengthen's rule is `canStrengthen`, shared with the S shortcut so the key
+   * is live exactly when the button is on screen.
    */
   const showMissing = missing > 0 && missing < pairs;
-  const showStrengthen = weaker > 0 && weaker < pairs && weaker !== missing;
+  const showStrengthen = canStrengthen(doc, picked, level);
   /** How many pairings sit inside the group — what there is to take away. */
   const insideCount = pairs - missing;
 
@@ -155,7 +156,7 @@ export default function PairingPanel({
                 onClick={onApplyStrengthen}
                 title="Raise only the pairs that are weaker than this, leaving the stronger ones alone"
               >
-                Strengthen {weaker} pair{weaker === 1 ? '' : 's'}
+                Strengthen {weaker} pair{weaker === 1 ? '' : 's'} <kbd>S</kbd>
               </button>
             )}
             {showMissing && (

@@ -648,6 +648,26 @@ export function removeGroupPairings(
   };
 }
 
+/**
+ * Whether offering "Strengthen" would do anything the wider buttons do not.
+ *
+ * It is worth showing when some pairs are weaker than the level but not all of
+ * them — with all of them weaker, "Apply to all" has the same effect — and when
+ * the weaker ones are not exactly the missing ones, which is "Apply to missing".
+ * The keyboard shortcut reads this too, so the key is live exactly when the
+ * button is on screen.
+ */
+export function canStrengthen(
+  doc: SeatingDoc,
+  ids: string[],
+  level: PairingLevel,
+): boolean {
+  const pairs = pairCount([...new Set(ids)].length);
+  const weaker = weakerPairs(doc, ids, level).length;
+  const missing = missingPairs(doc, ids).length;
+  return weaker > 0 && weaker < pairs && weaker !== missing;
+}
+
 /** Raise the group's weaker pairs to this level, leaving the rest alone. */
 export function strengthenGroupLevel(
   doc: SeatingDoc,

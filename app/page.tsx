@@ -9,6 +9,7 @@ import {
   addGuestsFromText,
   applyGroupLevel,
   assignToGroup,
+  canStrengthen,
   clearAllPins,
   clearPin,
   fillGroupLevel,
@@ -270,23 +271,28 @@ export default function Page() {
    */
   const generateRef = useRef(generate);
   const applyRef = useRef(applyToGroup);
+  const strengthenRef = useRef(applyToWeaker);
   const draftRef = useRef(draft);
+  const docRef = useRef(doc);
   useEffect(() => {
     generateRef.current = generate;
     applyRef.current = applyToGroup;
+    strengthenRef.current = applyToWeaker;
     draftRef.current = draft;
+    docRef.current = doc;
   });
 
   /**
-   * A applies the level to the pick, C clears it and G generates, wherever you
-   * are — except where the letter is being typed, and with a modifier held,
-   * where it belongs to the browser.
+   * A applies the level to the pick, S strengthens only the pairs below it, C
+   * clears the pick and G generates — wherever you are, except where the letter
+   * is being typed, and with a modifier held, where it belongs to the browser.
+   * Each key is live exactly when its button is, so nothing happens off screen.
    */
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.metaKey || e.ctrlKey || e.altKey) return;
       const key = e.key.toLowerCase();
-      if (key !== 'a' && key !== 'c' && key !== 'g') return;
+      if (key !== 'a' && key !== 's' && key !== 'c' && key !== 'g') return;
       if (takesTyping(e.target as HTMLElement | null)) return;
       // A select would otherwise jump to the option starting with the letter,
       // which in a pairing row would quietly rewrite that pairing's level.
@@ -294,6 +300,11 @@ export default function Page() {
       if (key === 'a') {
         // Same condition as the button: a pairing needs two ends.
         if (draftRef.current.guests.length >= 2) applyRef.current();
+      } else if (key === 's') {
+        const { guests, level } = draftRef.current;
+        if (canStrengthen(docRef.current, guests, level)) {
+          strengthenRef.current();
+        }
       } else if (key === 'c') {
         setDraft((d) => (d.guests.length ? { ...d, guests: [] } : d));
       } else {
