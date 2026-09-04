@@ -157,17 +157,14 @@ export default function TablePanel({
           </p>
           {/* Per level, because one broken "must sit with" matters more than a
               dozen unseated "could"s, and a bare total hides which it was.
-              "Could" is the exception: it is worth nothing either way, so
-              leaving one unseated costs the score nothing and is reported as a
-              plain count rather than as something gone wrong. */}
+              A level worth nothing either way is the exception: leaving one of
+              those unseated costs the score nothing, so it is a plain count
+              rather than a verdict, and it sits under the verdicts rather than
+              interrupting them. */}
           <ul className="score-lines">
-            {breakdown.map(({ level, total, violated }) =>
-              levelWeight(level) === 0 ? (
-                <li key={level} className="score-note">
-                  {total - violated} / {total} {levelPhrase(level)} pairings
-                  honored
-                </li>
-              ) : (
+            {breakdown
+              .filter(({ level }) => levelWeight(level) !== 0)
+              .map(({ level, violated }) => (
                 <li
                   key={level}
                   className={violated === 0 ? 'score-ok' : 'score-bad'}
@@ -178,8 +175,15 @@ export default function TablePanel({
                         violated === 1 ? '' : 's'
                       } not honored`}
                 </li>
-              ),
-            )}
+              ))}
+            {breakdown
+              .filter(({ level }) => levelWeight(level) === 0)
+              .map(({ level, total, violated }) => (
+                <li key={level} className="score-note">
+                  {total - violated} / {total} {levelPhrase(level)} pairings
+                  honored
+                </li>
+              ))}
               </ul>
             </>
           )}
