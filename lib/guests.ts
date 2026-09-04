@@ -11,7 +11,14 @@ import type { Group, Guest, Pairing, PairingLevel, SeatingDoc } from './types';
 /*  Guests                                                                     */
 /* -------------------------------------------------------------------------- */
 
-/** Append one guest. A blank or whitespace-only name is ignored. */
+/**
+ * Add one guest at the top of the list. A blank or whitespace-only name is
+ * ignored.
+ *
+ * The top rather than the bottom because that is where the box you typed into
+ * is: a guest added to the end of three hundred names is a guest you have to go
+ * looking for to check, rename or tick.
+ */
 export function addGuest(doc: SeatingDoc, name: string): SeatingDoc {
   const trimmed = name.trim();
   if (!trimmed) return doc;
@@ -19,13 +26,14 @@ export function addGuest(doc: SeatingDoc, name: string): SeatingDoc {
   return normalize({
     ...doc,
     guests: [...doc.guests, guest],
-    order: [...doc.order, guest.id],
+    order: [guest.id, ...doc.order],
   });
 }
 
 /**
- * Append every non-blank line of a pasted list. Names already on the list are
- * skipped, so re-pasting an updated list only adds what is new.
+ * Add every non-blank line of a pasted list, at the top and in the order they
+ * were pasted. Names already on the list are skipped, so re-pasting an updated
+ * list only adds what is new — and only the new ones move to the top.
  */
 export function addGuestsFromText(doc: SeatingDoc, text: string): SeatingDoc {
   const existing = new Set(doc.guests.map((g) => g.name.toLowerCase()));
@@ -42,7 +50,7 @@ export function addGuestsFromText(doc: SeatingDoc, text: string): SeatingDoc {
   return normalize({
     ...doc,
     guests: [...doc.guests, ...added],
-    order: [...doc.order, ...added.map((g) => g.id)],
+    order: [...added.map((g) => g.id), ...doc.order],
   });
 }
 
