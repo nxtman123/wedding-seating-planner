@@ -184,6 +184,37 @@ textarea {
   color: var(--text);
   min-width: 0;
 }
+/*
+ * Selects are drawn here, not by the operating system.
+ *
+ * A native select takes its height and its inner spacing from platform metrics,
+ * and Safari's are not Chrome's — which shows up as a row of pairings that is
+ * the wrong height on one browser and right on the other. Turning the
+ * appearance off makes a select an ordinary box, so stating line-height,
+ * padding and height settles it everywhere.
+ *
+ * The arrow then has to be ours. It is two gradients rather than an image so it
+ * can be drawn in `currentColor`, which is what lets the level dropdowns carry
+ * their own ink into it.
+ *
+ * Only the closed control is ours. The list that opens is still the platform's,
+ * which is where the emoji do their work.
+ */
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  line-height: 1.25;
+  height: 37px;
+  padding-right: 26px;
+  background-image: linear-gradient(45deg, transparent 50%, currentColor 50%),
+    linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-repeat: no-repeat;
+  background-size: 5px 5px, 5px 5px;
+  background-position:
+    right 13px center,
+    right 9px center;
+}
+
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible,
@@ -745,7 +776,17 @@ textarea {
      different font rendering from clipping it. A select is as wide as its widest
      option whatever is selected, so this never shifts between rows. */
   width: 144px;
-  padding: 3px 2px 3px 7px;
+  /* Its own height and its own arrow, both smaller than the page default: this
+     one has to sit inside a pairing row, and the room to its right is what the
+     two names are competing for. The arrow is tucked to 14px from the edge, and
+     the padding clears it with the widest option ("😃 should sit with", 108px)
+     still having nine pixels to spare. */
+  height: 25px;
+  padding: 3px 18px 3px 7px;
+  background-size: 4px 4px, 4px 4px;
+  background-position:
+    right 10px center,
+    right 7px center;
   font-size: 0.8rem;
   font-weight: 600;
   border-color: transparent;
@@ -766,13 +807,17 @@ textarea {
   border: 1px solid transparent;
 }
 .level-pos-1 {
-  background: #2f6b4a;
+  /* background-color, not the shorthand: these classes also land on the level
+     dropdowns, whose arrow is a background image the shorthand would erase. */
+  background-color: #2f6b4a;
   color: #fff;
 }
 /* A notch down from the old wash, onto what used to be this level's own border
    colour, with the ink darkened to match so it still clears 4.5:1. */
 .level-pos-2 {
-  background: #bcdcc7;
+  /* background-color, not the shorthand: these classes also land on the level
+     dropdowns, whose arrow is a background image the shorthand would erase. */
+  background-color: #bcdcc7;
   color: #275a3d;
   border-color: #a6cfb4;
 }
@@ -781,7 +826,9 @@ textarea {
    the green ranks below it had, so it reads as its own thing without shouting:
    same L* on all three, hue turned to 260. */
 .level-pos-3 {
-  background: #dae9f9;
+  /* background-color, not the shorthand: these classes also land on the level
+     dropdowns, whose arrow is a background image the shorthand would erase. */
+  background-color: #dae9f9;
   color: #2a6188;
   border-color: #c6d9ee;
 }
@@ -789,7 +836,9 @@ textarea {
    than a wedding seating chart needs when it is doing exactly what you asked, so
    it takes the wash the rung above it wore back when there were four of them. */
 .level-neg-1 {
-  background: #eec6c2;
+  /* background-color, not the shorthand: these classes also land on the level
+     dropdowns, whose arrow is a background image the shorthand would erase. */
+  background-color: #eec6c2;
   color: #8f3f38;
   border-color: #e3aca6;
 }
