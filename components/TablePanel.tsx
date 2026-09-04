@@ -16,6 +16,7 @@ import {
 } from '@/lib/solver';
 import type { LevelTally, SeatingDoc } from '@/lib/types';
 import PinIcon from '@/components/PinIcon';
+import blurOnEnter from '@/components/blurOnEnter';
 
 export interface TablePanelProps {
   doc: SeatingDoc;
@@ -86,6 +87,7 @@ export default function TablePanel({
               onChange={(e) =>
                 onSpecChange(spec.id, { count: Number(e.target.value) })
               }
+              onKeyDown={blurOnEnter}
             />
             <span>{spec.count === 1 ? 'table of' : 'tables of'}</span>
             <input
@@ -97,6 +99,7 @@ export default function TablePanel({
               onChange={(e) =>
                 onSpecChange(spec.id, { seats: Number(e.target.value) })
               }
+              onKeyDown={blurOnEnter}
             />
             <span>{spec.seats === 1 ? 'seat' : 'seats'}</span>
             <button
@@ -229,6 +232,7 @@ export default function TablePanel({
                       value={tableName(doc, i)}
                       aria-label={`Name of table ${i + 1}`}
                       onChange={(e) => onRenameTable(i, e.target.value)}
+                      onKeyDown={blurOnEnter}
                     />
                   </h3>
                   <span className="count">

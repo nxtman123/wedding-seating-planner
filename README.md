@@ -43,6 +43,13 @@ between them, across group boundaries and all — it only ever adds, so a select
 built out of several runs. Order of picking carries no meaning. Then choose a level and press the button — the level sticks, so a run at the same level goes
 quickly.
 
+Enter finishes an edit. The fields that edit in place — a guest's name, a group's, a
+table's, and the numbers describing the room — have no submit button and save every
+keystroke as you type, so Enter lets go of the field rather than doing nothing. That also
+hands the keyboard back, since the keys below are live again the moment nothing is being
+typed into. The add-a-guest box is the exception: there Enter adds the name and keeps the
+box, so a list can be typed straight through.
+
 Four keys work anywhere outside a text field: <kbd>A</kbd> applies the level to the pick,
 <kbd>S</kbd> strengthens only the pairs below it, <kbd>C</kbd> clears the pick, the same as
 **Clear selection** in the top bar, and <kbd>G</kbd> generates a seating. Each is live

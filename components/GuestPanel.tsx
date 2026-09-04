@@ -6,6 +6,7 @@ import { levelClass, levelPhrase } from '@/lib/defaults';
 import { groupMembers } from '@/lib/guests';
 import type { Group, Guest, PairingLevel, SeatingDoc } from '@/lib/types';
 import PinIcon from '@/components/PinIcon';
+import blurOnEnter from '@/components/blurOnEnter';
 
 export interface GuestPanelProps {
   doc: SeatingDoc;
@@ -272,6 +273,7 @@ export default function GuestPanel({
           value={guest.name}
           aria-label="Guest name"
           onChange={(e) => onRename(guest.id, e.target.value)}
+          onKeyDown={blurOnEnter}
         />
         {pinnedTo !== undefined && (
           <span
@@ -439,6 +441,7 @@ export default function GuestPanel({
                     value={group.name}
                     aria-label="Group name"
                     onChange={(e) => onRenameGroup(group.id, e.target.value)}
+                    onKeyDown={blurOnEnter}
                   />
                   {/* Kept in the layout when idle, so the heading holds still
                       as guests are ticked. */}
