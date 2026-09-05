@@ -580,6 +580,31 @@ export function clearAllPins(doc: SeatingDoc): SeatingDoc {
 }
 
 /**
+ * Pin or unpin everyone sitting at one table.
+ *
+ * A table that came out right is usually right as a whole — the point of pinning
+ * it is to hold that arrangement while the rest of the room is solved again, and
+ * doing it a seat at a time is eight clicks to say one thing.
+ *
+ * Pinning only ever names the table those guests are already at, so it cannot
+ * promise the solver a seat that does not exist.
+ */
+export function setTablePinned(
+  doc: SeatingDoc,
+  index: number,
+  pinned: boolean,
+): SeatingDoc {
+  const seated = doc.tables[index] ?? [];
+  if (seated.length === 0) return doc;
+  const pins = { ...doc.pins };
+  for (const id of seated) {
+    if (pinned) pins[id] = index;
+    else delete pins[id];
+  }
+  return { ...doc, pins };
+}
+
+/**
  * Everyone named in a pairing that touches the picked group: the picked guests
  * themselves, plus whoever those pairings reach out to. Exactly the guests
  * appearing in the two bands the pairing list floats to the top, so the guest

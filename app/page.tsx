@@ -30,6 +30,7 @@ import {
   removeTableSpec,
   seatGuestsAt,
   setPairingLevel,
+  setTablePinned,
   setPin,
   setTableName,
   strengthenGroupLevel,
@@ -465,6 +466,9 @@ export default function Page() {
               setDoc((d) => seatGuestsAt(d, draft.guests, index))
             }
             onMoveTable={(from, to) => setDoc((d) => moveTable(d, from, to))}
+            onPinTable={(index, pinned) =>
+              setDoc((d) => setTablePinned(d, index, pinned))
+            }
             onRenameTable={(index, name) =>
               setDoc((d) => setTableName(d, index, name))
             }

@@ -150,7 +150,10 @@ and pins them, taking them off whatever table they were at. If the table cannot 
 all, whoever was sitting there unpinned gives up their seat first, and any arrival still
 without one is left in *Nowhere to sit* rather than pinned to a table with no room.
 
-**Pins** — the pin after a guest's name in the tables panel locks them to that table.
+**Pins** — the pin after a guest's name in the tables panel locks them to that table. The
+pin in a table's heading does the whole table at once, and reads as held only when nobody
+at it is still loose — which is usually what you want, since a table that came out right is
+right as a whole.
 Pinned guests stay put through later **Generate** presses while everyone else is
 rearranged, and are marked in the guest list too, so you can see at a glance who is held
 down without hunting through the tables.

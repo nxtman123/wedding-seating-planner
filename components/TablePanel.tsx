@@ -41,6 +41,8 @@ export interface TablePanelProps {
   /** True while the solver is working, so the button can show it. */
   solving: boolean;
   onTogglePin: (guestId: string) => void;
+  /** Pin or unpin everyone seated at one table. */
+  onPinTable: (tableIndex: number, pinned: boolean) => void;
   onClearPins: () => void;
 }
 
@@ -58,6 +60,7 @@ export default function TablePanel({
   onGenerate,
   solving,
   onTogglePin,
+  onPinTable,
   onClearPins,
 }: TablePanelProps) {
   const tables = tableCount(doc);
@@ -288,6 +291,11 @@ export default function TablePanel({
         >
           {doc.tables.map((table, i) => {
             const conflicts = conflictsAtTable(doc, doc.tables, i);
+            /* Held as a whole only when nobody at it is loose — so a table with
+               one guest still free offers to pin, not to unpin. */
+            const allPinned =
+              table.length > 0 &&
+              table.every((id) => doc.pins[id] !== undefined);
             // A table holding anyone currently ticked gets the same gentle
             // highlight the pairing rows use.
             const holdsPicked = table.some((id) => chosen.has(id));
@@ -348,6 +356,29 @@ export default function TablePanel({
                   <span className="count">
                     {table.length}/{sizes[i]}
                   </span>
+                  {/* A table that came out right is usually right as a whole, so
+                      it can be held that way in one click rather than eight. */}
+                  {table.length > 0 && (
+                    <button
+                      type="button"
+                      className={
+                        allPinned ? 'pin-button pin-on' : 'pin-button'
+                      }
+                      title={
+                        allPinned
+                          ? `Unpin everyone at ${tableName(doc, i)}`
+                          : `Pin everyone at ${tableName(doc, i)}`
+                      }
+                      aria-label={
+                        allPinned
+                          ? `Unpin everyone at ${tableName(doc, i)}`
+                          : `Pin everyone at ${tableName(doc, i)}`
+                      }
+                      onClick={() => onPinTable(i, !allPinned)}
+                    >
+                      <PinIcon />
+                    </button>
+                  )}
                 </div>
                 {table.length === 0 ? (
                   <p className="empty">Empty</p>
