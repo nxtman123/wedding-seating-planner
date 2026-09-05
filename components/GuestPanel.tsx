@@ -7,6 +7,7 @@ import { groupMembers } from '@/lib/guests';
 import type { Group, Guest, PairingLevel, SeatingDoc } from '@/lib/types';
 import PinIcon from '@/components/PinIcon';
 import blurOnEnter from '@/components/blurOnEnter';
+import useDragScroll from '@/components/useDragScroll';
 
 export interface GuestPanelProps {
   doc: SeatingDoc;
@@ -162,11 +163,16 @@ export default function GuestPanel({
     return best;
   };
 
+  /* The page holds still while a row is in the air, and the list pulls itself
+     along when the drag nears either end. */
+  const { listRef, pull } = useDragScroll(cargo !== null);
+
   const over = (e: DragEvent<HTMLElement>) => {
     if (!cargo) return;
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
     setDropAt(pointFor(e, cargo.kind === 'group'));
+    pull(e.currentTarget, e.clientY);
   };
 
   const drop = (e: DragEvent<HTMLElement>) => {
@@ -373,7 +379,12 @@ export default function GuestPanel({
       {doc.guests.length === 0 && doc.groups.length === 0 ? (
         <p className="empty">No guests yet. Add a few to get started.</p>
       ) : (
-        <div className="scroller sections" onDragOver={over} onDrop={drop}>
+        <div
+          ref={listRef}
+          className="scroller sections"
+          onDragOver={over}
+          onDrop={drop}
+        >
           {entries.map(({ group, guest, members }, i) => {
             const topMark = dropAt?.kind === 'top' && dropAt.index === i;
             const lastMark =
