@@ -1071,12 +1071,21 @@ textarea {
   background: none;
   color: inherit;
 }
-/* A table nobody has named still has a name — its number — so the placeholder
-   is the heading, in the heading's own ink rather than a greyed hint. Which of
-   the two a heading is does not matter to anyone reading the room. */
+/* A table nobody has named still has a name — its number — so at rest the
+   placeholder is the heading, in the heading's own ink rather than a greyed
+   hint. Which of the two a heading is does not matter to anyone reading the
+   room.
+
+   It matters while you are typing into it, though, where text you can edit and
+   text you cannot must not look alike — so the field greys its placeholder for
+   as long as it is being edited. React puts `is-editing` on and takes it off:
+   `:focus::placeholder` is the obvious way to say this and does not apply. */
 .table-head .table-name::placeholder {
   color: inherit;
   opacity: 1;
+}
+.table-head .table-name.is-editing::placeholder {
+  color: var(--muted);
 }
 .table-head .table-name:focus-visible {
   outline: none;

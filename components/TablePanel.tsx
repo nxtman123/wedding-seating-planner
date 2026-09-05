@@ -68,6 +68,16 @@ export default function TablePanel({
   const [dragging, setDragging] = useState<number | null>(null);
   /** Where a drop would land, as the position it would be inserted before. */
   const [dropAt, setDropAt] = useState<number | null>(null);
+  /*
+   * Which table's name is being edited, if any.
+   *
+   * At rest an unnamed table's number is drawn as the heading itself, so the
+   * placeholder wears the heading's ink. That is wrong the moment you are typing
+   * into the field, where text you cannot edit and text you can would look
+   * alike. The class is carried here rather than by `:focus::placeholder`, which
+   * this browser does not apply.
+   */
+  const [editing, setEditing] = useState<number | null>(null);
 
   const endDrag = () => {
     setArmed(null);
@@ -316,11 +326,15 @@ export default function TablePanel({
                   <h3>
                     <input
                       type="text"
-                      className="table-name"
+                      className={
+                        editing === i ? 'table-name is-editing' : 'table-name'
+                      }
                       value={doc.tableNames[i] ?? ''}
                       placeholder={`Table ${i + 1}`}
                       aria-label={`Name of table ${i + 1}`}
                       onChange={(e) => onRenameTable(i, e.target.value)}
+                      onFocus={() => setEditing(i)}
+                      onBlur={() => setEditing(null)}
                       onKeyDown={blurOnEnter}
                     />
                   </h3>
