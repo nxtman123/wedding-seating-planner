@@ -5,7 +5,15 @@ import {
   uid,
 } from './defaults';
 import { tableSizes } from './solver';
-import type { Group, Guest, Pairing, PairingLevel, SeatingDoc } from './types';
+import type {
+  Group,
+  Guest,
+  Pairing,
+  PairingLevel,
+  Pins,
+  SeatingDoc,
+  TableSpec,
+} from './types';
 
 /* -------------------------------------------------------------------------- */
 /*  Guests                                                                     */
@@ -412,8 +420,12 @@ export function tableName(doc: SeatingDoc, index: number): string {
 }
 
 /**
- * Name a table. An empty name is kept rather than falling back, so clearing the
- * field leaves it clear instead of refilling as the last letter is deleted.
+ * Name a table. Clearing the field gives the table its number back.
+ *
+ * The field shows the stored name and offers "Table N" as its placeholder, so
+ * emptying it is how you say "no name in particular" — which matters once tables
+ * can be reordered, since a name that was only ever the number would otherwise
+ * follow its table around and end up reading "Table 7" in third place.
  */
 export function setTableName(
   doc: SeatingDoc,
@@ -422,8 +434,69 @@ export function setTableName(
 ): SeatingDoc {
   const tableNames = [...doc.tableNames];
   while (tableNames.length <= index) tableNames.push(undefined as never);
-  tableNames[index] = name;
+  tableNames[index] = name.trim() ? name : (undefined as never);
   return { ...doc, tableNames };
+}
+
+/**
+ * Describe a run of table sizes as room rows again, so the editor still reads
+ * "10 tables of 8" rather than ten rows of one.
+ *
+ * Existing row ids are reused in order, which keeps the inputs from remounting
+ * — and losing focus — when a move leaves the shape of the room unchanged, as
+ * it does whenever every table is the same size.
+ */
+function roomRowsFor(sizes: number[], previous: TableSpec[]): TableSpec[] {
+  const rows: TableSpec[] = [];
+  for (const seats of sizes) {
+    const last = rows[rows.length - 1];
+    if (last && last.seats === seats) last.count += 1;
+    else rows.push({ id: '', count: 1, seats });
+  }
+  return rows.map((row, i) => ({ ...row, id: previous[i]?.id ?? uid() }));
+}
+
+/**
+ * Move the table at `from` so it sits before position `to`.
+ *
+ * A table is only ever its index here — the seating, the name, the pins and the
+ * capacity are four separate things keyed by it — so a move has to carry all
+ * four. The first three are permuted directly; the capacity travels by
+ * permuting the flattened sizes and describing the room again from the result,
+ * so a sixteen dragged in among the eights stays a sixteen.
+ */
+export function moveTable(
+  doc: SeatingDoc,
+  from: number,
+  to: number,
+): SeatingDoc {
+  const sizes = tableSizes(doc);
+  const n = sizes.length;
+  if (from < 0 || from >= n) return doc;
+  const at = to > from ? to - 1 : to;
+  if (at === from || at < 0 || at > n - 1) return doc;
+
+  // Where each table ends up, as old index -> new index and back again.
+  const wasAt = [...Array(n).keys()];
+  wasAt.splice(at, 0, ...wasAt.splice(from, 1));
+  const nowAt = new Map(wasAt.map((old, next) => [old, next]));
+
+  const pins: Pins = {};
+  for (const [guest, table] of Object.entries(doc.pins)) {
+    const next = nowAt.get(table);
+    if (next !== undefined) pins[guest] = next;
+  }
+
+  return {
+    ...doc,
+    tableSpecs: roomRowsFor(
+      wasAt.map((old) => sizes[old]),
+      doc.tableSpecs,
+    ),
+    tableNames: wasAt.map((old) => doc.tableNames[old]),
+    tables: wasAt.map((old) => doc.tables[old] ?? []),
+    pins,
+  };
 }
 
 /**

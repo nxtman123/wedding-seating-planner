@@ -1,5 +1,7 @@
 'use client';
 
+import { useState } from 'react';
+
 import {
   levelBadge,
   levelClass,
@@ -32,6 +34,8 @@ export interface TablePanelProps {
   /** Seat every ticked guest at this table and pin them there. */
   onAddPickedToTable: (tableIndex: number) => void;
   onRenameTable: (tableIndex: number, name: string) => void;
+  /** Move the table at `from` so it sits before position `to`. */
+  onMoveTable: (from: number, to: number) => void;
   onGenerate: () => void;
   /** True while the solver is working, so the button can show it. */
   solving: boolean;
@@ -49,12 +53,54 @@ export default function TablePanel({
   onSpecRemove,
   onAddPickedToTable,
   onRenameTable,
+  onMoveTable,
   onGenerate,
   solving,
   onTogglePin,
   onClearPins,
 }: TablePanelProps) {
   const tables = tableCount(doc);
+  /*
+   * Only a grip arms a drag: the card's heading is a text field, and a card that
+   * was always draggable would fight selecting the name inside it.
+   */
+  const [armed, setArmed] = useState<number | null>(null);
+  const [dragging, setDragging] = useState<number | null>(null);
+  /** Where a drop would land, as the position it would be inserted before. */
+  const [dropAt, setDropAt] = useState<number | null>(null);
+
+  const endDrag = () => {
+    setArmed(null);
+    setDragging(null);
+    setDropAt(null);
+  };
+
+  /*
+   * Cards wrap into a grid rather than a column, so a drop cannot be resolved by
+   * height alone. It goes to whichever card's middle is nearest the cursor, and
+   * lands before or after it depending on which side of that middle the cursor
+   * is — which reads correctly along a row and still picks the right row when
+   * the cursor is between two.
+   */
+  const dropIndex = (list: HTMLElement, x: number, y: number): number => {
+    const cards = [
+      ...list.querySelectorAll<HTMLElement>(':scope > [data-table]'),
+    ];
+    let best = 0;
+    let bestDistance = Infinity;
+    cards.forEach((card, i) => {
+      const box = card.getBoundingClientRect();
+      const cx = box.left + box.width / 2;
+      const cy = box.top + box.height / 2;
+      const distance = (x - cx) ** 2 + (y - cy) ** 2;
+      if (distance < bestDistance) {
+        bestDistance = distance;
+        best = x < cx ? i : i + 1;
+      }
+    });
+    return best;
+  };
+
   const sizes = tableSizes(doc);
   const seats = seatCount(doc);
   const seated = doc.tables.reduce((n, t) => n + t.length, 0);
@@ -209,27 +255,70 @@ export default function TablePanel({
           pairings are in.
         </p>
       ) : (
-        <div className="tables scroller">
+        <div
+          className="tables scroller"
+          onDragOver={(e) => {
+            if (dragging === null) return;
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            setDropAt(dropIndex(e.currentTarget, e.clientX, e.clientY));
+          }}
+          onDrop={(e) => {
+            e.preventDefault();
+            if (dragging !== null && dropAt !== null) onMoveTable(dragging, dropAt);
+            endDrag();
+          }}
+        >
           {doc.tables.map((table, i) => {
             const conflicts = conflictsAtTable(doc, doc.tables, i);
             // A table holding anyone currently ticked gets the same gentle
             // highlight the pairing rows use.
             const holdsPicked = table.some((id) => chosen.has(id));
+            const className = [
+              'table-card',
+              holdsPicked ? 'row-selected' : '',
+              dragging === i ? 'row-dragging' : '',
+              dropAt === i ? 'drop-before' : '',
+              dropAt === doc.tables.length && i === doc.tables.length - 1
+                ? 'drop-after'
+                : '',
+            ]
+              .filter(Boolean)
+              .join(' ');
             return (
               <div
                 key={i}
-                className={
-                  holdsPicked ? 'table-card row-selected' : 'table-card'
-                }
+                data-table=""
+                className={className}
+                draggable={armed === i}
+                onDragStart={(e) => {
+                  setDragging(i);
+                  e.dataTransfer.effectAllowed = 'move';
+                  e.dataTransfer.setData('text/plain', String(i));
+                }}
+                onDragEnd={endDrag}
               >
                 <div className="table-head">
+                  <span
+                    className="drag-handle"
+                    title="Drag to reorder"
+                    aria-hidden="true"
+                    onMouseDown={() => setArmed(i)}
+                    onMouseUp={() => setArmed(null)}
+                  >
+                    ⠿
+                  </span>
                   {/* An h3 for the outline, an invisible field inside it for
-                      editing — the input inherits the heading's own type. */}
+                      editing — the input inherits the heading's own type. The
+                      field holds only what the table was actually named, so its
+                      number shows through as a placeholder and clearing the
+                      field gives that number back. */}
                   <h3>
                     <input
                       type="text"
                       className="table-name"
-                      value={tableName(doc, i)}
+                      value={doc.tableNames[i] ?? ''}
+                      placeholder={`Table ${i + 1}`}
                       aria-label={`Name of table ${i + 1}`}
                       onChange={(e) => onRenameTable(i, e.target.value)}
                       onKeyDown={blurOnEnter}

@@ -511,8 +511,33 @@ textarea {
 .group-section.drop-after::after {
   bottom: 10px;
 }
-.guest-row.row-dragging {
+.guest-row.row-dragging,
+.table-card.row-dragging {
   opacity: 0.4;
+}
+
+/* Tables wrap into a grid, so the line marking a drop stands upright between two
+   cards rather than lying between two rows. It sits in the gap and is drawn
+   outside the card, so showing it shifts nothing. */
+.table-card {
+  position: relative;
+}
+.table-card.drop-before::before,
+.table-card.drop-after::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  width: 2px;
+  border-radius: 1px;
+  background: var(--accent);
+  pointer-events: none;
+}
+.table-card.drop-before::before {
+  left: -6px;
+}
+.table-card.drop-after::after {
+  right: -6px;
 }
 
 .drag-handle {
@@ -524,7 +549,8 @@ textarea {
   cursor: grab;
   user-select: none;
 }
-.guest-row:hover .drag-handle {
+.guest-row:hover .drag-handle,
+.table-card:hover .drag-handle {
   color: var(--muted);
 }
 .drag-handle:active {
@@ -1044,6 +1070,13 @@ textarea {
   border-radius: 0;
   background: none;
   color: inherit;
+}
+/* A table nobody has named still has a name — its number — so the placeholder
+   is the heading, in the heading's own ink rather than a greyed hint. Which of
+   the two a heading is does not matter to anyone reading the room. */
+.table-head .table-name::placeholder {
+  color: inherit;
+  opacity: 1;
 }
 .table-head .table-name:focus-visible {
   outline: none;

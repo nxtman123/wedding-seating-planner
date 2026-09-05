@@ -17,6 +17,7 @@ import {
   linkedGuests,
   moveGroupToList,
   moveGuestsIntoGroup,
+  moveTable,
   moveGuestsToList,
   pairingCounts,
   removeGroup,
@@ -463,6 +464,7 @@ export default function Page() {
             onAddPickedToTable={(index) =>
               setDoc((d) => seatGuestsAt(d, draft.guests, index))
             }
+            onMoveTable={(from, to) => setDoc((d) => moveTable(d, from, to))}
             onRenameTable={(index, name) =>
               setDoc((d) => setTableName(d, index, name))
             }
