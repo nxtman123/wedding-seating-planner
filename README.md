@@ -10,6 +10,12 @@ of up to N guests; there is no "next to" finer than "same table".
 Everything runs client-side and your work is saved in your browser (`localStorage`).
 You can also **Export** / **Import** it as JSON.
 
+**Undo** and **Redo** walk back through the changes, on the toolbar or on the usual
+<kbd>⌘Z</kbd> / <kbd>⇧⌘Z</kbd> — including **Reset** and **Import**, which are the two
+worth being able to take back. A run of keystrokes in one field counts as a single step,
+so undoing a rename returns the name rather than a letter. The stack is this sitting's
+only: it lives in memory, is never saved or exported, and starts empty on a reload.
+
 ## How it works
 
 **Guests** (left panel) — add them one at a time, or hit **Paste a list** beside the

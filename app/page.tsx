@@ -47,9 +47,11 @@ import type { PairingDraft, PairingLevel, SeatingDoc } from '@/lib/types';
 import GuestPanel from '@/components/GuestPanel';
 import PairingPanel from '@/components/PairingPanel';
 import TablePanel from '@/components/TablePanel';
+import useDocHistory from '@/components/useDocHistory';
 
 export default function Page() {
-  const [doc, setDoc] = useState<SeatingDoc>(defaultDoc());
+  const { doc, commit, load, undo, redo, canUndo, canRedo } =
+    useDocHistory(defaultDoc());
   /** The group being composed, shared by the guest list and the pairing panel. */
   const [draft, setDraft] = useState<PairingDraft>({ guests: [], level: 1 });
   /** The last guest ticked on their own, which a shift-click reaches back to. */
@@ -60,7 +62,7 @@ export default function Page() {
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    setDoc(loadDoc());
+    load(loadDoc());
     setHydrated(true);
   }, []);
 
@@ -117,7 +119,7 @@ export default function Page() {
     const run = () => {
       if (started) return;
       started = true;
-      setDoc((d) => ({ ...d, tables: solveSeating(d).tables }));
+      commit((d) => ({ ...d, tables: solveSeating(d).tables }));
       setSolving(false);
     };
     requestAnimationFrame(() => requestAnimationFrame(run));
@@ -175,23 +177,23 @@ export default function Page() {
    * a level can be tried and changed without re-ticking everyone.
    */
   const applyToGroup = () =>
-    setDoc((d) => applyGroupLevel(d, draft.guests, draft.level));
+    commit((d) => applyGroupLevel(d, draft.guests, draft.level));
 
   /** Fill in only the pairs the group is missing, leaving the rest as they are. */
   const applyToMissing = () =>
-    setDoc((d) => fillGroupLevel(d, draft.guests, draft.level));
+    commit((d) => fillGroupLevel(d, draft.guests, draft.level));
 
   /** Raise only the pairs weaker than the level shown, leaving stronger ones. */
   const applyToWeaker = () =>
-    setDoc((d) => strengthenGroupLevel(d, draft.guests, draft.level));
+    commit((d) => strengthenGroupLevel(d, draft.guests, draft.level));
 
   /** Drop the pairings inside the group, keeping the ones reaching outside it. */
   const removeInside = () =>
-    setDoc((d) => removeGroupPairings(d, draft.guests));
+    commit((d) => removeGroupPairings(d, draft.guests));
 
   /** The mirror: drop what ties the group to everyone else, keeping its inside. */
   const removeOutward = () =>
-    setDoc((d) => removeOutwardPairings(d, draft.guests));
+    commit((d) => removeOutwardPairings(d, draft.guests));
 
   /**
    * Delete whoever is ticked. Guests can only be removed this way now, so the
@@ -208,7 +210,7 @@ export default function Page() {
     if (!window.confirm(`Delete ${who}? Their pairings and seats go too.`)) {
       return;
     }
-    setDoc((d) => removeGuests(d, going));
+    commit((d) => removeGuests(d, going));
     setDraft((d) => ({ ...d, guests: [] }));
   };
 
@@ -228,7 +230,7 @@ export default function Page() {
     ) {
       return;
     }
-    setDoc((d) => removeGroup(d, groupId));
+    commit((d) => removeGroup(d, groupId));
   };
 
   /* ----- pinning ----- */
@@ -238,7 +240,7 @@ export default function Page() {
    * needs a seating to point at, so this only fires from a seated row.
    */
   const togglePin = (guestId: string) =>
-    setDoc((d) => {
+    commit((d) => {
       if (d.pins[guestId] !== undefined) return clearPin(d, guestId);
       const table = seatIndex(d.tables).get(guestId);
       return table === undefined ? d : setPin(d, guestId, table);
@@ -339,6 +341,29 @@ export default function Page() {
    * C and G also carry you to the panel they act on: clearing a pick is done
    * with the guests, and a seating is worth watching appear.
    */
+  const historyRef = useRef({ undo, redo });
+  useEffect(() => {
+    historyRef.current = { undo, redo };
+  });
+
+  /**
+   * Undo and redo on the usual chord, which works while typing a name too — the
+   * letter shortcuts stand aside for anything with a modifier held, and a field
+   * mid-edit is exactly where an undo is most often wanted.
+   */
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (!(e.metaKey || e.ctrlKey) || e.altKey) return;
+      const key = e.key.toLowerCase();
+      if (key !== 'z' && key !== 'y') return;
+      e.preventDefault();
+      if (key === 'y' || e.shiftKey) historyRef.current.redo();
+      else historyRef.current.undo();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.metaKey || e.ctrlKey || e.altKey) return;
@@ -373,7 +398,8 @@ export default function Page() {
   const doImport = async (file: File) => {
     try {
       const text = await file.text();
-      setDoc(parseDocFile(text));
+      const imported = parseDocFile(text);
+      commit(() => imported);
       setDraft({ guests: [], level: 1 });
     } catch (e) {
       window.alert('Could not import file: ' + (e as Error).message);
@@ -382,7 +408,7 @@ export default function Page() {
 
   const reset = () => {
     if (window.confirm('Clear the guest list, pairings and seating?')) {
-      setDoc(defaultDoc());
+      commit(() => defaultDoc());
       setDraft({ guests: [], level: 1 });
     }
   };
@@ -399,6 +425,22 @@ export default function Page() {
           themselves out.
         </p>
         <div className="toolbar">
+          <button
+            type="button"
+            onClick={undo}
+            disabled={!canUndo}
+            title="Undo the last change"
+          >
+            Undo
+          </button>
+          <button
+            type="button"
+            onClick={redo}
+            disabled={!canRedo}
+            title="Redo the change just undone"
+          >
+            Redo
+          </button>
           <button
             type="button"
             onClick={clearSelection}
@@ -438,27 +480,31 @@ export default function Page() {
             doc={doc}
             counts={counts}
             linked={linked}
-            onAdd={(name) => setDoc((d) => addGuest(d, name))}
-            onAddMany={(text) => setDoc((d) => addGuestsFromText(d, text))}
-            onRename={(id, name) => setDoc((d) => renameGuest(d, id, name))}
+            onAdd={(name) => commit((d) => addGuest(d, name))}
+            onAddMany={(text) => commit((d) => addGuestsFromText(d, text))}
+            onRename={(id, name) =>
+              commit((d) => renameGuest(d, id, name), `guest:${id}`)
+            }
             onDeletePicked={deletePicked}
             selected={draft.guests}
             onTogglePair={toggleGuestSelection}
-            onAddGroup={() => setDoc((d) => addGroup(d, draft.guests))}
-            onRenameGroup={(id, n) => setDoc((d) => renameGroup(d, id, n))}
+            onAddGroup={() => commit((d) => addGroup(d, draft.guests))}
+            onRenameGroup={(id, n) =>
+              commit((d) => renameGroup(d, id, n), `group:${id}`)
+            }
             onRemoveGroup={dropGroup}
             onReorder={(ids, groupId, index) =>
-              setDoc((d) =>
+              commit((d) =>
                 groupId === null
                   ? moveGuestsToList(d, ids, index)
                   : moveGuestsIntoGroup(d, ids, groupId, index),
               )
             }
             onReorderGroup={(id, index) =>
-              setDoc((d) => moveGroupToList(d, id, index))
+              commit((d) => moveGroupToList(d, id, index))
             }
             onAddPickedToGroup={(groupId) =>
-              setDoc((d) => assignToGroup(d, draft.guests, groupId))
+              commit((d) => assignToGroup(d, draft.guests, groupId))
             }
           />
           <PairingPanel
@@ -472,34 +518,34 @@ export default function Page() {
             onRemoveInside={removeInside}
             onRemoveOutward={removeOutward}
             onSetLevel={(id, level) =>
-              setDoc((d) => setPairingLevel(d, id, level))
+              commit((d) => setPairingLevel(d, id, level))
             }
-            onRemove={(id) => setDoc((d) => removePairing(d, id))}
+            onRemove={(id) => commit((d) => removePairing(d, id))}
           />
           <TablePanel
             doc={doc}
             score={score}
             breakdown={breakdown}
             onSpecChange={(id, patch) =>
-              setDoc((d) => setTableSpec(d, id, patch))
+              commit((d) => setTableSpec(d, id, patch), `room:${id}`)
             }
-            onSpecAdd={() => setDoc(addTableSpec)}
-            onSpecRemove={(id) => setDoc((d) => removeTableSpec(d, id))}
+            onSpecAdd={() => commit(addTableSpec)}
+            onSpecRemove={(id) => commit((d) => removeTableSpec(d, id))}
             onAddPickedToTable={(index) =>
-              setDoc((d) => seatGuestsAt(d, draft.guests, index))
+              commit((d) => seatGuestsAt(d, draft.guests, index))
             }
-            onMoveTable={(from, to) => setDoc((d) => moveTable(d, from, to))}
+            onMoveTable={(from, to) => commit((d) => moveTable(d, from, to))}
             onPinTable={(index, pinned) =>
-              setDoc((d) => setTablePinned(d, index, pinned))
+              commit((d) => setTablePinned(d, index, pinned))
             }
             onRenameTable={(index, name) =>
-              setDoc((d) => setTableName(d, index, name))
+              commit((d) => setTableName(d, index, name), `table:${index}`)
             }
             selected={draft.guests}
             onGenerate={generate}
             solving={solving}
             onTogglePin={togglePin}
-            onClearPins={() => setDoc(clearAllPins)}
+            onClearPins={() => commit(clearAllPins)}
           />
         </div>
       )}
