@@ -53,7 +53,10 @@ box, so a list can be typed straight through.
 Four keys work anywhere outside a text field: <kbd>A</kbd> applies the level to the pick,
 <kbd>S</kbd> strengthens only the pairs below it, <kbd>C</kbd> clears the pick, the same as
 **Clear selection** in the top bar, and <kbd>G</kbd> generates a seating. Each is live
-exactly when its button is on screen.
+exactly when its button is on screen. Where the layout has rows to move between, <kbd>C</kbd>
+and <kbd>G</kbd> also take you to the panel they act on — clearing a pick is done among the
+guests, and a seating is worth watching appear. Wide enough for three columns there is
+nothing to scroll, so neither moves the page.
 
 Pick **two** guests for a single pairing. Pick **three or more** and you get a clique:
 every pair within the group is set to the same level, so five friends who should all sit

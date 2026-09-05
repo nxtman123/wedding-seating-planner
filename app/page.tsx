@@ -313,10 +313,31 @@ export default function Page() {
   });
 
   /**
+   * Bring one end of the page into view, when the layout has ends to move
+   * between.
+   *
+   * Wide enough for three columns and there is nothing to scroll — the whole
+   * page is one screen, and moving it would be a jolt with no destination.
+   * Narrower, the rows are screens, so the two keys that act on a whole panel
+   * take you to the panel they acted on.
+   */
+  const showRow = (end: 'top' | 'bottom') => {
+    const page = document.scrollingElement;
+    if (!page || page.scrollHeight <= page.clientHeight + 1) return;
+    page.scrollTo({
+      top: end === 'top' ? 0 : page.scrollHeight,
+      behavior: 'smooth',
+    });
+  };
+
+  /**
    * A applies the level to the pick, S strengthens only the pairs below it, C
    * clears the pick and G generates — wherever you are, except where the letter
    * is being typed, and with a modifier held, where it belongs to the browser.
    * Each key is live exactly when its button is, so nothing happens off screen.
+   *
+   * C and G also carry you to the panel they act on: clearing a pick is done
+   * with the guests, and a seating is worth watching appear.
    */
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -337,7 +358,9 @@ export default function Page() {
         }
       } else if (key === 'c') {
         setDraft((d) => (d.guests.length ? { ...d, guests: [] } : d));
+        showRow('top');
       } else {
+        showRow('bottom');
         generateRef.current();
       }
     };
