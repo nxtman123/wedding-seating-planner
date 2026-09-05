@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import {
   levelBadge,
@@ -83,6 +83,65 @@ export default function TablePanel({
     setArmed(null);
     setDragging(null);
     setDropAt(null);
+  };
+
+  /*
+   * While a table is in the air the page itself holds still, so the only thing
+   * that moves is the list being rearranged. Otherwise a drag towards the foot
+   * of the panel pulls the whole page down instead — the cards you are aiming
+   * at leave the window, and the drop lands somewhere you did not choose.
+   */
+  useEffect(() => {
+    if (dragging === null) return;
+    const root = document.documentElement;
+    const held = root.style.overflow;
+    root.style.overflow = 'hidden';
+    return () => {
+      root.style.overflow = held;
+    };
+  }, [dragging]);
+
+  /*
+   * The list scrolls itself while you hover near its ends.
+   *
+   * The browser does this on its own, but only within a few pixels of the edge,
+   * which is a hard thing to hold a drag inside of. This reaches `EDGE_PULL`
+   * pixels in and gets faster the closer you are, so the whole bottom of the
+   * panel is somewhere you can rest a drag and let the list come to you.
+   *
+   * `dragover` only says where the cursor is; the scrolling has to be its own
+   * clock, or a drag held still would stop the moment the events did.
+   */
+  const scrollSpeed = useRef(0);
+  const listRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    if (dragging === null) return;
+    const tick = window.setInterval(() => {
+      const list = listRef.current;
+      if (list && scrollSpeed.current !== 0) {
+        list.scrollTop += scrollSpeed.current;
+      }
+    }, 16);
+    return () => {
+      window.clearInterval(tick);
+      scrollSpeed.current = 0;
+    };
+  }, [dragging]);
+
+  /** How near an end the cursor pulls the list along, and how hard at the very end. */
+  const EDGE_PULL = 80;
+  const EDGE_SPEED = 20;
+
+  const pullTowardsEnds = (list: HTMLElement, y: number) => {
+    const box = list.getBoundingClientRect();
+    const fromTop = y - box.top;
+    const fromBottom = box.bottom - y;
+    const speed = (depth: number) =>
+      Math.ceil(((EDGE_PULL - depth) / EDGE_PULL) * EDGE_SPEED);
+    if (fromTop < EDGE_PULL) scrollSpeed.current = -speed(Math.max(0, fromTop));
+    else if (fromBottom < EDGE_PULL) {
+      scrollSpeed.current = speed(Math.max(0, fromBottom));
+    } else scrollSpeed.current = 0;
   };
 
   /*
@@ -266,12 +325,14 @@ export default function TablePanel({
         </p>
       ) : (
         <div
+          ref={listRef}
           className="tables scroller"
           onDragOver={(e) => {
             if (dragging === null) return;
             e.preventDefault();
             e.dataTransfer.dropEffect = 'move';
             setDropAt(dropIndex(e.currentTarget, e.clientX, e.clientY));
+            pullTowardsEnds(e.currentTarget, e.clientY);
           }}
           onDrop={(e) => {
             e.preventDefault();
