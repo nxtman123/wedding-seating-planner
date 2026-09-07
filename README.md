@@ -108,7 +108,7 @@ be set at one level without resetting it each time.
 | --- | --- | --- | --- |
 | ❤️ | 600 | Must sit together | A **must sit with** B |
 | 😃 | 30 | Ought to sit together | A **ought to sit with** B |
-| 🤝 | 6 | Like to sit together | A **likes to sit with** B |
+| 🙂 | 6 | Like to sit together | A **likes to sit with** B |
 | 👋 | 0 | Could sit together | A **could sit with** B |
 | | −1 | *nothing said at all* | |
 | 😬 | −6 | Should not sit together | A **should avoid** B |

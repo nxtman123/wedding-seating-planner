@@ -136,7 +136,7 @@ export function levelBadge(level: PairingLevel): string {
     case 2:
       return '😃';
     case 3:
-      return '🤝';
+      return '🙂';
     case 4:
       return '👋';
     case -2:
