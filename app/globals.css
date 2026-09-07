@@ -11,14 +11,19 @@
  * Every pairing of text and its ground in this file clears 4.5:1.
  */
 :root {
-  /* The lavender, and the two surfaces lightened out of it. */
-  --bg: #efdef8;
-  --surface: #fefaff;
-  --surface-2: #f8effd;
-  --border: #dccce4;
+  /*
+   * The periwinkle sets the hue; the ground sits well above it in lightness, so
+   * the page reads as tinted paper rather than as a coloured panel. The two
+   * surfaces climb from there, losing chroma as they go, which is what makes a
+   * card look lit rather than merely paler.
+   */
+  --bg: #e7e9ff;
+  --surface: #fafbff;
+  --surface-2: #f2f3ff;
+  --border: #d3d6ed;
   --text: #2e2832;
-  /* Dark enough to clear 4.5:1 on every ground it can land on — the two
-     surfaces and the lavender itself, which is the strictest of the three. */
+  /* Dark enough to clear 4.5:1 on every ground it can land on — both surfaces
+     and the page itself, which at this lightness no longer needs its own. */
   --muted: #6b6272;
   --accent: #5d3b7d;
   --accent-ink: #ffffff;
@@ -189,7 +194,7 @@ button {
 }
 button:hover:not(:disabled) {
   background: var(--surface-2);
-  border-color: #cdbbd6;
+  border-color: #c2c5df;
 }
 button:disabled {
   opacity: 0.45;
@@ -595,7 +600,7 @@ textarea {
   width: 14px;
   text-align: center;
   line-height: 1;
-  color: #cdc3d4;
+  color: #c3c5d8;
   cursor: grab;
   user-select: none;
 }
@@ -607,16 +612,20 @@ textarea {
   cursor: grabbing;
 }
 /* One highlight for everything the current pick touches: the guest rows, the
-   pairing rows an Apply would rewrite, and the tables holding those guests. */
+   pairing rows an Apply would rewrite, and the tables holding those guests.
+
+   It sits a clear step below the row's own ground rather than beside it: on a
+   tinted page a wash that differs only in hue stops reading as a highlight at
+   all, and the adjacent band has to land between the two or the ladder inverts. */
 .guest-row.row-selected,
 .pairing-row.row-selected,
 .table-card.row-selected {
-  background: #f8f1fe;
-  box-shadow: inset 0 0 0 1px #e5d8ef;
+  background: #f0e5f9;
+  box-shadow: inset 0 0 0 1px #ddcbeb;
 }
 .pairing-row.row-selected,
 .table-card.row-selected {
-  border-color: #e5d8ef;
+  border-color: #ddcbeb;
 }
 
 /* Reaching out of the pick rather than inside it: same treatment, stepped back,
@@ -624,9 +633,9 @@ textarea {
    touches and, in the guest list, for the guests on the far end of them. */
 .pairing-row.row-adjacent,
 .guest-row.row-adjacent {
-  background: #fbf7fe;
-  border-color: #f1eaf6;
-  box-shadow: inset 0 0 0 1px #f1eaf6;
+  background: #f3eef7;
+  border-color: #e8dfef;
+  box-shadow: inset 0 0 0 1px #e8dfef;
 }
 
 /* Picks a guest into the group. Order of picking carries no meaning, so this is
@@ -744,12 +753,12 @@ textarea {
   font-size: 0.75rem;
   border-radius: 6px;
   color: var(--accent);
-  border-color: #e5d8ef;
-  background: #f8f1fe;
+  border-color: #ddcbeb;
+  background: #f0e5f9;
 }
 .add-picked:hover:not(:disabled) {
-  background: #f1e5f9;
-  border-color: #dfcfeb;
+  background: #e8d9f3;
+  border-color: #d3bfe2;
 }
 /* Holds its place in the row when there is nothing picked to add. visibility
    keeps the box and takes it out of the tab order and the a11y tree both. */
@@ -763,7 +772,7 @@ textarea {
   font-size: 0.8rem;
   border-color: transparent;
   background: none;
-  color: #cdc3d4;
+  color: #c3c5d8;
 }
 .group-head .icon-button:hover:not(:disabled) {
   background: #ffe6df;
@@ -933,7 +942,7 @@ textarea {
   background: var(--danger-vivid);
 }
 .dot-unknown {
-  background: #c6becc;
+  background: #bec0d1;
 }
 
 /* ---------------- tables ---------------- */
@@ -1185,7 +1194,7 @@ textarea {
   border: 0;
   border-radius: 5px;
   background: none;
-  color: #cdc3d4;
+  color: #c3c5d8;
 }
 .pin-button:hover:not(:disabled) {
   background: #ede5f3;
@@ -1195,7 +1204,7 @@ textarea {
   color: var(--accent);
 }
 .pin-button.pin-on:hover:not(:disabled) {
-  background: #f1e5f9;
+  background: #e8d9f3;
 }
 
 .table-warning {
