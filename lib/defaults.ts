@@ -118,7 +118,7 @@ export function levelLabel(level: PairingLevel): string {
     case 4:
       return 'Could sit together';
     case -2:
-      return 'Rather not sit together';
+      return 'Should not sit together';
     case -1:
       return 'Must not sit together';
   }
@@ -134,9 +134,9 @@ export function levelBadge(level: PairingLevel): string {
     case 1:
       return '❤️';
     case 2:
-      return '🤝';
-    case 3:
       return '😃';
+    case 3:
+      return '🤝';
     case 4:
       return '👋';
     case -2:
@@ -163,7 +163,7 @@ export function levelPhrase(level: PairingLevel): string {
     case 4:
       return 'could sit with';
     case -2:
-      return 'rather avoid';
+      return 'should avoid';
     case -1:
       return 'must avoid';
   }

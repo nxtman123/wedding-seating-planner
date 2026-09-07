@@ -107,11 +107,11 @@ be set at one level without resetting it each time.
 | | Weight | Setting a group | A single pairing reads |
 | --- | --- | --- | --- |
 | ❤️ | 600 | Must sit together | A **must sit with** B |
-| 🤝 | 30 | Ought to sit together | A **ought to sit with** B |
-| 😃 | 6 | Like to sit together | A **likes to sit with** B |
+| 😃 | 30 | Ought to sit together | A **ought to sit with** B |
+| 🤝 | 6 | Like to sit together | A **likes to sit with** B |
 | 👋 | 0 | Could sit together | A **could sit with** B |
 | | −1 | *nothing said at all* | |
-| 😬 | −6 | Rather not sit together | A **rather avoids** B |
+| 😬 | −6 | Should not sit together | A **should avoid** B |
 | 🚫 | −1200 | Must not sit together | A **must avoid** B |
 
 The rung with no name is the one that does the most work. Two guests you have never
