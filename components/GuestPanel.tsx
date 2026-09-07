@@ -290,7 +290,7 @@ export default function GuestPanel({
             title={`Pinned to table ${pinnedTo + 1}`}
             aria-label={`Pinned to table ${pinnedTo + 1}`}
           >
-            <PinIcon size={13} />
+            <PinIcon size={17} />
           </span>
         )}
         {tally.map(({ level, count }) => (

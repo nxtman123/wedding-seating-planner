@@ -3,7 +3,7 @@
  * glyph points straight down; the `.pin-button`/`.pin-mark` rules turn it to
  * lean down-left, the angle a pin is actually pushed in at.
  */
-export default function PinIcon({ size = 15 }: { size?: number }) {
+export default function PinIcon({ size = 19 }: { size?: number }) {
   return (
     <svg
       viewBox="0 0 24 24"
