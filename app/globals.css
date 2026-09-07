@@ -12,15 +12,16 @@
  */
 :root {
   /*
-   * The periwinkle sets the hue; the ground sits well above it in lightness, so
-   * the page reads as tinted paper rather than as a coloured panel. The two
-   * surfaces climb from there, losing chroma as they go, which is what makes a
-   * card look lit rather than merely paler.
+   * All one hue — the accent's own — so the page, the panels and the accent are
+   * the same colour at different strengths rather than three that have to be
+   * made to agree. The ground is light enough to read as tinted paper rather
+   * than as a coloured panel, and the surfaces climb from there, shedding
+   * chroma as they go, which is what makes a card look lit rather than paler.
    */
-  --bg: #e7e9ff;
-  --surface: #fafbff;
-  --surface-2: #f2f3ff;
-  --border: #d3d6ed;
+  --bg: #f2e6fb;
+  --surface: #fdfafe;
+  --surface-2: #f8f1fd;
+  --border: #dfd3e8;
   --text: #2e2832;
   /* Dark enough to clear 4.5:1 on every ground it can land on — both surfaces
      and the page itself, which at this lightness no longer needs its own. */
@@ -194,7 +195,7 @@ button {
 }
 button:hover:not(:disabled) {
   background: var(--surface-2);
-  border-color: #c2c5df;
+  border-color: #cfc2da;
 }
 button:disabled {
   opacity: 0.45;
@@ -600,7 +601,7 @@ textarea {
   width: 14px;
   text-align: center;
   line-height: 1;
-  color: #c3c5d8;
+  color: #cdc2d4;
   cursor: grab;
   user-select: none;
 }
@@ -772,7 +773,7 @@ textarea {
   font-size: 0.8rem;
   border-color: transparent;
   background: none;
-  color: #c3c5d8;
+  color: #cdc2d4;
 }
 .group-head .icon-button:hover:not(:disabled) {
   background: #ffe6df;
@@ -828,15 +829,19 @@ textarea {
 }
 
 /* Reads as a sentence — name, relation, name — with the relation in a column of
-   its own so the dropdowns line up down the list. */
+   its own so the dropdowns line up down the list, and the outcome mark in one of
+   its own at the end.
+
+   No fill: three hundred filled rows made a wall of boxes, and with the row
+   plain the wash that marks a pick is the only fill in the list, which is
+   exactly what it should be. */
 .pairing-row {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 8px;
   padding: 5px 8px;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
+  border: 1px solid transparent;
   border-radius: 8px;
 }
 .pairing-name {
@@ -941,8 +946,24 @@ textarea {
   /* A fill, so it can be the given red rather than the readable one. */
   background: var(--danger-vivid);
 }
+/* The same marks the score report uses, in the same two colours. The column
+   holds its width empty so the names do not shift when a seating first
+   appears. */
+.outcome {
+  flex: none;
+  width: 13px;
+  text-align: center;
+  font-size: 0.85rem;
+  line-height: 1;
+}
+.outcome-ok {
+  color: var(--ok);
+}
+.outcome-bad {
+  color: var(--danger);
+}
 .dot-unknown {
-  background: #bec0d1;
+  background: #c7becd;
 }
 
 /* ---------------- tables ---------------- */
@@ -1194,7 +1215,7 @@ textarea {
   border: 0;
   border-radius: 5px;
   background: none;
-  color: #c3c5d8;
+  color: #cdc2d4;
 }
 .pin-button:hover:not(:disabled) {
   background: #ede5f3;

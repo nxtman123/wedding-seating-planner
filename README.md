@@ -125,7 +125,8 @@ university friends) and you have described a pool the solver may fill tables fro
 the couples and the households on top of that with **should** and **must**.
 
 In the pairing list the level sits between the two names, so each row reads as a sentence
-and doubles as the control that changes it.
+and doubles as the control that changes it — including taking it away, which is the last
+entry in the same dropdown rather than a button every row has to make room for.
 
 The levels are weights, not rules — the solver maximizes the total, so it will always
 produce a seating even when the pairings contradict each other. What matters is not the
@@ -155,7 +156,8 @@ not be given a seat is listed rather than squeezed in. The score comes with a li
 use — "all must sit with pairings honored", "6 should sit with pairings not honored" —
 because one broken **must** matters more than a hundred unseated **could**s, and a single
 total hides which it was. *Could* gets a plain grey count instead of a verdict, since
-leaving one of those unseated costs the score nothing and is not a failure. Per-table warnings and the dots in the pairings panel show the detail.
+leaving one of those unseated costs the score nothing and is not a failure. Per-table warnings show the detail, and each pairing row carries the same ✓ or ✗ at its
+end, so a row and the tally above it say the same thing the same way.
 
 Ticking guests puts an **Add to table** button on every table heading: it seats them there
 and pins them, taking them off whatever table they were at. If the table cannot hold them

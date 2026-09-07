@@ -47,16 +47,34 @@ export interface PairingPanelProps {
   onRemove: (id: string) => void;
 }
 
-/** Dot next to a pairing: did the current arrangement honor it? */
-function OutcomeDot({ outcome }: { outcome: PairingOutcome | undefined }) {
-  if (!outcome || outcome === 'unplaced') {
-    return <span className="dot dot-unknown" title="Not seated yet" />;
-  }
+/**
+ * Whether the current seating honored a pairing, in the marks the score report
+ * uses — so a row and the tally above it say the same thing the same way.
+ *
+ * The column is held even when there is nothing to put in it, which is every
+ * row until a seating exists; otherwise the names would shift sideways the
+ * first time you pressed Generate.
+ */
+function OutcomeMark({ outcome }: { outcome: PairingOutcome | undefined }) {
   if (outcome === 'satisfied') {
-    return <span className="dot dot-ok" title="Honored by this seating" />;
+    return (
+      <span className="outcome outcome-ok" title="Honored by this seating">
+        ✓
+      </span>
+    );
   }
-  return <span className="dot dot-bad" title="Not honored by this seating" />;
+  if (outcome === 'violated') {
+    return (
+      <span className="outcome outcome-bad" title="Not honored by this seating">
+        ✗
+      </span>
+    );
+  }
+  return <span className="outcome" title="Not seated yet" />;
 }
+
+/** The one option that is not a level. Never a stored value, only ever chosen. */
+const REMOVE = 'remove';
 
 export default function PairingPanel({
   doc,
@@ -219,7 +237,6 @@ export default function PairingPanel({
                 .filter(Boolean)
                 .join(' ')}
             >
-              <OutcomeDot outcome={outcomes.get(p.id)} />
               {/* Reads as a sentence: name, relation, name. */}
               <span className="pairing-name pairing-name-a">
                 {guestName(doc, p.a)}
@@ -229,26 +246,24 @@ export default function PairingPanel({
                 value={p.level}
                 aria-label={`${guestName(doc, p.a)} and ${guestName(doc, p.b)}`}
                 title={levelLabel(p.level)}
-                onChange={(e) =>
-                  onSetLevel(p.id, Number(e.target.value) as PairingLevel)
-                }
+                onChange={(e) => {
+                  if (e.target.value === REMOVE) onRemove(p.id);
+                  else onSetLevel(p.id, Number(e.target.value) as PairingLevel);
+                }}
               >
                 {PAIRING_LEVELS.map((l) => (
                   <option key={l} value={l}>
                     {levelBadge(l)} {levelPhrase(l)}
                   </option>
                 ))}
+                {/* Taking the pairing away is the last thing this control can
+                    do to it, so it lives at the foot of the same list rather
+                    than as a button the row has to make room for. */}
+                <hr />
+                <option value={REMOVE}>🗑️ Remove pairing</option>
               </select>
               <span className="pairing-name">{guestName(doc, p.b)}</span>
-              <button
-                type="button"
-                className="icon-button danger"
-                title="Remove pairing"
-                aria-label="Remove pairing"
-                onClick={() => onRemove(p.id)}
-              >
-                &times;
-              </button>
+              <OutcomeMark outcome={outcomes.get(p.id)} />
             </li>
           ))}
         </ul>
