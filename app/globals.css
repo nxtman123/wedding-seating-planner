@@ -104,6 +104,16 @@ body {
   font-size: 0.75rem;
   border-radius: 6px;
 }
+/* The key chip has to shrink further than the button did: at the page default it
+   stood nearly as tall as the small button holding it, which read as a second
+   button rather than a note about this one. */
+.toolbar kbd {
+  font-size: 0.62rem;
+  padding: 1px 4px;
+  margin-left: 5px;
+  border-bottom-width: 1px;
+  border-radius: 3px;
+}
 .toolbar {
   display: flex;
   gap: 8px;
