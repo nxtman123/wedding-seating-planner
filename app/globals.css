@@ -1288,15 +1288,26 @@ textarea {
   background: none;
   color: #e1dae7;
 }
+/*
+ * Two things, kept separate: the ground says whether the button is under the
+ * cursor, the pin says whether it is held. Hovering never changes what the pin
+ * is telling you.
+ *
+ * The one wrinkle is that a loose pin has to deepen slightly on hover — its own
+ * hover ground is darker than the card, and at rest it would sit at 1.1:1
+ * against it and vanish. It deepens from one grey to another, well short of the
+ * accent, so it still reads as an offer rather than as pressed.
+ */
 .pin-button:hover:not(:disabled) {
   background: #ede5f3;
-  color: var(--text);
+  color: #b0a9b5;
 }
 .pin-button.pin-on {
   color: var(--accent);
 }
+/* Written past the hover rule, which would otherwise grey out a held pin. */
 .pin-button.pin-on:hover:not(:disabled) {
-  background: #e8d9f3;
+  color: var(--accent);
 }
 
 /*
@@ -1329,11 +1340,6 @@ textarea {
 .table-head .pin-button.pin-on {
   visibility: visible;
 }
-.pin-button.pin-on:hover:not(:disabled) {
-  background: var(--accent-deep);
-  color: var(--accent-ink);
-}
-
 .table-warning {
   list-style: none;
   margin: 2px 0 0;
