@@ -7,6 +7,9 @@ fill the room.
 Tables are circular and every seat at one is equivalent, so a table is really just a set
 of up to N guests; there is no "next to" finer than "same table".
 
+The heading is the plan's own name, edited in place — clear it and it goes back to
+*Seating Chart*. It travels with the document, so an export carries what you called it.
+
 Everything runs client-side and your work is saved in your browser (`localStorage`).
 You can also **Export** / **Import** it as JSON.
 

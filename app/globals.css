@@ -49,43 +49,60 @@ body {
 
 /* ---------------- header / toolbar ---------------- */
 /*
- * The title and the toolbar share the first line, and the subtitle drops to a
- * second on its own — which is a line cheaper than giving the toolbar a row,
- * and the panels below get the difference.
- *
- * The subtitle is written between them in the markup, where it belongs when
- * read aloud, and reordered here. Its 100% basis is what puts it on its own
- * line; the toolbar's auto margin holds it to the right until the window is too
- * narrow for both, at which point the wrap takes over on its own.
+ * The plan's name and the toolbar share one line. The name takes the room that
+ * is left, so a long one runs on until the buttons stop it rather than being
+ * cut to some fixed width; the toolbar keeps its own size and wraps beneath
+ * when a window cannot hold both.
  */
 .app-header {
   flex: none;
   display: flex;
   flex-wrap: wrap;
-  /* Bottoms, not baselines. The buttons are a few pixels taller than the title's
-     line box, so sharing a baseline left the title floating above the row's
-     floor and further from its own subtitle than the toolbar was. Aligned to
-     the bottom, the title sits the row gap above the sentence that belongs to
-     it. */
-  align-items: flex-end;
-  gap: 4px 16px;
+  align-items: center;
+  gap: 8px 16px;
   margin-bottom: 24px;
 }
 .app-header h1 {
+  flex: 1 1 12ch;
+  min-width: 0;
   margin: 0;
   font-size: 1.6rem;
   letter-spacing: -0.01em;
 }
 .app-header .toolbar {
-  order: 1;
   margin-left: auto;
 }
-.subtitle {
-  order: 2;
-  flex: 0 0 100%;
-  margin: 0;
+/* Editable in place, and indistinguishable from the heading it replaces — the
+   same arrangement the table headings use. Scoped past the global input rule,
+   whose :not() outweighs a lone class. */
+.app-header .doc-title {
+  width: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: inherit;
+}
+.app-header .doc-title:focus-visible {
+  outline: none;
+  box-shadow: inset 0 -2px 0 0 var(--accent);
+}
+/* A plan nobody has named still has a name, so at rest the placeholder is the
+   heading in the heading's own ink; it greys only while being typed into, where
+   text you can edit and text you cannot must not look alike. */
+.app-header .doc-title::placeholder {
+  color: inherit;
+  opacity: 1;
+}
+.app-header .doc-title.is-editing::placeholder {
   color: var(--muted);
-  font-size: 0.95rem;
+}
+/* The page's own controls are secondary to the work, so they take the size the
+   panels give their own small buttons rather than the page default. */
+.toolbar button {
+  padding: 3px 9px;
+  font-size: 0.75rem;
+  border-radius: 6px;
 }
 .toolbar {
   display: flex;

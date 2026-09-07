@@ -29,6 +29,8 @@ import {
   removeOutwardPairings,
   removeTableSpec,
   seatGuestsAt,
+  setDocTitle,
+  docTitle,
   setPairingLevel,
   setTablePinned,
   setPin,
@@ -48,6 +50,7 @@ import GuestPanel from '@/components/GuestPanel';
 import PairingPanel from '@/components/PairingPanel';
 import TablePanel from '@/components/TablePanel';
 import useDocHistory from '@/components/useDocHistory';
+import blurOnEnter from '@/components/blurOnEnter';
 
 export default function Page() {
   const { doc, commit, load, undo, redo, canUndo, canRedo } =
@@ -57,6 +60,8 @@ export default function Page() {
   /** The last guest ticked on their own, which a shift-click reaches back to. */
   const [anchor, setAnchor] = useState<string | null>(null);
   const [hydrated, setHydrated] = useState(false);
+  /** Whether the plan's own name is being edited, so its placeholder can grey. */
+  const [namingPlan, setNamingPlan] = useState(false);
   /** True while the solver has the thread, so the button can say so. */
   const [solving, setSolving] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -415,15 +420,23 @@ export default function Page() {
 
   return (
     <main className="app">
-      {/* Title and toolbar share the first line; the subtitle takes the second
-          on its own. Written in reading order and reordered in CSS, so the
-          sentence under the title still follows it for a screen reader. */}
+      {/* The title is the plan's own name, edited in place: an h1 for the
+          outline with an invisible field inside it, the same arrangement the
+          table headings use. */}
       <header className="app-header" ref={headerRef}>
-        <h1>Wedding Seating Planner</h1>
-        <p className="subtitle">
-          List the guests, say who should sit together, and let the tables sort
-          themselves out.
-        </p>
+        <h1>
+          <input
+            type="text"
+            className={namingPlan ? 'doc-title is-editing' : 'doc-title'}
+            value={doc.title ?? ''}
+            placeholder={docTitle(defaultDoc())}
+            aria-label="Name of this plan"
+            onChange={(e) => commit((d) => setDocTitle(d, e.target.value), 'title')}
+            onFocus={() => setNamingPlan(true)}
+            onBlur={() => setNamingPlan(false)}
+            onKeyDown={blurOnEnter}
+          />
+        </h1>
         <div className="toolbar">
           <button
             type="button"

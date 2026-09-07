@@ -250,8 +250,12 @@ function sanitize(doc: SeatingDoc): SeatingDoc {
     ...g,
     groupId: g.groupId && known.has(g.groupId) ? g.groupId : null,
   }));
+  const title = (doc as { title?: unknown }).title;
   return normalize({
     version: DOC_VERSION,
+    // A title is optional and only kept when it says something; anything else
+    // in that field is treated as never having been named.
+    ...(typeof title === 'string' && title.trim() ? { title } : {}),
     guests,
     groups,
     order,

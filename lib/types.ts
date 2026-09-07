@@ -90,6 +90,11 @@ export interface SeatingDoc {
    * room shifts names the same way it shifts everything else.
    */
   tableNames: string[];
+  /**
+   * What this plan is called. Absent until named, and cleared back to absent
+   * rather than stored empty, so `docTitle` can supply the default.
+   */
+  title?: string;
   pins: Pins;
   tables: string[][];
 }

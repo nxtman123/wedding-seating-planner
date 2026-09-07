@@ -414,6 +414,19 @@ export function removeTableSpec(doc: SeatingDoc, id: string): SeatingDoc {
   return { ...doc, tableSpecs: doc.tableSpecs.filter((s) => s.id !== id) };
 }
 
+/** What this plan is called, or the name it has until you give it one. */
+export function docTitle(doc: SeatingDoc): string {
+  return doc.title ?? 'Seating Chart';
+}
+
+/**
+ * Name the plan. Clearing the field gives the default name back, the same way
+ * clearing a table's name gives its number back.
+ */
+export function setDocTitle(doc: SeatingDoc, title: string): SeatingDoc {
+  return { ...doc, title: title.trim() ? title : undefined };
+}
+
 /** A table's name: whatever it was given, or its number. */
 export function tableName(doc: SeatingDoc, index: number): string {
   return doc.tableNames[index] ?? `Table ${index + 1}`;
