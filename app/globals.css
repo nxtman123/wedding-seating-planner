@@ -498,13 +498,17 @@ textarea {
   border-bottom-left-radius: var(--radius);
   border-bottom-right-radius: var(--radius);
 }
+.scroller {
+  /* How far the fade reaches in from an end. */
+  --fade: 52px;
+}
 .scroller.has-above {
-  mask-image: linear-gradient(to bottom, transparent 0, #000 26px);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 var(--fade));
 }
 .scroller.has-below {
   mask-image: linear-gradient(
     to bottom,
-    #000 calc(100% - 26px),
+    #000 calc(100% - var(--fade)),
     transparent 100%
   );
 }
@@ -512,8 +516,8 @@ textarea {
   mask-image: linear-gradient(
     to bottom,
     transparent 0,
-    #000 26px,
-    #000 calc(100% - 26px),
+    #000 var(--fade),
+    #000 calc(100% - var(--fade)),
     transparent 100%
   );
 }
