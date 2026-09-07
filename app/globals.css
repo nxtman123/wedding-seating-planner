@@ -18,10 +18,10 @@
    * than as a coloured panel, and the surfaces climb from there, shedding
    * chroma as they go, which is what makes a card look lit rather than paler.
    */
-  --bg: #f2e6fb;
-  --surface: #fdfafe;
-  --surface-2: #f8f1fd;
-  --border: #dfd3e8;
+  --bg: #f6f0fb;
+  --surface: #fefdff;
+  --surface-2: #fbf8fd;
+  --border: #e4dde9;
   --text: #2e2832;
   /* Dark enough to clear 4.5:1 on every ground it can land on — both surfaces
      and the page itself, which at this lightness no longer needs its own. */
@@ -39,7 +39,24 @@
   --danger-vivid: #f04539;
   --ok: #337f48;
   --radius: 12px;
-  --shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 4px 16px rgba(0, 0, 0, 0.05);
+  /*
+   * Elevation, in three layers because one is never convincing: a contact
+   * shadow tight under the edge, a short one for the body, and a wide soft one
+   * for the ambient light. Each is weak on its own — the look comes from their
+   * overlap, which is what a real shadow does.
+   *
+   * Tinted with the scheme's own dark purple rather than black: a black shadow
+   * on a coloured ground greys it, and greys are the one thing this palette
+   * does not contain.
+   */
+  --shadow:
+    0 1px 1px rgba(64, 44, 81, 0.04),
+    0 2px 4px -1px rgba(64, 44, 81, 0.05),
+    0 8px 16px -6px rgba(64, 44, 81, 0.07);
+  /* One step down, for a card sitting on a panel that is itself lifted. */
+  --shadow-sm:
+    0 1px 1px rgba(64, 44, 81, 0.04),
+    0 2px 5px -2px rgba(64, 44, 81, 0.06);
 }
 
 * {
@@ -436,7 +453,6 @@ textarea {
   flex-direction: column;
   gap: 12px;
   background: var(--surface);
-  border: 1px solid var(--border);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
   padding: 16px;
@@ -1116,14 +1132,17 @@ textarea {
   grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
   gap: 10px;
 }
+/* Lifted off the panel rather than drawn on it: the same surface as the panel
+   it sits on, told apart by its shadow alone, which is what makes it read as a
+   card rather than as a box. */
 .table-card {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
+  background: var(--surface);
   border-radius: 10px;
-  padding: 10px 12px;
+  box-shadow: var(--shadow-sm);
+  padding: 11px 13px;
 }
 /* Just the name and the count: at these card widths there was no room for a
    button between them, and it squeezed both. It sits at the foot instead. */
