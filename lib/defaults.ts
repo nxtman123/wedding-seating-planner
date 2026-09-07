@@ -9,7 +9,7 @@ export function uid(): string {
 }
 
 /** Bumped when stored documents need bringing forward; see lib/storage.ts. */
-export const DOC_VERSION = 3;
+export const DOC_VERSION = 4;
 
 export const DEFAULT_SEATS_PER_TABLE = 8;
 
@@ -44,10 +44,17 @@ export function defaultDoc(): SeatingDoc {
 /* -------------------------------------------------------------------------- */
 
 /** Every level, strongest pull first, strongest push last. */
-export const PAIRING_LEVELS: PairingLevel[] = [1, 2, 3, -1];
+export const PAIRING_LEVELS: PairingLevel[] = [1, 2, 3, 4, -2, -1];
 
 export function isPairingLevel(value: unknown): value is PairingLevel {
-  return value === 1 || value === 2 || value === 3 || value === -1;
+  return (
+    value === 1 ||
+    value === 2 ||
+    value === 3 ||
+    value === 4 ||
+    value === -2 ||
+    value === -1
+  );
 }
 
 /**
@@ -57,23 +64,26 @@ export function isPairingLevel(value: unknown): value is PairingLevel {
  * a table of S seats holds S-1 pairs at once and they all count. So the question
  * for any rung is how many of the rung below it takes to outweigh one of it.
  *
- * A "must" clears a whole table of anything under it: 400 against nineteen
- * "should"s at the largest table the app allows. Below that the ladder is
- * deliberately softer. A "should" is worth four unmentioned guests, so at a full
- * table of eight the company a guest keeps can outweigh a single preference —
- * which is the point, since a table wants to be a group, not a chain of pairs.
- * And a "must not" is worth two "must"s, so it bends rather than breaks: it will
- * lose to a knot of musts that all want the same table, and the pairing panel
- * will say so rather than the solver quietly producing nonsense elsewhere.
+ * Only the top step is guaranteed: a "must" clears a whole table of "ought"s at
+ * any table this app allows. Below that the ladder is deliberately soft — seven
+ * "likes" at a full table outweigh one "ought", and six unmentioned guests
+ * outweigh one "likes" — because a table wants to be a group rather than a chain
+ * of pairs, and the pull of the company someone keeps should be able to win.
+ *
+ * A "must not" is worth two "must"s, so it bends rather than breaks: hem someone
+ * in with enough musts and it will give, and the report will say so rather than
+ * the solver wrecking something else to hold it.
  *
  * "Could sit together" is worth nothing on purpose. It does not pull anyone
  * anywhere; it only cancels the penalty below, which is the whole of its job.
  */
 const LEVEL_WEIGHTS: Record<PairingLevel, number> = {
-  1: 400,
-  2: 20,
-  3: 0,
-  [-1]: -800,
+  1: 600,
+  2: 30,
+  3: 6,
+  4: 0,
+  [-2]: -6,
+  [-1]: -1200,
 };
 
 /**
@@ -85,7 +95,7 @@ const LEVEL_WEIGHTS: Record<PairingLevel, number> = {
  * together" mean something: setting it lifts this, which is why that rung can be
  * worth zero.
  */
-export const IMPLICIT_WEIGHT = -5;
+export const IMPLICIT_WEIGHT = -1;
 
 /** Signed score for seating this pair together. Negative levels return < 0. */
 export function levelWeight(level: PairingLevel): number {
@@ -102,9 +112,13 @@ export function levelLabel(level: PairingLevel): string {
     case 1:
       return 'Must sit together';
     case 2:
-      return 'Should sit together';
+      return 'Ought to sit together';
     case 3:
+      return 'Like to sit together';
+    case 4:
       return 'Could sit together';
+    case -2:
+      return 'Rather not sit together';
     case -1:
       return 'Must not sit together';
   }
@@ -120,9 +134,13 @@ export function levelBadge(level: PairingLevel): string {
     case 1:
       return '❤️';
     case 2:
-      return '😃';
+      return '🤝';
     case 3:
+      return '😃';
+    case 4:
       return '👋';
+    case -2:
+      return '😬';
     case -1:
       return '🚫';
   }
@@ -139,9 +157,13 @@ export function levelPhrase(level: PairingLevel): string {
     case 1:
       return 'must sit with';
     case 2:
-      return 'should sit with';
+      return 'ought to sit with';
     case 3:
+      return 'likes to sit with';
+    case 4:
       return 'could sit with';
+    case -2:
+      return 'rather avoid';
     case -1:
       return 'must avoid';
   }

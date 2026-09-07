@@ -929,11 +929,11 @@ textarea {
    a short label, so the row needs no separate badge beside the names. */
 .level-select {
   flex: none;
-  /* Sized for the widest option, "👍 should sit with", which Chrome wants 139px
-     for once its own dropdown arrow is counted; the few spare pixels keep a
-     different font rendering from clipping it. A select is as wide as its widest
-     option whatever is selected, so this never shifts between rows. */
-  width: 144px;
+  /* Sized for the widest option, "🤝 ought to sit with", which needs 118px of
+     text — one pixel more than 144 left room for. A select is as wide as its
+     widest option whatever is selected, so this never shifts between rows, and
+     the spare few pixels keep a different font rendering from clipping it. */
+  width: 148px;
   /* Its own height and its own arrow, both smaller than the page default: this
      one has to sit inside a pairing row, and the room to its right is what the
      two names are competing for. The arrow is tucked to 14px from the edge, and
@@ -964,41 +964,42 @@ textarea {
   padding: 2px 7px;
   border: 1px solid transparent;
 }
+/* The two ends are solid and the middles are washes, so the extremes read as
+   extremes before any colour is named. Every pair here clears 4.5:1. */
 .level-pos-1 {
-  /* background-color, not the shorthand: these classes also land on the level
-     dropdowns, whose arrow is a background image the shorthand would erase. */
   background-color: #337f48;
   color: #fff;
 }
-/* A notch down from the old wash, onto what used to be this level's own border
-   colour, with the ink darkened to match so it still clears 4.5:1. */
+/* A duty, not a rule: the strongest wash rather than a fill. */
 .level-pos-2 {
-  /* background-color, not the shorthand: these classes also land on the level
-     dropdowns, whose arrow is a background image the shorthand would erase. */
   background-color: #b5dfbb;
   color: #226937;
   border-color: #a2d2aa;
 }
+/* A preference, and a soft one — the same green a step lighter. */
+.level-pos-3 {
+  background-color: #d6eed9;
+  color: #347545;
+  border-color: #c4e1c8;
+}
 /* "Could sit together" steps out of the green, because it is not a pull at all —
    it only lifts the penalty two unmentioned guests carry. Blue at the lightness
-   the green ranks below it had, so it reads as its own thing without shouting:
-   same L* on all three, hue turned to 260. */
-.level-pos-3 {
-  /* background-color, not the shorthand: these classes also land on the level
-     dropdowns, whose arrow is a background image the shorthand would erase. */
+   the green ranks above it have. */
+.level-pos-4 {
   background-color: #d3e9ff;
   color: #1f6b9d;
   border-color: #bedafa;
 }
-/* The one avoid left. It used to be solid red on white, which was more alarm
-   than a wedding seating chart needs when it is doing exactly what you asked, so
-   it takes the wash the rung above it wore back when there were four of them. */
-.level-neg-1 {
-  /* background-color, not the shorthand: these classes also land on the level
-     dropdowns, whose arrow is a background image the shorthand would erase. */
+/* The soft push, mirroring "likes" on the other side of nothing-said. */
+.level-neg-2 {
   background-color: #f9beb3;
   color: #8b3c31;
   border-color: #f4a99b;
+}
+/* Solid, as its opposite number is: the two things you are certain about. */
+.level-neg-1 {
+  background-color: #b93d31;
+  color: #fff;
 }
 
 .dot {

@@ -106,11 +106,13 @@ be set at one level without resetting it each time.
 
 | | Weight | Setting a group | A single pairing reads |
 | --- | --- | --- | --- |
-| ❤️ | 400 | Must sit together | A **must sit with** B |
-| 😃 | 20 | Should sit together | A **should sit with** B |
+| ❤️ | 600 | Must sit together | A **must sit with** B |
+| 🤝 | 30 | Ought to sit together | A **ought to sit with** B |
+| 😃 | 6 | Like to sit together | A **likes to sit with** B |
 | 👋 | 0 | Could sit together | A **could sit with** B |
-| | −5 | *nothing said at all* | |
-| 🚫 | −800 | Must not sit together | A **must avoid** B |
+| | −1 | *nothing said at all* | |
+| 😬 | −6 | Rather not sit together | A **rather avoids** B |
+| 🚫 | −1200 | Must not sit together | A **must avoid** B |
 
 The rung with no name is the one that does the most work. Two guests you have never
 mentioned to each other carry a small penalty for sharing a table, so strangers drift
@@ -133,14 +135,18 @@ produce a seating even when the pairings contradict each other. What matters is 
 numbers themselves but the gaps between them, because a guest at a table of S seats holds
 S−1 pairs at once and every one of them counts.
 
-A **must** clears a whole table of anything under it — 400 against nineteen *should*s even
-at the largest table the app allows — so it is as close to a rule as a weight gets. Below
-that the ladder is deliberately softer. A **should** is worth four unmentioned guests, so
-at a full table of eight the company a guest keeps can outweigh a single preference, which
-is the point: a table wants to be a group, not a chain of pairs. And a **must not** is
-worth two *must*s, so it bends rather than breaks — hem someone in with enough musts and it
-will give, and the report will tell you it did rather than the solver quietly wrecking
+Only the top step is guaranteed: a **must** clears a whole table of *ought*s at any table
+size the app allows, so it is as close to a rule as a weight gets. Below that the ladder is
+deliberately soft — seven *likes* at a full table outweigh one *ought*, and six unmentioned
+guests outweigh one *likes* — because a table wants to be a group rather than a chain of
+pairs, and the pull of the company someone keeps should be able to win. And a **must not**
+is worth two *must*s, so it bends rather than breaks: hem someone in with enough musts and
+it will give, and the report will tell you it did rather than the solver quietly wrecking
 something else to avoid it.
+
+The four positive rungs are four different kinds of statement rather than four volumes of
+one — a rule, a duty, a preference, permission — which is what lets them be told apart
+without a key.
 
 **Tables** (right panel) — describe the room a row at a time: *10 tables of 8 seats*, then
 *2 tables of 16*, then *1 table of 2* if there is an odd corner to fill. Add and remove

@@ -197,6 +197,9 @@ function roomOf(
  *   the two faint avoids (-3, -4) are dropped altogether — a pair with no
  *     pairing now carries a small penalty of its own, which is what those two
  *     were for.
+ *
+ * Version 4 split "should" into "ought" and "likes" and added "rather avoid",
+ * and divided every weight by ten on the way past. See below for what moves.
  */
 function migrate(doc: SeatingDoc): SeatingDoc {
   let next = doc;
@@ -228,6 +231,23 @@ function migrate(doc: SeatingDoc): SeatingDoc {
       pairings: next.pairings.flatMap((p) => {
         const level = remap[p.level as number];
         return level === null || level === undefined ? [] : [{ ...p, level }];
+      }),
+    };
+  }
+  if ((next.version ?? 1) < 4) {
+    /*
+     * Version 4 split the middle of the positive ladder and gave the negative
+     * side a soft rung. "Should" was the only preference there was, and it sat
+     * where "ought" sits now — a real one — so it keeps that place rather than
+     * being demoted to the new milder "likes". "Could" only moves number.
+     */
+    const remap: Record<number, PairingLevel> = { 1: 1, 2: 2, 3: 4, [-1]: -1 };
+    next = {
+      ...next,
+      version: 4,
+      pairings: next.pairings.flatMap((p) => {
+        const level = remap[p.level as number];
+        return level === undefined ? [] : [{ ...p, level }];
       }),
     };
   }
