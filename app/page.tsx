@@ -75,6 +75,14 @@ export default function Page() {
     if (hydrated) saveDoc(doc);
   }, [doc, hydrated]);
 
+  /*
+   * The tab carries the plan's name, so several of them open at once are told
+   * apart by what they hold rather than by all saying the same thing.
+   */
+  useEffect(() => {
+    document.title = `${docTitle(doc)} - Seating Planner`;
+  }, [doc.title]);
+
   /* ----- derived views of the current seating ----- */
 
   const counts = useMemo(() => pairingCounts(doc), [doc]);
