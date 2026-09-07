@@ -1274,13 +1274,7 @@ textarea {
   background: var(--accent);
 }
 
-/*
- * Quiet until pinned or hovered — most seats are neither.
- *
- * Held is a filled chip rather than the same shape in a stronger colour: at this
- * size a change of ink alone asks you to compare two pins to know which is
- * which, and a fill is legible without the comparison.
- */
+/* Quiet until pinned or hovered — most seats are neither. */
 .pin-button {
   flex: none;
   display: inline-flex;
@@ -1292,15 +1286,45 @@ textarea {
   border: 0;
   border-radius: 6px;
   background: none;
-  color: #d7cfdc;
+  color: #e1dae7;
 }
 .pin-button:hover:not(:disabled) {
   background: #ede5f3;
   color: var(--text);
 }
 .pin-button.pin-on {
-  background: var(--accent);
-  color: var(--accent-ink);
+  color: var(--accent);
+}
+.pin-button.pin-on:hover:not(:disabled) {
+  background: #e8d9f3;
+}
+
+/*
+ * An unpinned pin is an offer, so it waits to be reached for: it shows when the
+ * row or heading it belongs to is hovered, or when it takes focus, so a table of
+ * loose guests is a list of names rather than a column of pins.
+ *
+ * A held one always shows. That is not an offer but a fact about the seating,
+ * and a fact you can only see by hovering is a fact you will miss.
+ *
+ * `visibility` rather than display, so the row keeps the space and the names do
+ * not shuffle sideways as the mouse crosses them.
+ *
+ * Each rule that shows a pin is written through the same ancestor that hides it.
+ * A bare `.pin-button.pin-on` loses to `.seat-list li .pin-button` on the count
+ * of elements, and a held pin that cannot be seen is worse than no rule at all.
+ */
+.seat-list li .pin-button,
+.table-head .pin-button {
+  visibility: hidden;
+}
+.seat-list li:hover .pin-button,
+.seat-list li:focus-within .pin-button,
+.seat-list li .pin-button.pin-on,
+.table-head:hover .pin-button,
+.table-head:focus-within .pin-button,
+.table-head .pin-button.pin-on {
+  visibility: visible;
 }
 .pin-button.pin-on:hover:not(:disabled) {
   background: var(--accent-deep);
