@@ -8,6 +8,7 @@ import type { Group, Guest, PairingLevel, SeatingDoc } from '@/lib/types';
 import PinIcon from '@/components/PinIcon';
 import blurOnEnter from '@/components/blurOnEnter';
 import useDragScroll from '@/components/useDragScroll';
+import useScrollEdges from '@/components/useScrollEdges';
 
 export interface GuestPanelProps {
   doc: SeatingDoc;
@@ -166,6 +167,8 @@ export default function GuestPanel({
   /* The page holds still while a row is in the air, and the list pulls itself
      along when the drag nears either end. */
   const { listRef, pull } = useDragScroll(cargo !== null);
+  /** Fades whichever end of the list still has more beyond it. */
+  const edges = useScrollEdges(listRef);
 
   const over = (e: DragEvent<HTMLElement>) => {
     if (!cargo) return;
@@ -381,7 +384,7 @@ export default function GuestPanel({
       ) : (
         <div
           ref={listRef}
-          className="scroller sections"
+          className={`scroller sections ${edges}`}
           onDragOver={over}
           onDrop={drop}
         >

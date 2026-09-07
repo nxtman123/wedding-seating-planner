@@ -19,6 +19,7 @@ import {
 import type { LevelTally, SeatingDoc } from '@/lib/types';
 import PinIcon from '@/components/PinIcon';
 import useDragScroll from '@/components/useDragScroll';
+import useScrollEdges from '@/components/useScrollEdges';
 import blurOnEnter from '@/components/blurOnEnter';
 
 export interface TablePanelProps {
@@ -92,6 +93,8 @@ export default function TablePanel({
   /* The page holds still while a card is in the air, and the list pulls itself
      along when the drag nears either end. */
   const { listRef, pull } = useDragScroll(dragging !== null);
+  /** Fades whichever end of the list still has more beyond it. */
+  const edges = useScrollEdges(listRef);
 
   /*
    * Cards wrap into a grid rather than a column, so a drop cannot be resolved by
@@ -275,7 +278,7 @@ export default function TablePanel({
       ) : (
         <div
           ref={listRef}
-          className="tables scroller"
+          className={`tables scroller ${edges}`}
           onDragOver={(e) => {
             if (dragging === null) return;
             e.preventDefault();

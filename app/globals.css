@@ -467,11 +467,55 @@ textarea {
 }
 
 /* Each panel's controls stay put and only its list scrolls, so all three
-   columns stay side by side however long the guest list gets. */
+   columns stay side by side however long the guest list gets.
+
+   The scrollport reaches the panel's own edges, and the inset that used to be
+   the panel's padding is carried inside it as padding instead. Two things come
+   of that: a card's shadow is cut off at the edge of the section it lives in
+   rather than fading out short of it, and the fade below has an edge to sit
+   against. The bottom corners are rounded to the panel's, since content now
+   arrives at them.
+
+   `has-above` / `has-below` are set from the scroll position; the mask fades
+   whichever end still has something beyond it. It is a mask rather than a
+   painted gradient so it works over any ground, and it is on the scrollport
+   rather than the content, so it stays put while the list moves under it. */
 .scroller {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
+}
+/* Written against the panel so it outranks the list resets, which zero their
+   own padding and would otherwise undo this.
+
+   Half an inset at the top rather than none: the first row's shadow needs
+   somewhere to fall, and without it the top of the list looks sliced. The sides
+   and foot keep the full inset, which is what the panel's padding used to
+   provide. */
+.panel > .scroller {
+  margin: -8px -16px -16px;
+  padding: 8px 16px 16px;
+  border-bottom-left-radius: var(--radius);
+  border-bottom-right-radius: var(--radius);
+}
+.scroller.has-above {
+  mask-image: linear-gradient(to bottom, transparent 0, #000 26px);
+}
+.scroller.has-below {
+  mask-image: linear-gradient(
+    to bottom,
+    #000 calc(100% - 26px),
+    transparent 100%
+  );
+}
+.scroller.has-above.has-below {
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 26px,
+    #000 calc(100% - 26px),
+    transparent 100%
+  );
 }
 
 .panel-header {
@@ -772,18 +816,13 @@ textarea {
   outline: none;
   box-shadow: inset 0 -1px 0 0 var(--accent);
 }
+/* Small, but otherwise an ordinary button: it appears and disappears with the
+   pick, and a tinted one drew the eye to a control that is only ever an offer. */
 .add-picked {
   flex: none;
   padding: 3px 9px;
   font-size: 0.75rem;
   border-radius: 6px;
-  color: var(--accent);
-  border-color: #ddcbeb;
-  background: #f0e5f9;
-}
-.add-picked:hover:not(:disabled) {
-  background: #e8d9f3;
-  border-color: #d3bfe2;
 }
 /* Holds its place in the row when there is nothing picked to add. visibility
    keeps the box and takes it out of the tab order and the a11y tree both. */

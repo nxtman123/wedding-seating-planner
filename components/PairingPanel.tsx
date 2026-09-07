@@ -1,5 +1,7 @@
 'use client';
 
+import { useRef } from 'react';
+import useScrollEdges from '@/components/useScrollEdges';
 import {
   PAIRING_LEVELS,
   levelBadge,
@@ -140,6 +142,10 @@ export default function PairingPanel({
     bandBreaks.add(bandInside.length + bandOut.length);
   }
 
+  /** Fades whichever end of the list still has more beyond it. */
+  const listRef = useRef<HTMLUListElement>(null);
+  const edges = useScrollEdges(listRef);
+
   return (
     <section className="panel">
       <div className="panel-header">
@@ -221,7 +227,7 @@ export default function PairingPanel({
           No pairings yet. Everyone will be seated arbitrarily.
         </p>
       ) : (
-        <ul className="list scroller">
+        <ul ref={listRef} className={`list scroller ${edges}`}>
           {pairings.map((p, i) => (
             <li
               key={p.id}
