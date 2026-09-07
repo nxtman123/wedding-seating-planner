@@ -1,14 +1,37 @@
+/*
+ * Five colours were given — a lavender, a purple, a red, a blue and a green —
+ * and the rest is derived from them in Lab, so every step is a stated lightness
+ * at one of those hues rather than a hex somebody nudged until it looked right.
+ *
+ * The lavender is the floor: it is the page's ground, and the surfaces above it
+ * are the same hue lightened, so a panel reads as lifted off the page rather
+ * than as a different colour. Ink and borders take the purple's hue at low
+ * chroma, which is what keeps the neutrals from going cold and grey against it.
+ *
+ * Every pairing of text and its ground in this file clears 4.5:1.
+ */
 :root {
-  --bg: #f6f2ee;
-  --surface: #ffffff;
-  --surface-2: #faf7f4;
-  --border: #e4ddd5;
-  --text: #2c2622;
-  --muted: #8a7f76;
-  --accent: #b06a7e;
+  /* The lavender, and the two surfaces lightened out of it. */
+  --bg: #efdef8;
+  --surface: #fefaff;
+  --surface-2: #f8effd;
+  --border: #dccce4;
+  --text: #2e2832;
+  /* Dark enough to clear 4.5:1 on every ground it can land on — the two
+     surfaces and the lavender itself, which is the strictest of the three. */
+  --muted: #6b6272;
+  --accent: #5d3b7d;
   --accent-ink: #ffffff;
-  --danger: #b34a4a;
-  --ok: #4a8a5e;
+  /* Pressed and hovered states of anything filled with the accent. */
+  --accent-deep: #4a2a68;
+  /*
+   * The given red is #f04539, which carries a fill well and text badly — 3.6:1
+   * on these surfaces. So the one that has to be read is darkened to clear 4.5,
+   * and the given red keeps the jobs where nothing is written on it.
+   */
+  --danger: #d62a26;
+  --danger-vivid: #f04539;
+  --ok: #337f48;
   --radius: 12px;
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 4px 16px rgba(0, 0, 0, 0.05);
 }
@@ -135,7 +158,7 @@ body {
 }
 .link-button:hover:not(:disabled) {
   background: none;
-  color: #9d5c6f;
+  color: var(--accent-deep);
 }
 
 /* The key that does the same thing as the button it sits in. */
@@ -166,7 +189,7 @@ button {
 }
 button:hover:not(:disabled) {
   background: var(--surface-2);
-  border-color: #d8cfc5;
+  border-color: #cdbbd6;
 }
 button:disabled {
   opacity: 0.45;
@@ -174,10 +197,10 @@ button:disabled {
 }
 button.danger {
   color: var(--danger);
-  border-color: #e7c9c9;
+  border-color: #ffd2ca;
 }
 button.danger:hover:not(:disabled) {
-  background: #fbecec;
+  background: #ffe6df;
 }
 button.primary {
   background: var(--accent);
@@ -185,8 +208,8 @@ button.primary {
   color: var(--accent-ink);
 }
 button.primary:hover:not(:disabled) {
-  background: #9d5c6f;
-  border-color: #9d5c6f;
+  background: var(--accent-deep);
+  border-color: var(--accent-deep);
 }
 
 /* Square affordance for pin / remove, sized to sit inline with a text row. */
@@ -572,7 +595,7 @@ textarea {
   width: 14px;
   text-align: center;
   line-height: 1;
-  color: #cfc5bb;
+  color: #cdc3d4;
   cursor: grab;
   user-select: none;
 }
@@ -588,12 +611,12 @@ textarea {
 .guest-row.row-selected,
 .pairing-row.row-selected,
 .table-card.row-selected {
-  background: #fdf3f6;
-  box-shadow: inset 0 0 0 1px #f0dbe2;
+  background: #f8f1fe;
+  box-shadow: inset 0 0 0 1px #e5d8ef;
 }
 .pairing-row.row-selected,
 .table-card.row-selected {
-  border-color: #f0dbe2;
+  border-color: #e5d8ef;
 }
 
 /* Reaching out of the pick rather than inside it: same treatment, stepped back,
@@ -601,9 +624,9 @@ textarea {
    touches and, in the guest list, for the guests on the far end of them. */
 .pairing-row.row-adjacent,
 .guest-row.row-adjacent {
-  background: #fdf9fb;
-  border-color: #f7ecf0;
-  box-shadow: inset 0 0 0 1px #f7ecf0;
+  background: #fbf7fe;
+  border-color: #f1eaf6;
+  box-shadow: inset 0 0 0 1px #f1eaf6;
 }
 
 /* Picks a guest into the group. Order of picking carries no meaning, so this is
@@ -721,12 +744,12 @@ textarea {
   font-size: 0.75rem;
   border-radius: 6px;
   color: var(--accent);
-  border-color: #f0dbe2;
-  background: #fdf3f6;
+  border-color: #e5d8ef;
+  background: #f8f1fe;
 }
 .add-picked:hover:not(:disabled) {
-  background: #f7e2e9;
-  border-color: #e6c7d2;
+  background: #f1e5f9;
+  border-color: #dfcfeb;
 }
 /* Holds its place in the row when there is nothing picked to add. visibility
    keeps the box and takes it out of the tab order and the a11y tree both. */
@@ -740,10 +763,10 @@ textarea {
   font-size: 0.8rem;
   border-color: transparent;
   background: none;
-  color: #d5ccc3;
+  color: #cdc3d4;
 }
 .group-head .icon-button:hover:not(:disabled) {
-  background: #fbecec;
+  background: #ffe6df;
   color: var(--danger);
 }
 .group-empty {
@@ -862,7 +885,7 @@ textarea {
 .level-pos-1 {
   /* background-color, not the shorthand: these classes also land on the level
      dropdowns, whose arrow is a background image the shorthand would erase. */
-  background-color: #2f6b4a;
+  background-color: #337f48;
   color: #fff;
 }
 /* A notch down from the old wash, onto what used to be this level's own border
@@ -870,9 +893,9 @@ textarea {
 .level-pos-2 {
   /* background-color, not the shorthand: these classes also land on the level
      dropdowns, whose arrow is a background image the shorthand would erase. */
-  background-color: #bcdcc7;
-  color: #275a3d;
-  border-color: #a6cfb4;
+  background-color: #b5dfbb;
+  color: #226937;
+  border-color: #a2d2aa;
 }
 /* "Could sit together" steps out of the green, because it is not a pull at all —
    it only lifts the penalty two unmentioned guests carry. Blue at the lightness
@@ -881,9 +904,9 @@ textarea {
 .level-pos-3 {
   /* background-color, not the shorthand: these classes also land on the level
      dropdowns, whose arrow is a background image the shorthand would erase. */
-  background-color: #dae9f9;
-  color: #2a6188;
-  border-color: #c6d9ee;
+  background-color: #d3e9ff;
+  color: #1f6b9d;
+  border-color: #bedafa;
 }
 /* The one avoid left. It used to be solid red on white, which was more alarm
    than a wedding seating chart needs when it is doing exactly what you asked, so
@@ -891,9 +914,9 @@ textarea {
 .level-neg-1 {
   /* background-color, not the shorthand: these classes also land on the level
      dropdowns, whose arrow is a background image the shorthand would erase. */
-  background-color: #eec6c2;
-  color: #8f3f38;
-  border-color: #e3aca6;
+  background-color: #f9beb3;
+  color: #8b3c31;
+  border-color: #f4a99b;
 }
 
 .dot {
@@ -906,10 +929,11 @@ textarea {
   background: var(--ok);
 }
 .dot-bad {
-  background: var(--danger);
+  /* A fill, so it can be the given red rather than the readable one. */
+  background: var(--danger-vivid);
 }
 .dot-unknown {
-  background: #d6cdc4;
+  background: #c6becc;
 }
 
 /* ---------------- tables ---------------- */
@@ -965,8 +989,8 @@ textarea {
   font-weight: 600;
 }
 .unseated {
-  background: #fbecec;
-  border: 1px solid #eec6c2;
+  background: #ffe6df;
+  border: 1px solid #ffc2b6;
   border-radius: 10px;
   padding: 9px 11px;
 }
@@ -976,12 +1000,12 @@ textarea {
   gap: 8px;
   margin: 0 0 4px;
   font-size: 0.9rem;
-  color: #8f3f38;
+  color: #a25043;
 }
 .unseated p {
   margin: 0;
   font-size: 0.85rem;
-  color: #8f3f38;
+  color: #a25043;
 }
 
 .generate-row {
@@ -1161,17 +1185,17 @@ textarea {
   border: 0;
   border-radius: 5px;
   background: none;
-  color: #d5ccc3;
+  color: #cdc3d4;
 }
 .pin-button:hover:not(:disabled) {
-  background: #f0e7e0;
+  background: #ede5f3;
   color: var(--text);
 }
 .pin-button.pin-on {
   color: var(--accent);
 }
 .pin-button.pin-on:hover:not(:disabled) {
-  background: #f7e2e9;
+  background: #f1e5f9;
 }
 
 .table-warning {
@@ -1181,11 +1205,11 @@ textarea {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  background: #fbecec;
-  border: 1px solid #eec6c2;
+  background: #ffe6df;
+  border: 1px solid #ffc2b6;
   border-radius: 8px;
   font-size: 0.8rem;
-  color: #8f3f38;
+  color: #a25043;
 }
 .table-warning li {
   display: flex;
