@@ -1300,9 +1300,12 @@ textarea {
 }
 
 /*
- * An unpinned pin is an offer, so it waits to be reached for: it shows when the
- * row or heading it belongs to is hovered, or when it takes focus, so a table of
- * loose guests is a list of names rather than a column of pins.
+ * An unpinned pin is an offer, so it waits to be reached for, which leaves a
+ * table of loose guests a list of names rather than a column of pins.
+ *
+ * A seat's pin shows on its own row: the rows are a list, and each is a separate
+ * question. The card's shows anywhere on the card, because it is about the table
+ * as a whole — the whole card is what you are pointing at when you want it.
  *
  * A held one always shows. That is not an offer but a fact about the seating,
  * and a fact you can only see by hovering is a fact you will miss.
@@ -1321,8 +1324,8 @@ textarea {
 .seat-list li:hover .pin-button,
 .seat-list li:focus-within .pin-button,
 .seat-list li .pin-button.pin-on,
-.table-head:hover .pin-button,
-.table-head:focus-within .pin-button,
+.table-card:hover .table-head .pin-button,
+.table-card:focus-within .table-head .pin-button,
 .table-head .pin-button.pin-on {
   visibility: visible;
 }
